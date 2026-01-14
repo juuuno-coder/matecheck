@@ -19,7 +19,7 @@ export default function NestChoiceScreen() {
                 </Text>
 
                 <TouchableOpacity
-                    onPress={() => router.push({ pathname: '/(onboarding)/profile', params: { intent: 'create' } })}
+                    onPress={() => router.push('/(onboarding)/create_nest')}
                     className="w-full bg-white border border-gray-100 p-8 rounded-3xl mb-4 shadow-sm active:bg-gray-50"
                 >
                     <View className="w-14 h-14 bg-orange-50 rounded-2xl items-center justify-center mb-5">
@@ -32,7 +32,7 @@ export default function NestChoiceScreen() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    onPress={() => router.push({ pathname: '/(onboarding)/profile', params: { intent: 'join' } })}
+                    onPress={() => router.push('/(onboarding)/join_nest')}
                     className="w-full bg-white border border-gray-100 p-8 rounded-3xl shadow-sm active:bg-gray-50"
                 >
                     <View className="w-14 h-14 bg-blue-50 rounded-2xl items-center justify-center mb-5">

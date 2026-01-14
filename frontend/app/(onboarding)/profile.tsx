@@ -41,14 +41,7 @@ export default function ProfileScreen() {
 
             if (response.ok) {
                 setProfile(nickname, selectedAvatarId);
-
-                if (params.intent === 'create') {
-                    router.push('/(onboarding)/create_nest');
-                } else if (params.intent === 'join') {
-                    router.push('/(onboarding)/join_nest');
-                } else {
-                    router.push('/(onboarding)/nest_choice');
-                }
+                router.push('/(onboarding)/nest_choice');
             } else {
                 Alert.alert("Error", data.error || "Something went wrong.");
             }

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_14_083527) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_14_110258) do
   create_table "calendar_events", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "creator_id"
@@ -72,6 +72,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_14_083527) do
     t.integer "avatar_id"
     t.datetime "created_at", null: false
     t.string "email"
+    t.string "member_type"
     t.integer "nest_id"
     t.string "nest_status", default: "active"
     t.string "nickname"

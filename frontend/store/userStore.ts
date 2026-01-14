@@ -8,6 +8,7 @@ export interface User {
     id: string;
     nickname: string;
     avatarId: number;
+    memberType?: 'human' | 'baby' | 'pet' | 'plant' | 'ai';
 }
 
 export interface Todo {
@@ -88,6 +89,7 @@ interface UserState {
     setMembers: (members: User[]) => void;
     logout: () => void;
     addMember: (nickname: string, avatarId: number) => void;
+    addManagedMember: (nickname: string, avatarId: number, memberType: string) => Promise<void>;
 
     // Join Requests
     pendingRequests: User[];
@@ -219,6 +221,29 @@ export const useUserStore = create<UserState>((set) => ({
     addMember: (nickname, avatarId) => set((state: UserState) => ({
         members: [...state.members, { id: Math.random().toString(36).substr(2, 9), nickname, avatarId }]
     })),
+
+    addManagedMember: async (nickname, avatarId, memberType) => {
+        const { nestId } = useUserStore.getState();
+        if (!nestId) return;
+        try {
+            const response = await fetch(`${API_URL}/nests/${nestId}/members`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nickname, avatar_id: avatarId, member_type: memberType })
+            });
+            if (response.ok) {
+                const data = await response.json();
+                set({
+                    members: data.members.map((m: any) => ({
+                        id: String(m.id),
+                        nickname: m.nickname,
+                        avatarId: m.avatar_id,
+                        memberType: m.member_type
+                    }))
+                });
+            }
+        } catch (error) { console.error(error); }
+    },
 
     // Type-safe Todo Actions
     addTodo: async (title: string, assignedTo: string = '0', repeat: 'none' | 'daily' | 'weekly' = 'none', imageUrl?: string) => {

@@ -7,6 +7,7 @@ Rails.application.routes.draw do
     post 'join', on: :collection
     get 'requests', on: :member
     patch 'approve/:user_id', on: :member, to: 'nests#approve'
+    post 'members', on: :member, to: 'nests#add_managed_member'
     resources :missions
     resources :calendar_events
     resources :goals

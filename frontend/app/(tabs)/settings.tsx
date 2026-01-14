@@ -115,7 +115,7 @@ export default function SettingsScreen() {
                     <Text className="px-6 py-2 text-xs font-bold text-gray-400 uppercase">{t.nest_section}</Text>
                     <SettingItem icon="rocket-outline" label={t.nest_info} value={nestName} />
 
-                    <View className="flex-row items-center justify-between py-4 border-b border-gray-100 bg-white px-6">
+                    <TouchableOpacity onPress={() => router.push('/add_member')} className="flex-row items-center justify-between py-4 border-b border-gray-100 bg-white px-6">
                         <View className="flex-row items-center gap-3">
                             <View className="w-8 h-8 rounded-full items-center justify-center bg-gray-50">
                                 <Ionicons name="people-outline" size={18} color="#4B5563" />
@@ -133,14 +133,12 @@ export default function SettingsScreen() {
                                     />
                                 ))}
                             </View>
-                            {members.length > 3 && (
-                                <View className="w-6 h-6 rounded-full bg-gray-200 border border-white -ml-2 items-center justify-center z-0">
-                                    <Text className="text-[8px] text-gray-600">+{members.length - 3}</Text>
-                                </View>
-                            )}
+                            <View className="w-6 h-6 rounded-full bg-gray-100 border border-white -ml-2 items-center justify-center z-20">
+                                <Ionicons name="add" size={14} color="#6B7280" />
+                            </View>
                             <Ionicons name="chevron-forward" size={16} color="#D1D5DB" className="ml-2" />
                         </View>
-                    </View>
+                    </TouchableOpacity>
 
                     <SettingItem icon="share-social-outline" label={t.invite_code} value="MATE-2024" />
                 </View>

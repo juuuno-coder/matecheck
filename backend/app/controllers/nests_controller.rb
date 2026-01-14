@@ -53,6 +53,22 @@ class NestsController < ApplicationController
     end
   end
 
+  def add_managed_member
+    nest = Nest.find(params[:id])
+    member = nest.users.new(
+      nickname: params[:nickname],
+      avatar_id: params[:avatar_id],
+      member_type: params[:member_type], # 'baby', 'pet', 'plant', 'ai'
+      nest_status: 'active'
+    )
+    
+    if member.save
+      render json: { message: "Member added", members: nest_data(nest)[:members] }, status: :created
+    else
+      render json: { errors: member.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def nest_data(nest)

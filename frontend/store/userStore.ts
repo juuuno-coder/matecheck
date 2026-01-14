@@ -139,30 +139,12 @@ export const useUserStore = create<UserState>((set) => ({
     inviteCode: '',
     isLoggedIn: false,
 
-    members: [ // Mock Initial Members
-        { id: '0', nickname: '나', avatarId: 0 },
-        { id: '1', nickname: '아내', avatarId: 1 },
-        { id: '2', nickname: '딸', avatarId: 4 },
-    ],
-
-    todos: [
-        { id: '1', title: '거실 청소하기', isCompleted: false, assignees: [{ id: '0', nickname: '나', avatarId: 0 }], createdAt: new Date().toISOString(), repeat: 'none' },
-        { id: '2', title: '쓰레기 분리수거', isCompleted: true, assignees: [{ id: '1', nickname: '아내', avatarId: 1 }], completedBy: '1', createdAt: new Date().toISOString(), repeat: 'none' },
-        { id: '3', title: '저녁 장보기', isCompleted: false, assignees: [{ id: '2', nickname: '딸', avatarId: 4 }], createdAt: new Date().toISOString(), repeat: 'none' },
-    ],
-    events: [
-        { id: '1', title: '가족 외식', date: new Date().toISOString().split('T')[0], type: 'event', votes: {}, creatorId: '0' },
-    ],
-    budgetGoal: 1000000,
-    transactions: [
-        { id: '1', title: '이마트 장보기', amount: 85000, category: 'food', date: '2024-03-10', payerId: '0' },
-        { id: '2', title: '관리비', amount: 150000, category: 'housing', date: '2024-03-05', payerId: '0' },
-    ],
-    goals: [
-        { id: '1', type: 'vision', title: '행복하고 건강한 우리 가족', current: 1, target: 1, unit: 'step' },
-        { id: '2', type: 'year', title: '가족 여행 2회 가기', current: 1, target: 2, unit: 'count' },
-        { id: '3', type: 'month', title: '배달 음식 줄이기', current: 5, target: 10, unit: 'count' },
-    ],
+    members: [],
+    todos: [],
+    events: [],
+    budgetGoal: 0,
+    transactions: [],
+    goals: [],
 
     pendingRequests: [],
     language: 'ko',

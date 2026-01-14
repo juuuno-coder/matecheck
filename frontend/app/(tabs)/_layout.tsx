@@ -1,8 +1,23 @@
-import { Tabs } from 'expo-router';
-import { View } from 'react-native';
+import { Tabs, useRouter } from 'expo-router';
+import { View, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useUserStore } from '../../store/userStore';
+import React, { useEffect } from 'react';
 
 export default function TabLayout() {
+    const { isLoggedIn } = useUserStore();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!isLoggedIn) {
+            Alert.alert(
+                "로그인 필요",
+                "로그인이 필요한 서비스입니다.",
+                [{ text: "확인", onPress: () => router.replace('/') }]
+            );
+        }
+    }, [isLoggedIn]);
+
     return (
         <Tabs
             screenOptions={{

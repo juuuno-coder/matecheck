@@ -35,10 +35,22 @@ export default function FloatingActionMenu({ themeBg = 'bg-orange-500' }: Floati
 
     const menuItems = [
         {
-            label: '미션',
-            icon: 'checkbox-outline',
+            label: '하우스 룰',
+            icon: 'document-text-outline',
+            color: 'bg-indigo-500',
+            path: '/house_rules'
+        },
+        {
+            label: '공동 정산',
+            icon: 'cash-outline',
+            color: 'bg-pink-500',
+            path: '/split_bills'
+        },
+        {
+            label: '로테이션',
+            icon: 'refresh-outline',
             color: 'bg-green-500',
-            path: { pathname: '/(tabs)/todo', params: { action: 'add' } }
+            path: '/chore_rotation'
         },
         {
             label: '일정',
@@ -51,13 +63,7 @@ export default function FloatingActionMenu({ themeBg = 'bg-orange-500' }: Floati
             icon: 'trophy-outline',
             color: 'bg-yellow-500',
             path: { pathname: '/(tabs)/goal', params: { action: 'add' } }
-        },
-        {
-            label: '가계부',
-            icon: 'wallet-outline',
-            color: 'bg-purple-500',
-            path: { pathname: '/(tabs)/budget', params: { action: 'add' } }
-        },
+        }
     ];
 
     const rotateInterp = animation.interpolate({

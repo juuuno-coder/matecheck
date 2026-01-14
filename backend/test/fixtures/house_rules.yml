@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  nest: one
+  title: MyString
+  description: MyText
+  rule_type: MyString
+  is_active: false
+  priority: 1
+
+two:
+  nest: two
+  title: MyString
+  description: MyText
+  rule_type: MyString
+  is_active: false
+  priority: 1

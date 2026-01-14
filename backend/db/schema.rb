@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_14_140625) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_14_234218) do
   create_table "anniversaries", force: :cascade do |t|
     t.date "anniversary_date"
     t.string "category"
@@ -44,6 +44,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_14_140625) do
     t.index ["nest_id"], name: "index_calendar_events_on_nest_id"
   end
 
+  create_table "chore_rotations", force: :cascade do |t|
+    t.string "chore_name"
+    t.datetime "created_at", null: false
+    t.integer "current_assignee_id"
+    t.integer "nest_id", null: false
+    t.date "next_rotation_date"
+    t.string "rotation_type"
+    t.datetime "updated_at", null: false
+    t.index ["nest_id"], name: "index_chore_rotations_on_nest_id"
+  end
+
   create_table "goals", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "current"
@@ -54,6 +65,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_14_140625) do
     t.string "unit"
     t.datetime "updated_at", null: false
     t.index ["nest_id"], name: "index_goals_on_nest_id"
+  end
+
+  create_table "house_rules", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.boolean "is_active"
+    t.integer "nest_id", null: false
+    t.integer "priority"
+    t.string "rule_type"
+    t.string "title"
+    t.datetime "updated_at", null: false
+    t.index ["nest_id"], name: "index_house_rules_on_nest_id"
   end
 
   create_table "mission_assignments", force: :cascade do |t|
@@ -84,6 +107,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_14_140625) do
     t.string "name"
     t.integer "theme_id"
     t.datetime "updated_at", null: false
+  end
+
+  create_table "split_bills", force: :cascade do |t|
+    t.string "bill_type"
+    t.datetime "created_at", null: false
+    t.date "due_date"
+    t.boolean "is_paid"
+    t.integer "nest_id", null: false
+    t.string "split_method"
+    t.string "title"
+    t.decimal "total_amount"
+    t.datetime "updated_at", null: false
+    t.index ["nest_id"], name: "index_split_bills_on_nest_id"
   end
 
   create_table "support_tickets", force: :cascade do |t|
@@ -123,9 +159,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_14_140625) do
 
   add_foreign_key "anniversaries", "nests"
   add_foreign_key "calendar_events", "nests"
+  add_foreign_key "chore_rotations", "nests"
   add_foreign_key "goals", "nests"
+  add_foreign_key "house_rules", "nests"
   add_foreign_key "mission_assignments", "missions"
   add_foreign_key "mission_assignments", "users"
   add_foreign_key "missions", "nests"
+  add_foreign_key "split_bills", "nests"
   add_foreign_key "transactions", "nests"
 end

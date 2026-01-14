@@ -15,6 +15,13 @@ Rails.application.routes.draw do
     resources :goals
     resources :transactions
     resources :anniversaries
+    resources :house_rules
+    resources :split_bills
+    resources :chore_rotations do
+      member do
+        post 'rotate'
+      end
+    end
   end
   
   resources :support_tickets, only: [:create]

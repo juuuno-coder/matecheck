@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  nest: one
+  chore_name: MyString
+  rotation_type: MyString
+  current_assignee_id: 1
+  next_rotation_date: 2026-01-15
+
+two:
+  nest: two
+  chore_name: MyString
+  rotation_type: MyString
+  current_assignee_id: 1
+  next_rotation_date: 2026-01-15

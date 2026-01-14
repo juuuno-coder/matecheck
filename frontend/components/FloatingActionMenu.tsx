@@ -79,7 +79,7 @@ export default function FloatingActionMenu({ themeBg = 'bg-orange-500' }: Floati
                 </TouchableWithoutFeedback>
 
                 {/* Menu Items */}
-                <View className="absolute bottom-40 right-6 items-end gap-4 pointer-events-box-none">
+                <View className="absolute bottom-48 right-6 items-end gap-4 pointer-events-box-none">
                     {menuItems.map((item, index) => {
                         const translateY = animation.interpolate({
                             inputRange: [0, 1],
@@ -113,7 +113,7 @@ export default function FloatingActionMenu({ themeBg = 'bg-orange-500' }: Floati
                 onPress={toggleMenu}
                 activeOpacity={0.8}
                 className={cn(
-                    "absolute bottom-24 right-6 w-14 h-14 rounded-full items-center justify-center shadow-lg shadow-orange-300 z-50",
+                    "absolute bottom-32 right-6 w-14 h-14 rounded-full items-center justify-center shadow-lg shadow-orange-300 z-50",
                     themeBg
                 )}
             >

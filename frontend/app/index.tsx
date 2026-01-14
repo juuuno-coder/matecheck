@@ -18,57 +18,53 @@ import { StatusBar } from 'expo-status-bar';
 const { width, height } = Dimensions.get('window');
 
 const REVIEWS = [
-    "가족 간 소통이 많아져서 좋아요! ❤️",
-    "반려동물과 함께라서 더 행복해요 🐶",
-    "우리 가족만의 공간이 생겼어요 ✨",
-    "서로 할 일을 챙겨주니 든든해요 👍",
-    "집안일 분담이 훨씬 쉬워졌어요 🧹",
-    "매일매일 기록하는 재미가 있어요 📝",
-    "아이들과 함께 목표를 달성해요 🏆"
+    "가족 간 소통이 많아졌어요 ❤️",
+    "집안일이 재미있어졌어요 ✨",
+    "반려동물과 함께라서 좋아요 🐶",
 ];
 
 const FloatingReview = ({ text, index, total }: { text: string, index: number, total: number }) => {
-    const translateY = useSharedValue(height);
+    const translateY = useSharedValue(0);
     const opacity = useSharedValue(0);
-    const scale = useSharedValue(0.8);
 
     useEffect(() => {
-        const duration = 8000 + Math.random() * 4000; // Random duration 8-12s
-        const delay = index * (8000 / total); // Staggered start
+        const delay = index * 2500; // Staggered by 2.5s each
 
         translateY.value = withDelay(
             delay,
             withRepeat(
-                withTiming(-100, { duration, easing: Easing.linear }),
-                -1, // Infinite
-                false // Do not reverse
+                withSequence(
+                    withTiming(-80, { duration: 3500, easing: Easing.inOut(Easing.ease) }),
+                    withTiming(0, { duration: 0 }) // Reset
+                ),
+                -1,
+                false
             )
         );
 
-        // Fade in/out logic is a bit complex with continuous repeat of transform.
-        // Simplified: Just opacity 1 during move?
-        // Better: Layout animation opacity?
-
-        // Let's just define a fixed opacity animation that loops or just stays visible after entry?
-        // Actually, let's keep it simple: Start opacity 0, fade in, iterate.
-        // But with translate repeating, we want opacity to reset.
-        // We can attach opacity to translateY? 
-        // Or just let it fly.
-        opacity.value = withDelay(delay, withTiming(1, { duration: 1000 }));
+        opacity.value = withDelay(
+            delay,
+            withRepeat(
+                withSequence(
+                    withTiming(0.5, { duration: 800 }),
+                    withTiming(0.5, { duration: 2000 }),
+                    withTiming(0, { duration: 800 }),
+                    withTiming(0, { duration: 2400 }) // Stay hidden
+                ),
+                -1,
+                false
+            )
+        );
     }, []);
 
     const animatedStyle = useAnimatedStyle(() => {
         return {
             transform: [{ translateY: translateY.value }],
-            opacity: opacity.value, // Simple fade in at start
-            // position: 'absolute',
-            // left: Math.random() * (width - 200), // Random collision? better distinct positions
+            opacity: opacity.value,
         };
     });
 
-    // Determine random horizontal position
-    const randomLeft = 20 + (index % 2) * (width / 2 - 40) + Math.random() * 40;
-    // Alternate sides roughly: left, right, left...
+    const startY = height / 2 + (index - 1) * 50; // Start from middle area
 
     return (
         <Animated.View
@@ -76,14 +72,15 @@ const FloatingReview = ({ text, index, total }: { text: string, index: number, t
                 animatedStyle,
                 {
                     position: 'absolute',
+                    top: startY,
                     left: index % 2 === 0 ? 20 : undefined,
                     right: index % 2 !== 0 ? 20 : undefined,
                     zIndex: 0
                 }
             ]}
         >
-            <View className="bg-white/90 px-4 py-3 rounded-2xl shadow-sm border border-orange-50 mb-4 opacity-80">
-                <Text className="text-gray-600 font-medium text-sm">
+            <View className="bg-white/70 px-3 py-2 rounded-full shadow-sm">
+                <Text className="text-gray-500 text-xs">
                     {text}
                 </Text>
             </View>
@@ -102,14 +99,11 @@ export default function Home() {
         <View className="flex-1 bg-orange-50/30 items-center justify-between py-20 px-6 relative overflow-hidden">
             <StatusBar style="dark" />
 
-            {/* Background Floating Reviews */}
+            {/* Background Floating Reviews - Limited to middle area */}
             <View className="absolute inset-0 pointer-events-none w-full h-full">
                 {REVIEWS.map((review, i) => (
                     <FloatingReview key={i} text={review} index={i} total={REVIEWS.length} />
                 ))}
-                {/* Overlay gradient to fade out at top/bottom? optional */}
-                <View className="absolute top-0 w-full h-40 bg-gradient-to-b from-white/90 to-transparent" />
-                <View className="absolute bottom-0 w-full h-40 bg-gradient-to-t from-white/90 to-transparent" />
             </View>
 
             {/* Header / Hero */}

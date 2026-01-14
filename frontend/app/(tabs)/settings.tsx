@@ -172,7 +172,11 @@ export default function SettingsScreen() {
 
                 <View className="mb-8">
                     <Text className="px-6 py-2 text-xs font-bold text-gray-400 uppercase">{language === 'ko' ? "기타" : "Etc"}</Text>
-                    <SettingItem icon="document-text-outline" label={language === 'ko' ? "공지사항" : "Announcements"} />
+                    <SettingItem
+                        icon="document-text-outline"
+                        label={language === 'ko' ? "공지사항" : "Announcements"}
+                        onPress={() => router.push('/announcements')}
+                    />
                     <SettingItem icon="help-circle-outline" label={language === 'ko' ? "지원센터" : "Support Center"} onPress={() => router.push('/support')} />
                     <SettingItem icon="log-out-outline" label={t.logout} isDestructive onPress={handleLogout} />
                     <View className="items-center py-6">

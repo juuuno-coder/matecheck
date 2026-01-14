@@ -155,7 +155,12 @@ export default function SettingsScreen() {
                         </View>
                     </TouchableOpacity>
 
-                    <SettingItem icon="share-social-outline" label={t.invite_code} value={inviteCode || "Loading..."} onPress={onShareInvite} />
+                    <SettingItem icon="key-outline" label={t.invite_code} value={inviteCode || "Loading..."} />
+                    <SettingItem
+                        icon="share-social-outline"
+                        label={language === 'ko' ? "초대 링크 공유하기" : "Share Invitation Link"}
+                        onPress={onShareInvite}
+                    />
                 </View>
 
                 <View className="mb-8">

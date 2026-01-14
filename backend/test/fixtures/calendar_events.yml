@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  title: MyString
+  date: 2026-01-14
+  end_date: 2026-01-14
+  creator_id: 1
+  nest: one
+  image_url: MyString
+  event_type: MyString
+
+two:
+  title: MyString
+  date: 2026-01-14
+  end_date: 2026-01-14
+  creator_id: 1
+  nest: two
+  image_url: MyString
+  event_type: MyString

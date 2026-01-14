@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  title: MyString
+  is_completed: false
+  assigned_to: 1
+  nest: one
+  repeat: MyString
+  image_url: MyString
+
+two:
+  title: MyString
+  is_completed: false
+  assigned_to: 1
+  nest: two
+  repeat: MyString
+  image_url: MyString

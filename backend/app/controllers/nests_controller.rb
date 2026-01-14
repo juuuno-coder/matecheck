@@ -1,0 +1,67 @@
+class NestsController < ApplicationController
+  def show
+    nest = Nest.find(params[:id])
+    render json: nest_data(nest)
+  end
+
+  def create
+    invite_code = SecureRandom.alphanumeric(6).upcase
+    nest_params = params[:nest] || {}
+    nest = Nest.new(name: nest_params[:name], theme_id: nest_params[:theme_id], invite_code: invite_code)
+    
+    if nest.save
+      user = User.find_by(email: params[:email]) 
+      if user
+        user.update(nest: nest, nest_status: 'active', nickname: params.dig(:user, :nickname))
+        render json: nest_data(nest), status: :created
+      else
+        render json: { error: "User not found" }, status: :not_found
+      end
+    else
+      render json: { errors: nest.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  def join
+    nest = Nest.find_by(invite_code: params[:invite_code])
+    if nest
+      user = User.find_by(email: params[:email])
+      if user
+        user.update(nest: nest, nest_status: 'pending')
+        render json: { message: "Join request sent", status: "pending" }, status: :ok
+      else
+         render json: { error: "User not found" }, status: :not_found
+      end
+    else
+      render json: { error: "Invalid invite code" }, status: :not_found
+    end
+  end
+
+  def requests
+    nest = Nest.find(params[:id])
+    pending_users = nest.users.where(nest_status: 'pending')
+    render json: pending_users.map { |u| { id: u.id, nickname: u.nickname, avatar_id: u.avatar_id, email: u.email } }
+  end
+
+  def approve
+    nest = Nest.find(params[:id])
+    user = nest.users.find(params[:user_id])
+    if user.update(nest_status: 'active')
+      render json: { message: "User approved", members: nest_data(nest)[:members] }
+    else
+      render json: { error: "Failed to approve user" }, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+  def nest_data(nest)
+    {
+      id: nest.id,
+      name: nest.name,
+      theme_id: nest.theme_id,
+      invite_code: nest.invite_code,
+      members: nest.users.where(nest_status: 'active').map { |u| { id: u.id, nickname: u.nickname, avatar_id: u.avatar_id } }
+    }
+  end
+end

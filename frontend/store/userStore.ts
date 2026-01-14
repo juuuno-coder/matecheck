@@ -1,0 +1,648 @@
+import { create } from 'zustand';
+import { API_URL } from '../constants/Config';
+import { AVATARS } from '../constants/data';
+
+// --- Interfaces ---
+
+export interface User {
+    id: string;
+    nickname: string;
+    avatarId: number;
+}
+
+export interface Todo {
+    id: string;
+    title: string;
+    isCompleted: boolean;
+    assignedTo: string; // memberId
+    completedBy?: string; // memberId
+    createdAt: string;
+    repeat: 'none' | 'daily' | 'weekly';
+    imageUrl?: string;
+}
+
+export interface CalendarEvent {
+    id: string;
+    title: string;
+    date: string;
+    type: 'event' | 'vote';
+    votes: { [date: string]: string[] }; // date -> array of userIds who voted
+    creatorId: string;
+    imageUrl?: string;
+    endDate?: string; // Optional end date for events
+}
+
+export interface BudgetTransaction {
+    id: string;
+    title: string;
+    amount: number;
+    category: 'food' | 'housing' | 'living' | 'transport' | 'etc';
+    date: string;
+    payerId: string; // memberId
+}
+export interface Goal {
+    id: string;
+    type: 'vision' | 'year' | 'month' | 'week';
+    title: string;
+    current: number;
+    target: number;
+    unit: string;
+}
+
+interface UserState {
+    // Profile
+    nickname: string;
+    avatarId: number;
+    userEmail: string;
+
+    // Nest
+    nestName: string;
+    nestTheme: number;
+    nestId: string;
+    inviteCode: string;
+    isLoggedIn: boolean;
+
+    // Features - Todo
+    todos: Todo[];
+
+    // Features - Calendar
+    events: CalendarEvent[];
+
+    // Features - Budget
+    budgetGoal: number;
+    transactions: BudgetTransaction[];
+
+    // Features - Goals
+    goals: Goal[];
+
+    // Features - Members
+    members: User[];
+
+    // Localization
+    language: 'ko' | 'en';
+
+    // Actions
+    setProfile: (nickname: string, avatarId: number) => void;
+    setEmail: (email: string) => void;
+    setNest: (nestName: string, nestTheme: number, inviteCode?: string, nestId?: string) => void;
+    setMembers: (members: User[]) => void;
+    logout: () => void;
+    addMember: (nickname: string, avatarId: number) => void;
+
+    // Join Requests
+    pendingRequests: User[];
+    fetchJoinRequests: () => Promise<void>;
+    approveJoinRequest: (userId: string) => Promise<void>;
+    setLanguage: (lang: 'ko' | 'en') => void;
+
+    // Todo Actions
+    addTodo: (title: string, assignedTo?: string, repeat?: 'none' | 'daily' | 'weekly', imageUrl?: string) => void;
+    toggleTodo: (id: string, memberId: string) => void;
+    deleteTodo: (id: string) => void;
+
+    // Calendar Actions
+    addEvent: (title: string, date: string, imageUrl?: string, endDate?: string) => void;
+    voteEvent: (eventId: string, date: string, userId: string) => void;
+    deleteEvent: (id: string) => void;
+
+    // Budget Actions
+    addTransaction: (title: string, amount: number, category: BudgetTransaction['category']) => void;
+
+    // Goal Actions
+    addGoal: (type: Goal['type'], title: string, target: number, unit: string) => void;
+    incrementGoalProgress: (id: string) => void;
+    decrementGoalProgress: (id: string) => void;
+    deleteGoal: (id: string) => void;
+
+    // Sync Actions
+    syncMissions: () => Promise<void>;
+    syncEvents: () => Promise<void>;
+    syncGoals: () => Promise<void>;
+    syncTransactions: () => Promise<void>;
+}
+
+export const useUserStore = create<UserState>((set) => ({
+    // Initial State
+    nickname: '',
+    avatarId: 0,
+    userEmail: '',
+    nestName: '',
+    nestTheme: 0,
+    nestId: '',
+    inviteCode: '',
+    isLoggedIn: false,
+
+    members: [ // Mock Initial Members
+        { id: '0', nickname: '나', avatarId: 0 },
+        { id: '1', nickname: '아내', avatarId: 1 },
+        { id: '2', nickname: '딸', avatarId: 4 },
+    ],
+
+    todos: [
+        { id: '1', title: '거실 청소하기', isCompleted: false, assignedTo: '0', createdAt: new Date().toISOString(), repeat: 'none' },
+        { id: '2', title: '쓰레기 분리수거', isCompleted: true, assignedTo: '1', completedBy: '1', createdAt: new Date().toISOString(), repeat: 'none' },
+        { id: '3', title: '저녁 장보기', isCompleted: false, assignedTo: '2', createdAt: new Date().toISOString(), repeat: 'none' },
+    ],
+    events: [
+        { id: '1', title: '가족 외식', date: new Date().toISOString().split('T')[0], type: 'event', votes: {}, creatorId: '0' },
+    ],
+    budgetGoal: 1000000,
+    transactions: [
+        { id: '1', title: '이마트 장보기', amount: 85000, category: 'food', date: '2024-03-10', payerId: '0' },
+        { id: '2', title: '관리비', amount: 150000, category: 'housing', date: '2024-03-05', payerId: '0' },
+    ],
+    goals: [
+        { id: '1', type: 'vision', title: '행복하고 건강한 우리 가족', current: 1, target: 1, unit: 'step' },
+        { id: '2', type: 'year', title: '가족 여행 2회 가기', current: 1, target: 2, unit: 'count' },
+        { id: '3', type: 'month', title: '배달 음식 줄이기', current: 5, target: 10, unit: 'count' },
+    ],
+
+    pendingRequests: [],
+    language: 'ko',
+
+    // Actions
+    setProfile: (nickname, avatarId) => set({ nickname, avatarId }),
+    setEmail: (userEmail) => set({ userEmail }),
+    setNest: (nestName, nestTheme, inviteCode = '', nestId = '') => set({ nestName, nestTheme, inviteCode, nestId, isLoggedIn: true }),
+    setMembers: (members) => set({ members }),
+
+    fetchJoinRequests: async () => {
+        const { nestId } = useUserStore.getState();
+        if (!nestId) return;
+        try {
+            const response = await fetch(`${API_URL}/nests/${nestId}/requests`);
+            if (response.ok) {
+                const data = await response.json();
+                set({
+                    pendingRequests: data.map((u: any) => ({
+                        id: String(u.id),
+                        nickname: u.nickname,
+                        avatarId: u.avatar_id
+                    }))
+                });
+            }
+        } catch (error) { console.error(error); }
+    },
+
+    approveJoinRequest: async (userId) => {
+        const { nestId } = useUserStore.getState();
+        if (!nestId) return;
+        try {
+            const response = await fetch(`${API_URL}/nests/${nestId}/approve/${userId}`, {
+                method: 'PATCH'
+            });
+            if (response.ok) {
+                const data = await response.json();
+                set((state: UserState) => ({
+                    pendingRequests: state.pendingRequests.filter(u => u.id !== userId),
+                    members: data.members.map((m: any) => ({
+                        id: String(m.id),
+                        nickname: m.nickname,
+                        avatarId: m.avatar_id
+                    }))
+                }));
+            }
+        } catch (error) { console.error(error); }
+    },
+
+    setLanguage: (lang) => set({ language: lang }),
+
+    logout: () => set({
+        nickname: '', avatarId: 0, userEmail: '', nestName: '', nestTheme: 0, nestId: '', inviteCode: '', isLoggedIn: false,
+        todos: [],
+        events: [],
+        transactions: [],
+        goals: [],
+        pendingRequests: [],
+        language: 'ko'
+    }),
+    addMember: (nickname, avatarId) => set((state: UserState) => ({
+        members: [...state.members, { id: Math.random().toString(36).substr(2, 9), nickname, avatarId }]
+    })),
+
+    // Type-safe Todo Actions
+    addTodo: async (title: string, assignedTo: string = '0', repeat: 'none' | 'daily' | 'weekly' = 'none', imageUrl?: string) => {
+        const { nestId } = useUserStore.getState();
+        if (nestId) {
+            try {
+                const response = await fetch(`${API_URL}/nests/${nestId}/missions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        mission: {
+                            title,
+                            assigned_to: Number(assignedTo),
+                            repeat,
+                            image_url: imageUrl,
+                            is_completed: false
+                        }
+                    })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    set((state: UserState) => ({
+                        todos: [
+                            {
+                                id: String(data.id),
+                                title: data.title,
+                                isCompleted: data.is_completed,
+                                assignedTo: String(data.assigned_to),
+                                createdAt: data.created_at,
+                                repeat: data.repeat,
+                                imageUrl: data.image_url
+                            },
+                            ...state.todos
+                        ]
+                    }));
+                }
+            } catch (error) { console.error(error); }
+        } else {
+            // Fallback to local only for demo if no nestId
+            set((state: UserState) => ({
+                todos: [
+                    {
+                        id: Math.random().toString(36).substr(2, 9),
+                        title,
+                        isCompleted: false,
+                        assignedTo,
+                        createdAt: new Date().toISOString(),
+                        repeat,
+                        imageUrl
+                    },
+                    ...state.todos
+                ]
+            }));
+        }
+    },
+
+    toggleTodo: async (id, memberId) => {
+        const { nestId, todos } = useUserStore.getState();
+        const todo = todos.find(t => t.id === id);
+        if (!todo) return;
+
+        const nextStatus = !todo.isCompleted;
+
+        if (nestId) {
+            try {
+                const response = await fetch(`${API_URL}/nests/${nestId}/missions/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        mission: { is_completed: nextStatus }
+                    })
+                });
+                if (response.ok) {
+                    set((state: UserState) => ({
+                        todos: state.todos.map((t) =>
+                            t.id === id
+                                ? { ...t, isCompleted: nextStatus, completedBy: nextStatus ? memberId : undefined }
+                                : t
+                        ).sort((a, b) => Number(a.isCompleted) - Number(b.isCompleted))
+                    }));
+                }
+            } catch (error) { console.error(error); }
+        } else {
+            set((state: UserState) => ({
+                todos: state.todos.map((t) =>
+                    t.id === id
+                        ? { ...t, isCompleted: nextStatus, completedBy: nextStatus ? memberId : undefined }
+                        : t
+                ).sort((a, b) => Number(a.isCompleted) - Number(b.isCompleted))
+            }));
+        }
+    },
+
+    deleteTodo: async (id) => {
+        const { nestId } = useUserStore.getState();
+        if (nestId) {
+            try {
+                const response = await fetch(`${API_URL}/nests/${nestId}/missions/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    set((state: UserState) => ({ todos: state.todos.filter(todo => todo.id !== id) }));
+                }
+            } catch (error) { console.error(error); }
+        } else {
+            set((state: UserState) => ({ todos: state.todos.filter(todo => todo.id !== id) }));
+        }
+    },
+
+    // Calendar Actions
+    addEvent: async (title: string, date: string, imageUrl?: string, endDate?: string) => {
+        const { nestId, avatarId } = useUserStore.getState();
+        if (nestId) {
+            try {
+                const response = await fetch(`${API_URL}/nests/${nestId}/calendar_events`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        calendar_event: {
+                            title, date, end_date: endDate,
+                            creator_id: avatarId, image_url: imageUrl,
+                            event_type: 'event'
+                        }
+                    })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    set((state: UserState) => ({
+                        events: [...state.events, {
+                            id: String(data.id),
+                            title: data.title,
+                            date: data.date,
+                            endDate: data.end_date,
+                            type: data.event_type || 'event',
+                            votes: {},
+                            creatorId: String(data.creator_id),
+                            imageUrl: data.image_url
+                        }]
+                    }));
+                }
+            } catch (error) { console.error(error); }
+        } else {
+            set((state: UserState) => ({
+                events: [...state.events, {
+                    id: Math.random().toString(36).substr(2, 9),
+                    title, date, endDate, type: 'vote',
+                    votes: { [date]: [String(state.avatarId)] },
+                    creatorId: String(state.avatarId),
+                    imageUrl
+                }]
+            }));
+        }
+    },
+
+    voteEvent: (eventId, date, userId) => set((state: UserState) => ({
+        events: state.events.map(evt => {
+            if (evt.id !== eventId) return evt;
+            const currentVotes = evt.votes[date] || [];
+            const hasVoted = currentVotes.includes(userId);
+
+            return {
+                ...evt,
+                votes: {
+                    ...evt.votes,
+                    [date]: hasVoted
+                        ? currentVotes.filter(id => id !== userId) // Toggle off
+                        : [...currentVotes, userId] // Toggle on
+                }
+            };
+        })
+    })),
+
+    deleteEvent: async (id) => {
+        const { nestId } = useUserStore.getState();
+        if (nestId) {
+            try {
+                const response = await fetch(`${API_URL}/nests/${nestId}/calendar_events/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    set((state: UserState) => ({ events: state.events.filter(e => e.id !== id) }));
+                }
+            } catch (error) { console.error(error); }
+        } else {
+            set((state: UserState) => ({ events: state.events.filter(e => e.id !== id) }));
+        }
+    },
+
+    // Budget Actions
+    addTransaction: async (title, amount, category) => {
+        const { nestId, avatarId } = useUserStore.getState();
+        if (nestId) {
+            try {
+                const response = await fetch(`${API_URL}/nests/${nestId}/transactions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        transaction: {
+                            title, amount, category,
+                            date: new Date().toISOString().split('T')[0],
+                            payer_id: avatarId
+                        }
+                    })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    set((state: UserState) => ({
+                        transactions: [
+                            {
+                                id: String(data.id),
+                                title: data.title,
+                                amount: Number(data.amount),
+                                category: data.category,
+                                date: data.date,
+                                payerId: String(data.payer_id)
+                            },
+                            ...state.transactions
+                        ]
+                    }));
+                }
+            } catch (error) { console.error(error); }
+        } else {
+            set((state: UserState) => ({
+                transactions: [
+                    {
+                        id: Math.random().toString(36).substr(2, 9),
+                        title, amount, category,
+                        date: new Date().toISOString().split('T')[0],
+                        payerId: String(state.avatarId)
+                    },
+                    ...state.transactions
+                ]
+            }));
+        }
+    },
+
+    // Goal Actions
+    addGoal: async (type, title, target, unit) => {
+        const { nestId } = useUserStore.getState();
+        if (nestId) {
+            try {
+                const response = await fetch(`${API_URL}/nests/${nestId}/goals`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        goal: { goal_type: type, title, target, unit, current: 0 }
+                    })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    set((state: UserState) => ({
+                        goals: [
+                            ...state.goals,
+                            {
+                                id: String(data.id),
+                                type: data.goal_type,
+                                title: data.title,
+                                current: data.current,
+                                target: data.target,
+                                unit: data.unit
+                            }
+                        ]
+                    }));
+                }
+            } catch (error) { console.error(error); }
+        } else {
+            set((state: UserState) => ({
+                goals: [
+                    ...state.goals,
+                    {
+                        id: Math.random().toString(36).substr(2, 9),
+                        type, title, current: 0, target, unit
+                    }
+                ]
+            }));
+        }
+    },
+
+    incrementGoalProgress: async (id) => {
+        const { nestId, goals } = useUserStore.getState();
+        const goal = goals.find(g => g.id === id);
+        if (!goal || goal.current >= goal.target) return;
+
+        const nextVal = goal.current + 1;
+
+        if (nestId) {
+            try {
+                const response = await fetch(`${API_URL}/nests/${nestId}/goals/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ goal: { current: nextVal } })
+                });
+                if (response.ok) {
+                    set((state: UserState) => ({
+                        goals: state.goals.map(g => g.id === id ? { ...g, current: nextVal } : g)
+                    }));
+                }
+            } catch (error) { console.error(error); }
+        } else {
+            set((state: UserState) => ({
+                goals: state.goals.map(g => g.id === id ? { ...g, current: nextVal } : g)
+            }));
+        }
+    },
+
+    decrementGoalProgress: async (id) => {
+        const { nestId, goals } = useUserStore.getState();
+        const goal = goals.find(g => g.id === id);
+        if (!goal || goal.current <= 0) return;
+
+        const nextVal = goal.current - 1;
+
+        if (nestId) {
+            try {
+                const response = await fetch(`${API_URL}/nests/${nestId}/goals/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ goal: { current: nextVal } })
+                });
+                if (response.ok) {
+                    set((state: UserState) => ({
+                        goals: state.goals.map(g => g.id === id ? { ...g, current: nextVal } : g)
+                    }));
+                }
+            } catch (error) { console.error(error); }
+        } else {
+            set((state: UserState) => ({
+                goals: state.goals.map(g => g.id === id ? { ...g, current: nextVal } : g)
+            }));
+        }
+    },
+
+    deleteGoal: async (id) => {
+        const { nestId } = useUserStore.getState();
+        if (nestId) {
+            try {
+                const response = await fetch(`${API_URL}/nests/${nestId}/goals/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    set((state: UserState) => ({ goals: state.goals.filter(g => g.id !== id) }));
+                }
+            } catch (error) { console.error(error); }
+        } else {
+            set((state: UserState) => ({ goals: state.goals.filter(g => g.id !== id) }));
+        }
+    },
+
+    // Sync Implementations
+    syncMissions: async () => {
+        const { nestId } = useUserStore.getState();
+        if (!nestId) return;
+        try {
+            const response = await fetch(`${API_URL}/nests/${nestId}/missions`);
+            const data = await response.json();
+            if (response.ok) {
+                // Map backend to frontend keys if necessary
+                const mapped = data.map((m: any) => ({
+                    id: String(m.id),
+                    title: m.title,
+                    isCompleted: m.is_completed,
+                    assignedTo: String(m.assigned_to),
+                    repeat: m.repeat || 'none',
+                    imageUrl: m.image_url,
+                    createdAt: m.created_at
+                }));
+                set({ todos: mapped });
+            }
+        } catch (error) { console.error(error); }
+    },
+
+    syncEvents: async () => {
+        const { nestId } = useUserStore.getState();
+        if (!nestId) return;
+        try {
+            const response = await fetch(`${API_URL}/nests/${nestId}/calendar_events`);
+            const data = await response.json();
+            if (response.ok) {
+                const mapped = data.map((e: any) => ({
+                    id: String(e.id),
+                    title: e.title,
+                    date: e.date,
+                    endDate: e.end_date,
+                    type: e.event_type || 'event',
+                    creatorId: String(e.creator_id),
+                    imageUrl: e.image_url,
+                    votes: {} // Voting logic needs dedicated table later
+                }));
+                set({ events: mapped });
+            }
+        } catch (error) { console.error(error); }
+    },
+
+    syncGoals: async () => {
+        const { nestId } = useUserStore.getState();
+        if (!nestId) return;
+        try {
+            const response = await fetch(`${API_URL}/nests/${nestId}/goals`);
+            const data = await response.json();
+            if (response.ok) {
+                const mapped = data.map((g: any) => ({
+                    id: String(g.id),
+                    type: g.goal_type,
+                    title: g.title,
+                    current: g.current,
+                    target: g.target,
+                    unit: g.unit
+                }));
+                set({ goals: mapped });
+            }
+        } catch (error) { console.error(error); }
+    },
+
+    syncTransactions: async () => {
+        const { nestId } = useUserStore.getState();
+        if (!nestId) return;
+        try {
+            const response = await fetch(`${API_URL}/nests/${nestId}/transactions`);
+            const data = await response.json();
+            if (response.ok) {
+                const mapped = data.map((t: any) => ({
+                    id: String(t.id),
+                    title: t.title,
+                    amount: Number(t.amount),
+                    category: t.category,
+                    date: t.date,
+                    payerId: String(t.payer_id)
+                }));
+                set({ transactions: mapped });
+            }
+        } catch (error) { console.error(error); }
+    },
+}));

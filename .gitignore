@@ -1,0 +1,28 @@
+# Common
+.DS_Store
+*.log
+.env
+.ruby-lsp/
+
+# Frontend (Expo)
+frontend/node_modules/
+frontend/.expo/
+frontend/dist/
+frontend/web-build/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# Backend (Rails)
+backend/node_modules/
+backend/log/*.log
+backend/tmp/
+backend/public/assets
+backend/.bundle/
+backend/db/*.sqlite3
+backend/db/*.sqlite3-journal
+backend/db/*.sqlite3-shm
+backend/db/*.sqlite3-wal
+backend/vendor/bundle
+backend/storage/
+backend/fly.toml

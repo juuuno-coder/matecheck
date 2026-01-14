@@ -7,14 +7,14 @@ import { cn } from '../../lib/utils';
 import { AVATARS } from '../../constants/data';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-
+import Avatar from '../../components/Avatar';
 import { Language, translations } from '../../constants/I18n';
 
 export default function ProfileScreen() {
     const router = useRouter();
     const params = useLocalSearchParams();
     const { setProfile, userEmail, language } = useUserStore();
-    const t = translations[language].onboarding;
+    const t = translations[language as Language].onboarding;
 
     const [nickname, setLocalNickname] = useState('');
     const [selectedAvatarId, setSelectedAvatarId] = useState(0);
@@ -62,11 +62,16 @@ export default function ProfileScreen() {
                 <View className="items-center mb-10">
                     <TouchableOpacity
                         onPress={() => setSelectedAvatarId((selectedAvatarId + 1) % AVATARS.length)}
-                        className="w-24 h-24 bg-gray-50 rounded-full items-center justify-center border border-gray-100 shadow-sm"
+                        className="relative"
                     >
-                        <Text className="text-5xl">{(AVATARS[selectedAvatarId] || AVATARS[0]).emoji}</Text>
-                        <View className="absolute bottom-0 right-0 bg-white p-1.5 rounded-full border border-gray-100 shadow-sm">
-                            <Ionicons name="refresh" size={14} color="#666" />
+                        <Avatar
+                            source={(AVATARS[selectedAvatarId] || AVATARS[0]).image}
+                            size="xl"
+                            borderColor="#E5E7EB"
+                            borderWidth={2}
+                        />
+                        <View className="absolute bottom-0 right-0 bg-white p-2 rounded-full border border-gray-100 shadow-md">
+                            <Ionicons name="refresh" size={16} color="#666" />
                         </View>
                     </TouchableOpacity>
                     <Text className="text-gray-400 text-xs mt-3">{t.avatar_hint}</Text>

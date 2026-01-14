@@ -6,6 +6,7 @@ import { cn } from '../../lib/utils';
 import { AVATARS } from '../../constants/data';
 import { Ionicons } from '@expo/vector-icons';
 import { translations } from '../../constants/I18n';
+import Avatar from '../../components/Avatar';
 
 export default function SettingsScreen() {
     const {
@@ -81,7 +82,12 @@ export default function SettingsScreen() {
                 <Text className="text-2xl font-bold text-gray-800 mb-6 font-primary">{t.title}</Text>
 
                 <View className="flex-row items-center gap-4">
-                    <Image source={(AVATARS[avatarId] || AVATARS[0]).image} className="w-16 h-16 rounded-full border border-gray-100" />
+                    <Avatar
+                        source={(AVATARS[avatarId] || AVATARS[0]).image}
+                        size="lg"
+                        borderColor="#E5E7EB"
+                        borderWidth={1}
+                    />
                     <View>
                         <Text className="text-xl font-bold text-gray-900">{nickname}</Text>
                         <Text className="text-gray-500">{nestName}</Text>

@@ -8,10 +8,10 @@ import { THEMES } from '../constants/data';
 import { cn } from '../lib/utils';
 
 const PRESET_IMAGES = [
-    "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800&q=80", // House
-    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80", // Apartment
-    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80", // Modern
-    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80", // Cozy
+    "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800&q=80", // Cozy House
+    "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80", // Planet/Space
+    "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=800&q=80", // Dog House / Puppy
+    "https://images.unsplash.com/photo-1628155930542-3c7a64e2c833?w=800&q=80", // Fantasy/Illustration
 ];
 
 export default function NestManagementScreen() {

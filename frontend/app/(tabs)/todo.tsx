@@ -5,14 +5,22 @@ import { cn } from '../../lib/utils';
 import { AVATARS, THEMES } from '../../constants/data';
 import Animated, { FadeInUp, Layout } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { translations } from '../../constants/I18n';
 
 export default function TodoScreen() {
     const { todos, addTodo, toggleTodo, deleteTodo, nestTheme, members, language } = useUserStore();
     const router = useRouter();
+    const params = useLocalSearchParams();
     const t = translations[language].tabs;
+
+    React.useEffect(() => {
+        if (params.action === 'add') {
+            setModalVisible(true);
+            router.setParams({ action: '' });
+        }
+    }, [params.action]);
 
     const labels = {
         ko: {

@@ -1,15 +1,16 @@
 import { View, Text, TouchableOpacity, ScrollView, Image, Dimensions, Platform } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
-import TutorialOverlay from '../../components/TutorialOverlay';
-
-const { width, height } = Dimensions.get('window');
 import { useUserStore } from '../../store/userStore';
 import { cn } from '../../lib/utils';
 import { AVATARS, THEMES } from '../../constants/data';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { translations } from '../../constants/I18n';
+import TutorialOverlay from '../../components/TutorialOverlay';
+import FloatingActionMenu from '../../components/FloatingActionMenu';
+
+const { width, height } = Dimensions.get('window');
 
 const getDDay = (dateStr: string) => {
     const today = new Date();
@@ -256,6 +257,8 @@ export default function HomeScreen() {
                     }
                 ]}
             />
+
+            <FloatingActionMenu themeBg={THEMES[nestTheme]?.color || 'bg-orange-500'} />
         </View>
     );
 }

@@ -7,6 +7,7 @@ import { THEMES, AVATARS } from '../../constants/data';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 
 LocaleConfig.locales['kr'] = {
     monthNames: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
@@ -18,6 +19,8 @@ LocaleConfig.locales['kr'] = {
 LocaleConfig.defaultLocale = 'kr';
 
 export default function CalendarScreen() {
+    const router = useRouter();
+    const params = useLocalSearchParams();
     const { nestTheme, events, addEvent, voteEvent, deleteEvent, avatarId } = useUserStore();
     const themeText = THEMES[nestTheme]?.color?.replace('bg-', 'text-') || 'text-orange-600';
     const themeBg = THEMES[nestTheme]?.color || 'bg-orange-500';
@@ -35,6 +38,13 @@ export default function CalendarScreen() {
     const [endDate, setEndDate] = useState<string | null>(null);
     const [eventTime, setEventTime] = useState<string>('');
     const [isTimeEnabled, setIsTimeEnabled] = useState(false);
+
+    React.useEffect(() => {
+        if (params.action === 'add') {
+            setModalVisible(true);
+            router.setParams({ action: '' });
+        }
+    }, [params.action]);
 
     const handleDayPress = (day: DateData) => setSelectedDate(day.dateString);
 

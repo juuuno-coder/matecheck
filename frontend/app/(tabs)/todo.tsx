@@ -18,6 +18,7 @@ export default function TodoScreen() {
         ko: {
             title: "우리의 미션 🚀",
             success: "모든 미션을 완료했습니다!",
+            empty_list_title: "등록된 미션이 없어요",
             add_new: "새로운 미션을 추가해보세요.",
             today: "오늘의 미션 🔥",
             weekly: "이번 주 미션 ✨",
@@ -39,6 +40,7 @@ export default function TodoScreen() {
         en: {
             title: "Missions 🚀",
             success: "All missions completed!",
+            empty_list_title: "No missions yet",
             add_new: "Try adding a new mission.",
             today: "Today's Missions 🔥",
             weekly: "This Week's Missions ✨",
@@ -209,8 +211,8 @@ export default function TodoScreen() {
             <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 100 }}>
                 {todos.length === 0 ? (
                     <View className="items-center justify-center py-20">
-                        <Text className="text-5xl mb-4">🎉</Text>
-                        <Text className="text-gray-400 text-lg">{labels.success}</Text>
+                        <Text className="text-5xl mb-4">📝</Text>
+                        <Text className="text-gray-400 text-lg">{labels.empty_list_title}</Text>
                         <Text className="text-gray-300 text-sm mt-2">{labels.add_new}</Text>
                     </View>
                 ) : (

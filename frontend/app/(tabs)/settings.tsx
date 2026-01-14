@@ -101,7 +101,7 @@ export default function SettingsScreen() {
 
                 <View className="mb-2">
                     <Text className="px-6 py-2 text-xs font-bold text-gray-400 uppercase">{t.account_section}</Text>
-                    <SettingItem icon="person-outline" label={t.profile_edit} />
+                    <SettingItem icon="person-outline" label={t.profile_edit} onPress={() => router.push('/account_management')} />
                     <SettingItem icon="notifications-outline" label={t.notifications} value="On" />
                     <SettingItem
                         icon="earth-outline"

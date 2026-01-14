@@ -67,9 +67,10 @@ export default function TodoScreen() {
     // Modal State
     const [modalVisible, setModalVisible] = useState(false);
     const [newTodoTitle, setNewTodoTitle] = useState('');
-    const [selectedAssigneeId, setSelectedAssigneeId] = useState<string>(members[0]?.id || '0');
-    const [repeatOption, setRepeatOption] = useState<'none' | 'daily' | 'weekly'>('none');
+    const [selectedAssigneeIds, setSelectedAssigneeIds] = useState<string[]>([members[0]?.id || '0']);
+    const [repeatOption, setRepeatOption] = useState<'none' | 'daily' | 'weekly' | 'monthly'>('none');
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [isRepeatEnabled, setIsRepeatEnabled] = useState(false);
 
     // Grouping
     const dailyMissions = todos.filter(t => t.repeat !== 'weekly');
@@ -88,11 +89,22 @@ export default function TodoScreen() {
         }
     };
 
+    const toggleAssignee = (id: string) => {
+        if (selectedAssigneeIds.includes(id)) {
+            if (selectedAssigneeIds.length > 1) {
+                setSelectedAssigneeIds(prev => prev.filter(mid => mid !== id));
+            }
+        } else {
+            setSelectedAssigneeIds(prev => [...prev, id]);
+        }
+    };
+
     const handleAddTodo = () => {
         if (newTodoTitle.trim()) {
-            addTodo(newTodoTitle, selectedAssigneeId, repeatOption, selectedImage || undefined);
+            addTodo(newTodoTitle, selectedAssigneeIds, repeatOption, selectedImage || undefined);
             setNewTodoTitle('');
             setRepeatOption('none');
+            setIsRepeatEnabled(false);
             setSelectedImage(null);
             setModalVisible(false);
         }
@@ -101,11 +113,6 @@ export default function TodoScreen() {
     const getMemberAvatar = (memberId: string) => {
         const member = members.find(m => m.id === memberId);
         return AVATARS[member?.avatarId || 0].image;
-    };
-
-    const getMemberName = (memberId: string) => {
-        const member = members.find(m => m.id === memberId);
-        return member?.nickname || labels.unknown;
     };
 
     const TodoItem = ({ item, index }: { item: Todo, index: number }) => (
@@ -147,12 +154,12 @@ export default function TodoScreen() {
                 {item.isCompleted ? (
                     <View className="flex-row items-center">
                         <View className="items-end mr-2">
-                            <Text className="text-[10px] text-gray-400 line-through">To. {getMemberName(item.assignedTo)}</Text>
-                            <Text className={cn("text-xs font-bold", themeText)}>Done by.</Text>
+                            {/* Show completer name */}
+                            <Text className={cn("text-xs font-bold", themeText)}>Completed</Text>
                         </View>
                         <View>
                             <Image
-                                source={getMemberAvatar(item.completedBy || item.assignedTo)}
+                                source={getMemberAvatar(item.completedBy || item.assignees[0]?.id)}
                                 className={cn("w-10 h-10 rounded-full border-2", themeBorder)}
                             />
                             <View className={cn("absolute -bottom-1 -right-1 w-4 h-4 rounded-full items-center justify-center border border-white", themeBg)}>
@@ -163,11 +170,19 @@ export default function TodoScreen() {
                 ) : (
                     <View className="items-center">
                         <Text className="text-[10px] text-gray-400 mb-0.5">To.</Text>
-                        <Image
-                            source={getMemberAvatar(item.assignedTo)}
-                            className="w-10 h-10 rounded-full border border-gray-100"
-                        />
-                        <Text className="text-[10px] text-gray-500 mt-0.5">{getMemberName(item.assignedTo)}</Text>
+                        <View className="flex-row pl-2">
+                            {item.assignees?.map((assignee, i) => (
+                                <Image
+                                    key={assignee.id}
+                                    source={AVATARS[assignee.avatarId].image}
+                                    className="w-8 h-8 rounded-full border-2 border-white -ml-2"
+                                    style={{ zIndex: 10 - i }}
+                                />
+                            ))}
+                        </View>
+                        {item.assignees?.length === 1 && (
+                            <Text className="text-[10px] text-gray-500 mt-0.5">{item.assignees[0].nickname}</Text>
+                        )}
                     </View>
                 )}
             </View>
@@ -266,44 +281,71 @@ export default function TodoScreen() {
                         </TouchableOpacity>
 
                         <Text className="text-sm font-bold text-gray-500 mb-3">{labels.repeat_label}</Text>
-                        <View className="flex-row gap-3 mb-6">
-                            {(['none', 'daily', 'weekly'] as const).map((opt) => (
+                        <View className="mb-6">
+                            <View className="flex-row items-center gap-3 mb-3">
                                 <TouchableOpacity
-                                    key={opt}
-                                    onPress={() => setRepeatOption(opt)}
-                                    className={cn(
-                                        "px-4 py-2 rounded-lg border",
-                                        repeatOption === opt ? `${themeBg} border-transparent` : "bg-white border-gray-200"
-                                    )}
+                                    onPress={() => {
+                                        setIsRepeatEnabled(!isRepeatEnabled);
+                                        if (isRepeatEnabled) setRepeatOption('none');
+                                        else setRepeatOption('daily');
+                                    }}
+                                    className={cn("px-4 py-2 rounded-full border", isRepeatEnabled ? `${themeBg} border-transparent` : "bg-gray-100 border-gray-200")}
                                 >
-                                    <Text className={cn(
-                                        "font-bold",
-                                        repeatOption === opt ? "text-white" : "text-gray-500"
-                                    )}>
-                                        {labels.repeats[opt]}
+                                    <Text className={cn("font-bold text-xs", isRepeatEnabled ? "text-white" : "text-gray-500")}>
+                                        {isRepeatEnabled ? "반복 설정 ON" : "반복 안함"}
                                     </Text>
                                 </TouchableOpacity>
-                            ))}
+                            </View>
+
+                            {isRepeatEnabled && (
+                                <View className="flex-row gap-2 bg-gray-50 p-2 rounded-xl">
+                                    {(['daily', 'weekly', 'monthly'] as const).map((opt) => (
+                                        <TouchableOpacity
+                                            key={opt}
+                                            onPress={() => setRepeatOption(opt)}
+                                            className={cn(
+                                                "flex-1 py-2 rounded-lg items-center",
+                                                repeatOption === opt ? "bg-white shadow-sm" : ""
+                                            )}
+                                        >
+                                            <Text className={cn(
+                                                "font-bold text-xs",
+                                                repeatOption === opt ? themeText : "text-gray-400"
+                                            )}>
+                                                {opt === 'daily' ? '매일' : opt === 'weekly' ? '매주' : '매월'}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            )}
                         </View>
 
                         <Text className="text-sm font-bold text-gray-500 mb-3">{labels.assignee_label}</Text>
                         <View className="flex-row flex-wrap gap-4 mb-8">
-                            {members.map((member) => (
-                                <TouchableOpacity
-                                    key={member.id}
-                                    onPress={() => setSelectedAssigneeId(member.id)}
-                                    className={cn(
-                                        "items-center p-1 rounded-full border-2",
-                                        selectedAssigneeId === member.id ? themeBorder : "border-transparent"
-                                    )}
-                                >
-                                    <Image source={AVATARS[member.avatarId].image} className="w-12 h-12 rounded-full bg-gray-100" />
-                                    <Text className={cn(
-                                        "text-xs mt-1 font-medium",
-                                        selectedAssigneeId === member.id ? themeText : "text-gray-400"
-                                    )}>{member.nickname}</Text>
-                                </TouchableOpacity>
-                            ))}
+                            {members.map((member) => {
+                                const isSelected = selectedAssigneeIds.includes(member.id);
+                                return (
+                                    <TouchableOpacity
+                                        key={member.id}
+                                        onPress={() => toggleAssignee(member.id)}
+                                        className={cn(
+                                            "items-center p-1 rounded-full border-2 relative",
+                                            isSelected ? themeBorder : "border-transparent"
+                                        )}
+                                    >
+                                        <Image source={AVATARS[member.avatarId].image} className="w-12 h-12 rounded-full bg-gray-100" />
+                                        {isSelected && (
+                                            <View className={cn("absolute top-0 right-0 w-4 h-4 rounded-full items-center justify-center border border-white", themeBg)}>
+                                                <Ionicons name="checkmark" size={10} color="white" />
+                                            </View>
+                                        )}
+                                        <Text className={cn(
+                                            "text-xs mt-1 font-medium",
+                                            isSelected ? themeText : "text-gray-400"
+                                        )}>{member.nickname}</Text>
+                                    </TouchableOpacity>
+                                );
+                            })}
                         </View>
 
                         <TouchableOpacity

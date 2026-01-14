@@ -15,10 +15,10 @@ export interface Todo {
     id: string;
     title: string;
     isCompleted: boolean;
-    assignedTo: string; // memberId
+    assignees: User[]; // Full user objects
     completedBy?: string; // memberId
     createdAt: string;
-    repeat: 'none' | 'daily' | 'weekly';
+    repeat: 'none' | 'daily' | 'weekly' | 'monthly';
     imageUrl?: string;
 }
 
@@ -98,9 +98,13 @@ interface UserState {
     setLanguage: (lang: 'ko' | 'en') => void;
 
     // Todo Actions
-    addTodo: (title: string, assignedTo?: string, repeat?: 'none' | 'daily' | 'weekly', imageUrl?: string) => void;
+    addTodo: (title: string, assigneeIds?: string[], repeat?: 'none' | 'daily' | 'weekly' | 'monthly', imageUrl?: string) => void;
     toggleTodo: (id: string, memberId: string) => void;
     deleteTodo: (id: string) => void;
+
+    // Account Actions
+    updatePassword: (currentPassword: string, newPassword: string, confirmPassword: string) => Promise<{ success: boolean, error?: string }>;
+    deleteAccount: (password: string) => Promise<{ success: boolean, error?: string }>;
 
     // Calendar Actions
     addEvent: (title: string, date: string, imageUrl?: string, endDate?: string) => void;
@@ -141,9 +145,9 @@ export const useUserStore = create<UserState>((set) => ({
     ],
 
     todos: [
-        { id: '1', title: '거실 청소하기', isCompleted: false, assignedTo: '0', createdAt: new Date().toISOString(), repeat: 'none' },
-        { id: '2', title: '쓰레기 분리수거', isCompleted: true, assignedTo: '1', completedBy: '1', createdAt: new Date().toISOString(), repeat: 'none' },
-        { id: '3', title: '저녁 장보기', isCompleted: false, assignedTo: '2', createdAt: new Date().toISOString(), repeat: 'none' },
+        { id: '1', title: '거실 청소하기', isCompleted: false, assignees: [{ id: '0', nickname: '나', avatarId: 0 }], createdAt: new Date().toISOString(), repeat: 'none' },
+        { id: '2', title: '쓰레기 분리수거', isCompleted: true, assignees: [{ id: '1', nickname: '아내', avatarId: 1 }], completedBy: '1', createdAt: new Date().toISOString(), repeat: 'none' },
+        { id: '3', title: '저녁 장보기', isCompleted: false, assignees: [{ id: '2', nickname: '딸', avatarId: 4 }], createdAt: new Date().toISOString(), repeat: 'none' },
     ],
     events: [
         { id: '1', title: '가족 외식', date: new Date().toISOString().split('T')[0], type: 'event', votes: {}, creatorId: '0' },
@@ -222,6 +226,42 @@ export const useUserStore = create<UserState>((set) => ({
         members: [...state.members, { id: Math.random().toString(36).substr(2, 9), nickname, avatarId }]
     })),
 
+    updatePassword: async (currentPassword, newPassword, confirmPassword) => {
+        const { userEmail } = useUserStore.getState();
+        try {
+            const response = await fetch(`${API_URL}/users/password`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: userEmail,
+                    current_password: currentPassword,
+                    new_password: newPassword,
+                    new_password_confirmation: confirmPassword
+                })
+            });
+            const data = await response.json();
+            if (response.ok) return { success: true };
+            return { success: false, error: data.errors ? data.errors.join(", ") : data.error };
+        } catch (error) { return { success: false, error: "Network error" }; }
+    },
+
+    deleteAccount: async (password) => {
+        const { userEmail } = useUserStore.getState();
+        try {
+            const response = await fetch(`${API_URL}/users`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: userEmail, password })
+            });
+            if (response.ok) {
+                useUserStore.getState().logout();
+                return { success: true };
+            }
+            const data = await response.json();
+            return { success: false, error: data.error };
+        } catch (error) { return { success: false, error: "Network error" }; }
+    },
+
     addManagedMember: async (nickname, avatarId, memberType) => {
         const { nestId } = useUserStore.getState();
         if (!nestId) return;
@@ -246,8 +286,8 @@ export const useUserStore = create<UserState>((set) => ({
     },
 
     // Type-safe Todo Actions
-    addTodo: async (title: string, assignedTo: string = '0', repeat: 'none' | 'daily' | 'weekly' = 'none', imageUrl?: string) => {
-        const { nestId } = useUserStore.getState();
+    addTodo: async (title: string, assigneeIds: string[] = ['0'], repeat: 'none' | 'daily' | 'weekly' | 'monthly' = 'none', imageUrl?: string) => {
+        const { nestId, members } = useUserStore.getState();
         if (nestId) {
             try {
                 const response = await fetch(`${API_URL}/nests/${nestId}/missions`, {
@@ -256,7 +296,9 @@ export const useUserStore = create<UserState>((set) => ({
                     body: JSON.stringify({
                         mission: {
                             title,
-                            assigned_to: Number(assignedTo),
+                            assigned_to: null, // Deprecated in backend for assignee_ids, but keeping for compatibility if needed? No, backend ignores it or we send both.
+                            // Backend expects assignee_ids
+                            assignee_ids: assigneeIds,
                             repeat,
                             image_url: imageUrl,
                             is_completed: false
@@ -271,7 +313,9 @@ export const useUserStore = create<UserState>((set) => ({
                                 id: String(data.id),
                                 title: data.title,
                                 isCompleted: data.is_completed,
-                                assignedTo: String(data.assigned_to),
+                                assignees: data.assignees ? data.assignees.map((a: any) => ({
+                                    id: String(a.id), nickname: a.nickname, avatarId: a.avatar_id, memberType: a.member_type
+                                })) : [],
                                 createdAt: data.created_at,
                                 repeat: data.repeat,
                                 imageUrl: data.image_url
@@ -282,14 +326,15 @@ export const useUserStore = create<UserState>((set) => ({
                 }
             } catch (error) { console.error(error); }
         } else {
-            // Fallback to local only for demo if no nestId
+            // Fallback to local
+            const selectedMembers = members.filter(m => assigneeIds.includes(m.id));
             set((state: UserState) => ({
                 todos: [
                     {
                         id: Math.random().toString(36).substr(2, 9),
                         title,
                         isCompleted: false,
-                        assignedTo,
+                        assignees: selectedMembers,
                         createdAt: new Date().toISOString(),
                         repeat,
                         imageUrl
@@ -599,7 +644,9 @@ export const useUserStore = create<UserState>((set) => ({
                     id: String(m.id),
                     title: m.title,
                     isCompleted: m.is_completed,
-                    assignedTo: String(m.assigned_to),
+                    assignees: m.assignees ? m.assignees.map((a: any) => ({
+                        id: String(a.id), nickname: a.nickname, avatarId: a.avatar_id, memberType: a.member_type
+                    })) : [],
                     repeat: m.repeat || 'none',
                     imageUrl: m.image_url,
                     createdAt: m.created_at

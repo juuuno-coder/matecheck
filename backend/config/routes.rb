@@ -2,6 +2,8 @@ Rails.application.routes.draw do
   post '/signup', to: 'users#create'
   post '/login', to: 'sessions#create'
   patch '/profile', to: 'users#update'
+  put '/users/password', to: 'users#update_password'
+  delete '/users', to: 'users#destroy'
   
   resources :nests, only: [:create, :show] do
     post 'join', on: :collection

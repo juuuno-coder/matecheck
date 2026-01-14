@@ -17,6 +17,29 @@ class UsersController < ApplicationController
     end
   end
 
+  def update_password
+    user = User.find_by(email: params[:email])
+    if user && user.authenticate(params[:current_password])
+      if user.update(password: params[:new_password], password_confirmation: params[:new_password_confirmation])
+        render json: { message: "Password updated successfully" }, status: :ok
+      else
+        render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
+      end
+    else
+      render json: { error: "Current password incorrect" }, status: :unauthorized
+    end
+  end
+
+  def destroy
+    user = User.find_by(email: params[:email])
+    if user && user.authenticate(params[:password])
+      user.destroy
+      render json: { message: "Account deleted" }, status: :ok
+    else
+      render json: { error: "Authentication failed" }, status: :unauthorized
+    end
+  end
+
   private
 
   def user_params

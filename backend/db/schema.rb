@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_14_110258) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_14_113521) do
   create_table "calendar_events", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "creator_id"
@@ -34,6 +34,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_14_110258) do
     t.string "unit"
     t.datetime "updated_at", null: false
     t.index ["nest_id"], name: "index_goals_on_nest_id"
+  end
+
+  create_table "mission_assignments", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "mission_id", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["mission_id"], name: "index_mission_assignments_on_mission_id"
+    t.index ["user_id"], name: "index_mission_assignments_on_user_id"
   end
 
   create_table "missions", force: :cascade do |t|
@@ -82,6 +91,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_14_110258) do
 
   add_foreign_key "calendar_events", "nests"
   add_foreign_key "goals", "nests"
+  add_foreign_key "mission_assignments", "missions"
+  add_foreign_key "mission_assignments", "users"
   add_foreign_key "missions", "nests"
   add_foreign_key "transactions", "nests"
 end

@@ -64,7 +64,7 @@ export default function ProfileScreen() {
                         onPress={() => setSelectedAvatarId((selectedAvatarId + 1) % AVATARS.length)}
                         className="w-24 h-24 bg-gray-50 rounded-full items-center justify-center border border-gray-100 shadow-sm"
                     >
-                        <Text className="text-5xl">{AVATARS[selectedAvatarId].emoji}</Text>
+                        <Text className="text-5xl">{(AVATARS[selectedAvatarId] || AVATARS[0]).emoji}</Text>
                         <View className="absolute bottom-0 right-0 bg-white p-1.5 rounded-full border border-gray-100 shadow-sm">
                             <Ionicons name="refresh" size={14} color="#666" />
                         </View>

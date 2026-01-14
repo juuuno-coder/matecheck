@@ -66,7 +66,7 @@ export default function SettingsScreen() {
                 <Text className="text-2xl font-bold text-gray-800 mb-6 font-primary">{t.title}</Text>
 
                 <View className="flex-row items-center gap-4">
-                    <Image source={AVATARS[avatarId].image} className="w-16 h-16 rounded-full border border-gray-100" />
+                    <Image source={(AVATARS[avatarId] || AVATARS[0]).image} className="w-16 h-16 rounded-full border border-gray-100" />
                     <View>
                         <Text className="text-xl font-bold text-gray-900">{nickname}</Text>
                         <Text className="text-gray-500">{nestName}</Text>
@@ -82,7 +82,7 @@ export default function SettingsScreen() {
                         {pendingRequests.map((req) => (
                             <View key={req.id} className="flex-row items-center justify-between py-4 border-b border-gray-100 bg-orange-50/30 px-6">
                                 <View className="flex-row items-center gap-3">
-                                    <Image source={AVATARS[req.avatarId].image} className="w-10 h-10 rounded-full" />
+                                    <Image source={(AVATARS[req.avatarId] || AVATARS[0]).image} className="w-10 h-10 rounded-full" />
                                     <View>
                                         <Text className="text-base font-bold text-gray-800">{req.nickname}</Text>
                                         <Text className="text-gray-400 text-xs">{language === 'ko' ? '보금자리 참여를 요청했습니다.' : 'Requested to join MateHome.'}</Text>
@@ -127,7 +127,7 @@ export default function SettingsScreen() {
                                 {members.slice(0, 3).map((m: any, i: number) => (
                                     <Image
                                         key={m.id}
-                                        source={AVATARS[m.avatarId].image}
+                                        source={(AVATARS[m.avatarId] || AVATARS[0]).image}
                                         className="w-6 h-6 rounded-full border border-white -ml-2"
                                         style={{ zIndex: 10 - i }}
                                     />

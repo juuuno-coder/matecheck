@@ -63,7 +63,7 @@ export default function CreateNestScreen() {
                         className="items-center relative"
                     >
                         <Image
-                            source={AVATARS[avatarId].image}
+                            source={(AVATARS[avatarId] || AVATARS[0]).image}
                             className="w-24 h-24 rounded-full border-4 border-white shadow-sm bg-gray-50"
                         />
                         <View className="absolute bottom-0 right-0 bg-gray-900 p-2 rounded-full border-2 border-white">

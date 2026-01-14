@@ -94,7 +94,7 @@ export default function HomeScreen() {
                             {members.slice(0, 4).map((m, i) => (
                                 <Image
                                     key={m.id}
-                                    source={AVATARS[m.avatarId].image}
+                                    source={(AVATARS[m.avatarId] || AVATARS[0]).image}
                                     className="w-8 h-8 rounded-full border-2 border-white -ml-3"
                                 />
                             ))}

@@ -93,7 +93,7 @@ export default function AddMemberScreen() {
                                 className="w-20 h-20 bg-white rounded-full items-center justify-center border border-gray-200 shadow-sm"
                             >
                                 <Image
-                                    source={AVATARS[selectedAvatarId].image}
+                                    source={(AVATARS[selectedAvatarId] || AVATARS[0]).image}
                                     className="w-16 h-16 rounded-full"
                                 />
                                 <View className="absolute bottom-0 right-0 bg-gray-900 p-1 rounded-full">

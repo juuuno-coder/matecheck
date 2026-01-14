@@ -112,7 +112,7 @@ export default function TodoScreen() {
 
     const getMemberAvatar = (memberId: string) => {
         const member = members.find(m => m.id === memberId);
-        return AVATARS[member?.avatarId || 0].image;
+        return (AVATARS[member?.avatarId || 0] || AVATARS[0]).image;
     };
 
     const TodoItem = ({ item, index }: { item: Todo, index: number }) => (
@@ -174,7 +174,7 @@ export default function TodoScreen() {
                             {item.assignees?.map((assignee, i) => (
                                 <Image
                                     key={assignee.id}
-                                    source={AVATARS[assignee.avatarId].image}
+                                    source={(AVATARS[assignee.avatarId] || AVATARS[0]).image}
                                     className="w-8 h-8 rounded-full border-2 border-white -ml-2"
                                     style={{ zIndex: 10 - i }}
                                 />
@@ -333,7 +333,7 @@ export default function TodoScreen() {
                                             isSelected ? themeBorder : "border-transparent"
                                         )}
                                     >
-                                        <Image source={AVATARS[member.avatarId].image} className="w-12 h-12 rounded-full bg-gray-100" />
+                                        <Image source={(AVATARS[member.avatarId] || AVATARS[0]).image} className="w-12 h-12 rounded-full bg-gray-100" />
                                         {isSelected && (
                                             <View className={cn("absolute top-0 right-0 w-4 h-4 rounded-full items-center justify-center border border-white", themeBg)}>
                                                 <Ionicons name="checkmark" size={10} color="white" />

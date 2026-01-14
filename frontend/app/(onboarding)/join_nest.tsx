@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useUserStore } from '../../store/userStore';
@@ -7,14 +7,17 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { API_URL } from '../../constants/Config';
 import { translations } from '../../constants/I18n';
+import { AVATARS } from '../../constants/data';
+import AvatarPicker from '../../components/AvatarPicker';
 
 export default function JoinNestScreen() {
     const router = useRouter();
-    const { userEmail, language, nickname, avatarId } = useUserStore();
+    const { userEmail, language, nickname, avatarId, setProfile } = useUserStore();
     const t = translations[language].onboarding;
 
     const [inviteCode, setInviteCode] = useState('');
     const [isWaiting, setIsWaiting] = useState(false);
+    const [pickerVisible, setPickerVisible] = useState(false);
 
     const handleJoinRequest = async () => {
         if (!inviteCode.trim()) return;
@@ -77,6 +80,29 @@ export default function JoinNestScreen() {
                 <Text className="text-2xl font-bold text-gray-800 mb-8 leading-9">
                     {t.join_title}
                 </Text>
+
+                <View className="items-center mb-10">
+                    <TouchableOpacity
+                        onPress={() => setPickerVisible(true)}
+                        className="items-center relative"
+                    >
+                        <Image
+                            source={AVATARS[avatarId].image}
+                            className="w-24 h-24 rounded-full border-4 border-white shadow-sm bg-gray-50"
+                        />
+                        <View className="absolute bottom-0 right-0 bg-gray-900 p-2 rounded-full border-2 border-white">
+                            <Ionicons name="camera" size={14} color="white" />
+                        </View>
+                    </TouchableOpacity>
+                    <Text className="text-gray-400 text-xs mt-3">프로필 사진 변경</Text>
+                </View>
+
+                <AvatarPicker
+                    visible={pickerVisible}
+                    onClose={() => setPickerVisible(false)}
+                    onSelect={(id) => setProfile(nickname, id)}
+                    selectedId={avatarId}
+                />
 
                 <Text className="text-base font-semibold text-gray-700 mb-3 ml-1">{t.invite_code_label}</Text>
                 <TextInput

@@ -1,6 +1,6 @@
 import { View, Text, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
 import React, { useState } from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useUserStore } from '../../store/userStore';
 import { cn } from '../../lib/utils';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -15,7 +15,8 @@ export default function JoinNestScreen() {
     const { userEmail, language, nickname, avatarId, setProfile } = useUserStore();
     const t = translations[language].onboarding;
 
-    const [inviteCode, setInviteCode] = useState('');
+    const params = useLocalSearchParams();
+    const [inviteCode, setInviteCode] = useState(typeof params.code === 'string' ? params.code : '');
     const [isWaiting, setIsWaiting] = useState(false);
     const [pickerVisible, setPickerVisible] = useState(false);
 

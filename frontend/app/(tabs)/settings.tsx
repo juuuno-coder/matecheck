@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Image, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Image, ScrollView, Alert, Share } from 'react-native';
 import React from 'react';
 import { useUserStore } from '../../store/userStore';
 import { useRouter } from 'expo-router';
@@ -9,7 +9,7 @@ import { translations } from '../../constants/I18n';
 
 export default function SettingsScreen() {
     const {
-        nickname, avatarId, nestName, logout, members, nestId,
+        nickname, avatarId, nestName, logout, members, nestId, inviteCode,
         pendingRequests, fetchJoinRequests, approveJoinRequest,
         language, setLanguage
     } = useUserStore();
@@ -43,6 +43,21 @@ export default function SettingsScreen() {
     const toggleLanguage = () => {
         const nextLang = language === 'ko' ? 'en' : 'ko';
         setLanguage(nextLang);
+    };
+
+    const onShareInvite = async () => {
+        if (!inviteCode) return;
+        const url = `https://matecheck-pearl.vercel.app/join_nest?code=${inviteCode}`;
+        try {
+            await Share.share({
+                message: language === 'ko'
+                    ? `[MateCheck] 메이트체크에 초대합니다!\n초대 코드: ${inviteCode}\n바로 가기: ${url}`
+                    : `[MateCheck] Join my nest!\nInvite Code: ${inviteCode}\nLink: ${url}`,
+                url: url
+            });
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     const SettingItem = ({ icon, label, value, onPress, isDestructive = false }: any) => (
@@ -140,7 +155,7 @@ export default function SettingsScreen() {
                         </View>
                     </TouchableOpacity>
 
-                    <SettingItem icon="share-social-outline" label={t.invite_code} value="MATE-2024" />
+                    <SettingItem icon="share-social-outline" label={t.invite_code} value={inviteCode || "Loading..."} onPress={onShareInvite} />
                 </View>
 
                 <View className="mb-8">

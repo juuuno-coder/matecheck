@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  nest: one
+  title: MyString
+  anniversary_date: 2026-01-14
+  is_recurring: false
+  category: MyString
+
+two:
+  nest: two
+  title: MyString
+  anniversary_date: 2026-01-14
+  is_recurring: false
+  category: MyString

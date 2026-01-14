@@ -14,6 +14,7 @@ Rails.application.routes.draw do
     resources :calendar_events
     resources :goals
     resources :transactions
+    resources :anniversaries
   end
   
   resources :support_tickets, only: [:create]

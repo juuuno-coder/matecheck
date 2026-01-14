@@ -28,8 +28,8 @@ export default function TabLayout() {
                     elevation: 0,
                     shadowOpacity: 0.1,
                     shadowRadius: 10,
-                    height: 90, // Reduced height for better balance
-                    paddingBottom: 20, // Reduced padding
+                    height: 90,
+                    paddingBottom: 20,
                     paddingTop: 10,
                 },
                 tabBarActiveTintColor: '#FF7F50',
@@ -37,7 +37,7 @@ export default function TabLayout() {
                 tabBarLabelStyle: {
                     fontSize: 10,
                     fontWeight: '600',
-                    marginTop: 4, // Gap between icon and label
+                    marginTop: 4,
                 }
             }}
         >
@@ -60,20 +60,29 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="goal"
-                options={{
-                    title: "목표",
-                    tabBarIcon: ({ color, focused }) => (
-                        <Ionicons name={focused ? "trophy" : "trophy-outline"} size={24} color={color} />
-                    )
-                }}
-            />
-            <Tabs.Screen
                 name="calendar"
                 options={{
                     title: "일정",
                     tabBarIcon: ({ color, focused }) => (
                         <Ionicons name={focused ? "calendar" : "calendar-outline"} size={24} color={color} />
+                    )
+                }}
+            />
+            <Tabs.Screen
+                name="anniversary"
+                options={{
+                    title: "기념일",
+                    tabBarIcon: ({ color, focused }) => (
+                        <Ionicons name={focused ? "heart" : "heart-outline"} size={24} color={color} />
+                    )
+                }}
+            />
+            <Tabs.Screen
+                name="goal"
+                options={{
+                    title: "목표",
+                    tabBarIcon: ({ color, focused }) => (
+                        <Ionicons name={focused ? "trophy" : "trophy-outline"} size={24} color={color} />
                     )
                 }}
             />

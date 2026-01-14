@@ -10,7 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_14_124604) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_14_140625) do
+  create_table "anniversaries", force: :cascade do |t|
+    t.date "anniversary_date"
+    t.string "category"
+    t.datetime "created_at", null: false
+    t.boolean "is_recurring"
+    t.integer "nest_id", null: false
+    t.string "title"
+    t.datetime "updated_at", null: false
+    t.index ["nest_id"], name: "index_anniversaries_on_nest_id"
+  end
+
   create_table "announcements", force: :cascade do |t|
     t.text "content"
     t.datetime "created_at", null: false
@@ -110,6 +121,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_14_124604) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "anniversaries", "nests"
   add_foreign_key "calendar_events", "nests"
   add_foreign_key "goals", "nests"
   add_foreign_key "mission_assignments", "missions"

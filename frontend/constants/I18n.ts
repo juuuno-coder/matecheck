@@ -2,6 +2,41 @@ export type Language = 'ko' | 'en';
 
 export const translations = {
     ko: {
+        // 인트로 화면
+        intro: {
+            tagline: "우리 가족의 소중한 일상,\n함께 이루는 목표와 행복",
+            mission_card: "미션 관리",
+            mission_desc: "집안일을 재미있게",
+            calendar_card: "일정 공유",
+            calendar_desc: "가족 일정 한눈에",
+            goal_card: "목표 달성",
+            goal_desc: "함께 성장하기",
+            budget_card: "가계부",
+            budget_desc: "우리 가족 재정",
+            login_btn: "로그인",
+            signup_prompt: "아직 계정이 없으신가요?",
+            signup_btn: "회원가입"
+        },
+        // 인증
+        auth: {
+            login_title: "환영합니다! 🎉",
+            login_subtitle: "메이트들과 함께 일상을 공유해보세요",
+            email_label: "이메일",
+            email_placeholder: "example@email.com",
+            password_label: "비밀번호",
+            password_placeholder: "비밀번호를 입력하세요",
+            login_btn: "로그인",
+            signup_prompt: "아직 계정이 없으신가요?",
+            signup_link: "회원가입",
+            signup_title: "회원가입",
+            signup_subtitle: "새로운 보금자리를 시작하세요",
+            password_confirm_label: "비밀번호 확인",
+            password_confirm_placeholder: "비밀번호를 다시 입력하세요",
+            signup_btn: "가입하고 시작하기",
+            login_prompt: "이미 계정이 있으신가요?",
+            login_link: "로그인"
+        },
+        // 온보딩
         onboarding: {
             step1: "1단계 / 3단계",
             step2: "2단계 / 3단계",
@@ -29,6 +64,7 @@ export const translations = {
             waiting_desc: "기존 메이트가 수락하면\n이 보금자리의 모든 정보를 볼 수 있습니다.\n조금만 기다려주세요.",
             back_to_main: "메인으로 돌아가기"
         },
+        // 탭
         tabs: {
             home: "홈",
             mission: "미션",
@@ -36,32 +72,244 @@ export const translations = {
             goal: "목표",
             settings: "설정"
         },
+        // 홈
         home: {
             greeting_morning: "좋은 아침이에요! ☀️",
             greeting_afternoon: "활기찬 오후예요! ☕️",
             greeting_evening: "수고했어요, 오늘 하루! 🌙",
             mate_count: "보금자리 메이트 {count}명",
-            briefing_title: "오늘의 체크리스트",
+            briefing_title: "SMART BRIEFING",
             upcoming_events: "돌아오는 일정 📅",
-            no_events: "예정된 일정이 없어요.",
-            view_all: "전체 일정 보기"
+            no_events: "예정된 일정이 없어서 여유로워요.",
+            view_all: "전체 일정 보기",
+            today_mission: "오늘의 미션",
+            empty_mission: "예정된 일정이 없어요.",
+            empty_weekly: "이번 주 미션이 없어요."
         },
+        // 미션 (Todo)
+        todo: {
+            title: "미션",
+            success: "완료!",
+            empty_list_title: "아직 미션이 없어요",
+            add_new: "새 미션 추가하기",
+            today: "오늘",
+            weekly: "이번 주",
+            empty_today: "오늘 미션이 없어요.",
+            empty_weekly: "이번 주 미션이 없어요.",
+            add_modal: "새 미션 추가",
+            cancel: "취소",
+            placeholder_label: "미션 내용",
+            placeholder_input: "예: 설거지하기, 강아지 산책",
+            assignee_label: "담당자",
+            assignee_all: "모두",
+            repeat_label: "반복",
+            repeat_none: "없음",
+            repeat_daily: "매일",
+            repeat_weekly: "매주",
+            repeat_monthly: "매월",
+            image_label: "이미지 첨부 (선택)",
+            add_button: "미션 추가",
+            daily_badge: "매일",
+            weekly_badge: "매주",
+            monthly_badge: "매월"
+        },
+        // 일정
+        calendar: {
+            title: "일정",
+            add_event: "일정 추가",
+            event_title_label: "일정 제목",
+            event_title_placeholder: "예: 가족 여행, 생일 파티",
+            start_date_label: "시작일",
+            end_date_label: "종료일 (선택)",
+            time_label: "시간 (선택)",
+            time_placeholder: "예: 14:30",
+            image_label: "이미지 첨부 (선택)",
+            add_button: "일정 추가",
+            cancel: "취소",
+            no_events: "등록된 일정이 없습니다.",
+            select_date: "날짜를 선택하세요"
+        },
+        // 목표
+        goal: {
+            title: "목표",
+            add_goal: "목표 추가",
+            goal_title_label: "목표 제목",
+            goal_title_placeholder: "예: 매달 100만원 저축",
+            target_amount_label: "목표 금액",
+            target_amount_placeholder: "예: 1000000",
+            deadline_label: "목표 기한",
+            add_button: "목표 추가",
+            cancel: "취소",
+            no_goals: "설정된 목표가 없습니다.",
+            progress: "진행률",
+            achieved: "달성!"
+        },
+        // 가계부
+        budget: {
+            title: "가계부",
+            add_transaction: "거래 추가",
+            type_income: "수입",
+            type_expense: "지출",
+            amount_label: "금액",
+            amount_placeholder: "예: 50000",
+            category_label: "카테고리",
+            category_placeholder: "예: 식비, 교통비",
+            memo_label: "메모 (선택)",
+            memo_placeholder: "예: 마트 장보기",
+            date_label: "날짜",
+            add_button: "거래 추가",
+            cancel: "취소",
+            no_transactions: "거래 내역이 없습니다.",
+            total_income: "총 수입",
+            total_expense: "총 지출",
+            balance: "잔액"
+        },
+        // 설정
         settings: {
             title: "설정",
             account_section: "계정 설정",
+            account_management: "계정 관리",
             profile_edit: "프로필 수정",
             notifications: "알림 설정",
+            language: "언어 설정",
             nest_section: "보금자리 관리",
+            nest_management: "보금자리 관리",
             nest_info: "보금자리 정보",
             member_mgmt: "멤버 관리",
             invite_code: "초대 코드",
+            share_invite: "초대 링크 공유",
             join_requests: "가입 요청",
+            etc_section: "기타",
+            announcements: "공지사항",
+            support: "지원센터",
             logout: "로그아웃",
             confirm_logout: "정말 로그아웃 하시겠습니까?",
-            cancel: "취소"
+            cancel: "취소",
+            version: "버전"
+        },
+        // 보금자리 관리
+        nest_management: {
+            title: "보금자리 관리",
+            save: "완료",
+            saving: "저장 중",
+            preview: "미리보기",
+            name_label: "보금자리 이름",
+            name_placeholder: "우리 가족만의 이름을 지어주세요",
+            image_label: "대표 이미지 선택",
+            upload_button: "내 사진 업로드하기",
+            upload_subtitle: "갤러리에서 선택",
+            theme_label: "테마 컬러",
+            save_success: "저장 완료",
+            save_success_msg: "보금자리 정보가 수정되었습니다.",
+            save_error: "저장 실패",
+            name_required: "보금자리 이름을 입력해주세요."
+        },
+        // 멤버 관리
+        member_management: {
+            title: "멤버 관리",
+            add_member: "멤버 추가",
+            no_members: "멤버가 없습니다.",
+            member_count: "{count}명의 메이트"
+        },
+        // 계정 관리
+        account_management: {
+            title: "계정 관리",
+            password_section: "비밀번호 변경",
+            current_password: "현재 비밀번호",
+            new_password: "새 비밀번호",
+            confirm_password: "비밀번호 확인",
+            change_password_btn: "비밀번호 변경",
+            delete_section: "계정 삭제",
+            delete_warning: "계정을 삭제하면 모든 데이터가 영구적으로 삭제됩니다.",
+            nest_preservation: "계정을 삭제해도 다른 멤버가 있으면 보금자리는 유지됩니다.",
+            delete_btn: "계정 삭제",
+            delete_confirm_title: "정말 삭제하시겠습니까?",
+            delete_confirm_msg: "이 작업은 되돌릴 수 없습니다.",
+            cancel: "취소",
+            confirm: "삭제"
+        },
+        // 지원센터
+        support: {
+            title: "지원센터",
+            bug_title: "버그 제보",
+            bug_desc: "문제가 발생했나요?\n자세히 알려주세요!",
+            idea_title: "아이디어 제안",
+            idea_desc: "더 나은 서비스를 위한\n아이디어를 공유해주세요!",
+            sponsor_title: "후원하기",
+            sponsor_desc: "개발자에게 커피 한잔\n사주시겠어요?",
+            modal_title: "문의하기",
+            category_label: "카테고리",
+            title_label: "제목",
+            title_placeholder: "간단한 제목을 입력해주세요",
+            email_label: "답변 받을 이메일",
+            email_placeholder: "your@email.com",
+            content_label: "내용",
+            content_placeholder: "자세한 내용을 작성해주세요",
+            submit_btn: "제출하기",
+            cancel: "취소",
+            success_title: "감사합니다!",
+            success_msg: "소중한 의견 감사드립니다.\n빠른 시일 내에 답변드리겠습니다.",
+            sponsor_msg: "후원해주셔서 감사합니다!\n더 나은 앱을 만들겠습니다. ☕️"
+        },
+        // 공지사항
+        announcements: {
+            title: "공지사항",
+            empty: "등록된 공지사항이 없습니다.",
+            loading: "불러오는 중..."
+        },
+        // 공통
+        common: {
+            ok: "확인",
+            cancel: "취소",
+            save: "저장",
+            delete: "삭제",
+            edit: "수정",
+            add: "추가",
+            back: "뒤로",
+            close: "닫기",
+            loading: "로딩 중...",
+            error: "오류",
+            success: "성공",
+            confirm: "확인",
+            network_error: "네트워크 오류가 발생했습니다."
         }
     },
     en: {
+        // Intro Screen
+        intro: {
+            tagline: "Precious daily moments,\nGoals and happiness together",
+            mission_card: "Mission",
+            mission_desc: "Make chores fun",
+            calendar_card: "Calendar",
+            calendar_desc: "Family schedule at a glance",
+            goal_card: "Goals",
+            goal_desc: "Grow together",
+            budget_card: "Budget",
+            budget_desc: "Family finances",
+            login_btn: "Login",
+            signup_prompt: "Don't have an account?",
+            signup_btn: "Sign Up"
+        },
+        // Auth
+        auth: {
+            login_title: "Welcome! 🎉",
+            login_subtitle: "Share your daily life with mates",
+            email_label: "Email",
+            email_placeholder: "example@email.com",
+            password_label: "Password",
+            password_placeholder: "Enter your password",
+            login_btn: "Login",
+            signup_prompt: "Don't have an account?",
+            signup_link: "Sign Up",
+            signup_title: "Sign Up",
+            signup_subtitle: "Start your new MateHome",
+            password_confirm_label: "Confirm Password",
+            password_confirm_placeholder: "Re-enter your password",
+            signup_btn: "Sign Up & Start",
+            login_prompt: "Already have an account?",
+            login_link: "Login"
+        },
+        // Onboarding
         onboarding: {
             step1: "Step 1 / 3",
             step2: "Step 2 / 3",
@@ -89,6 +337,7 @@ export const translations = {
             waiting_desc: "You can view the MateHome\nafter a current mate approves you.\nPlease wait a moment.",
             back_to_main: "Back to Main"
         },
+        // Tabs
         tabs: {
             home: "Home",
             mission: "Mission",
@@ -96,29 +345,206 @@ export const translations = {
             goal: "Goal",
             settings: "Settings"
         },
+        // Home
         home: {
             greeting_morning: "Good morning! ☀️",
             greeting_afternoon: "Good afternoon! ☕️",
             greeting_evening: "Good night! 🌙",
             mate_count: "{count} Mates in MateHome",
-            briefing_title: "Today's Checklist",
+            briefing_title: "SMART BRIEFING",
             upcoming_events: "Upcoming Events 📅",
             no_events: "No upcoming events.",
-            view_all: "View All"
+            view_all: "View All",
+            today_mission: "Today's Mission",
+            empty_mission: "No scheduled events.",
+            empty_weekly: "No missions this week."
         },
+        // Mission (Todo)
+        todo: {
+            title: "Mission",
+            success: "Done!",
+            empty_list_title: "No missions yet",
+            add_new: "Add New Mission",
+            today: "Today",
+            weekly: "This Week",
+            empty_today: "No missions today.",
+            empty_weekly: "No missions this week.",
+            add_modal: "Add New Mission",
+            cancel: "Cancel",
+            placeholder_label: "Mission",
+            placeholder_input: "e.g. Do dishes, Walk the dog",
+            assignee_label: "Assignee",
+            assignee_all: "Everyone",
+            repeat_label: "Repeat",
+            repeat_none: "None",
+            repeat_daily: "Daily",
+            repeat_weekly: "Weekly",
+            repeat_monthly: "Monthly",
+            image_label: "Attach Image (Optional)",
+            add_button: "Add Mission",
+            daily_badge: "Daily",
+            weekly_badge: "Weekly",
+            monthly_badge: "Monthly"
+        },
+        // Calendar
+        calendar: {
+            title: "Calendar",
+            add_event: "Add Event",
+            event_title_label: "Event Title",
+            event_title_placeholder: "e.g. Family Trip, Birthday Party",
+            start_date_label: "Start Date",
+            end_date_label: "End Date (Optional)",
+            time_label: "Time (Optional)",
+            time_placeholder: "e.g. 14:30",
+            image_label: "Attach Image (Optional)",
+            add_button: "Add Event",
+            cancel: "Cancel",
+            no_events: "No events registered.",
+            select_date: "Select a date"
+        },
+        // Goal
+        goal: {
+            title: "Goal",
+            add_goal: "Add Goal",
+            goal_title_label: "Goal Title",
+            goal_title_placeholder: "e.g. Save $1000 monthly",
+            target_amount_label: "Target Amount",
+            target_amount_placeholder: "e.g. 1000",
+            deadline_label: "Deadline",
+            add_button: "Add Goal",
+            cancel: "Cancel",
+            no_goals: "No goals set.",
+            progress: "Progress",
+            achieved: "Achieved!"
+        },
+        // Budget
+        budget: {
+            title: "Budget",
+            add_transaction: "Add Transaction",
+            type_income: "Income",
+            type_expense: "Expense",
+            amount_label: "Amount",
+            amount_placeholder: "e.g. 50",
+            category_label: "Category",
+            category_placeholder: "e.g. Food, Transport",
+            memo_label: "Memo (Optional)",
+            memo_placeholder: "e.g. Grocery shopping",
+            date_label: "Date",
+            add_button: "Add Transaction",
+            cancel: "Cancel",
+            no_transactions: "No transactions.",
+            total_income: "Total Income",
+            total_expense: "Total Expense",
+            balance: "Balance"
+        },
+        // Settings
         settings: {
             title: "Settings",
             account_section: "Account",
+            account_management: "Account Management",
             profile_edit: "Edit Profile",
             notifications: "Notifications",
-            nest_section: "MateHome Management",
+            language: "Language",
+            nest_section: "MateHome",
+            nest_management: "MateHome Management",
             nest_info: "MateHome Info",
             member_mgmt: "Members",
             invite_code: "Invite Code",
+            share_invite: "Share Invite Link",
             join_requests: "Join Requests",
+            etc_section: "Etc",
+            announcements: "Announcements",
+            support: "Support",
             logout: "Logout",
             confirm_logout: "Are you sure you want to logout?",
-            cancel: "Cancel"
+            cancel: "Cancel",
+            version: "Version"
+        },
+        // Nest Management
+        nest_management: {
+            title: "MateHome Management",
+            save: "Done",
+            saving: "Saving",
+            preview: "Preview",
+            name_label: "MateHome Name",
+            name_placeholder: "Give your MateHome a unique name",
+            image_label: "Select Cover Image",
+            upload_button: "Upload My Photo",
+            upload_subtitle: "Choose from gallery",
+            theme_label: "Theme Color",
+            save_success: "Saved",
+            save_success_msg: "MateHome info has been updated.",
+            save_error: "Save Failed",
+            name_required: "Please enter a MateHome name."
+        },
+        // Member Management
+        member_management: {
+            title: "Member Management",
+            add_member: "Add Member",
+            no_members: "No members.",
+            member_count: "{count} Mates"
+        },
+        // Account Management
+        account_management: {
+            title: "Account Management",
+            password_section: "Change Password",
+            current_password: "Current Password",
+            new_password: "New Password",
+            confirm_password: "Confirm Password",
+            change_password_btn: "Change Password",
+            delete_section: "Delete Account",
+            delete_warning: "Deleting your account will permanently remove all your data.",
+            nest_preservation: "Your MateHome will be preserved if other members exist.",
+            delete_btn: "Delete Account",
+            delete_confirm_title: "Are you sure?",
+            delete_confirm_msg: "This action cannot be undone.",
+            cancel: "Cancel",
+            confirm: "Delete"
+        },
+        // Support
+        support: {
+            title: "Support Center",
+            bug_title: "Report Bug",
+            bug_desc: "Encountered a problem?\nLet us know!",
+            idea_title: "Suggest Idea",
+            idea_desc: "Share your ideas for\na better service!",
+            sponsor_title: "Sponsor",
+            sponsor_desc: "Buy the developer\na coffee?",
+            modal_title: "Contact Us",
+            category_label: "Category",
+            title_label: "Title",
+            title_placeholder: "Enter a brief title",
+            email_label: "Reply Email",
+            email_placeholder: "your@email.com",
+            content_label: "Content",
+            content_placeholder: "Describe in detail",
+            submit_btn: "Submit",
+            cancel: "Cancel",
+            success_title: "Thank you!",
+            success_msg: "We appreciate your feedback.\nWe'll respond soon.",
+            sponsor_msg: "Thank you for your support!\nWe'll make a better app. ☕️"
+        },
+        // Announcements
+        announcements: {
+            title: "Announcements",
+            empty: "No announcements.",
+            loading: "Loading..."
+        },
+        // Common
+        common: {
+            ok: "OK",
+            cancel: "Cancel",
+            save: "Save",
+            delete: "Delete",
+            edit: "Edit",
+            add: "Add",
+            back: "Back",
+            close: "Close",
+            loading: "Loading...",
+            error: "Error",
+            success: "Success",
+            confirm: "Confirm",
+            network_error: "A network error occurred."
         }
     }
 };

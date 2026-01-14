@@ -24,7 +24,10 @@ export default function CreateNestScreen() {
                 body: JSON.stringify({
                     email: userEmail,
                     nest: { name: name, theme_id: 0 },
-                    user: { nickname, avatar_id: avatarId }
+                    user: {
+                        nickname: nickname || userEmail.split('@')[0],
+                        avatar_id: avatarId || 0
+                    }
                 })
             });
 

@@ -10,7 +10,7 @@ import { translations } from '../../constants/I18n';
 
 export default function JoinNestScreen() {
     const router = useRouter();
-    const { userEmail, language } = useUserStore();
+    const { userEmail, language, nickname, avatarId } = useUserStore();
     const t = translations[language].onboarding;
 
     const [inviteCode, setInviteCode] = useState('');
@@ -25,7 +25,11 @@ export default function JoinNestScreen() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: userEmail,
-                    invite_code: inviteCode
+                    invite_code: inviteCode,
+                    user: {
+                        nickname: nickname || userEmail.split('@')[0],
+                        avatar_id: avatarId || 0
+                    }
                 })
             });
 

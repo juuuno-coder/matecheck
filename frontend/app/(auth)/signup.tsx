@@ -44,14 +44,9 @@ export default function SignupScreen() {
             const data = await response.json();
 
             if (response.ok) {
-                // Success: Proceed to Profile Setup
+                // Success: Proceed to Nest Choice
                 setStoreEmail(email);
-                router.push('/(onboarding)/profile'); // Ideally store token/user ID here. For MVP, just navigate.
-                // We might want to pass the email/id to the next screen if needed, 
-                // but usually we rely on auto-login cookie or token. 
-                // Since I haven't implemented JWT yet, I'll assume success means "account created".
-                // The profile screen uses userStore. I should probably update userStore to mark as "partially logged in" or similar.
-                // For now, let's just push.
+                router.push('/(onboarding)/nest_choice');
             } else {
                 Alert.alert("가입 실패", data.errors ? data.errors.join("\n") : "알 수 없는 오류가 발생했습니다.");
             }

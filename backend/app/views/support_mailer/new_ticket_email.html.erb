@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <h1>새로운 문의가 접수되었습니다.</h1>
+    <p>
+      <strong>종류:</strong> <%= @ticket.category %><br>
+      <strong>제목:</strong> <%= @ticket.title %><br>
+      <strong>작성자 이메일:</strong> <%= @ticket.email %><br>
+      <strong>User ID:</strong> <%= @ticket.user_id %>
+    </p>
+    <p>
+      <strong>내용:</strong><br>
+      <%= @ticket.content %>
+    </p>
+  </body>
+</html>

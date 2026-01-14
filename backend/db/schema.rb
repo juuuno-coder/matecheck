@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_14_114107) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_14_121153) do
   create_table "calendar_events", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "creator_id"
@@ -64,6 +64,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_14_114107) do
     t.string "name"
     t.integer "theme_id"
     t.datetime "updated_at", null: false
+  end
+
+  create_table "support_tickets", force: :cascade do |t|
+    t.string "category"
+    t.boolean "completed"
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.string "email"
+    t.string "title"
+    t.datetime "updated_at", null: false
+    t.integer "user_id"
   end
 
   create_table "transactions", force: :cascade do |t|

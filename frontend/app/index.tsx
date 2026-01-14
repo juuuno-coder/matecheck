@@ -65,6 +65,8 @@ const FloatingReview = ({ text, index, total }: { text: string, index: number, t
     });
 
     const startY = height / 2 + (index - 1) * 50; // Start from middle area
+    // Position closer to center: left-center for even index, right-center for odd
+    const horizontalPosition = index % 2 === 0 ? width * 0.25 : width * 0.75;
 
     return (
         <Animated.View
@@ -73,8 +75,7 @@ const FloatingReview = ({ text, index, total }: { text: string, index: number, t
                 {
                     position: 'absolute',
                     top: startY,
-                    left: index % 2 === 0 ? 20 : undefined,
-                    right: index % 2 !== 0 ? 20 : undefined,
+                    left: horizontalPosition - 60, // Center the bubble
                     zIndex: 0
                 }
             ]}
@@ -89,7 +90,7 @@ const FloatingReview = ({ text, index, total }: { text: string, index: number, t
 };
 
 export default function Home() {
-    const isLoggedIn = useUserStore((state) => state.isLoggedIn);
+    const isLoggedIn = useUserStore((state: any) => state.isLoggedIn);
 
     if (isLoggedIn) {
         return <Redirect href="/(tabs)/home" />;

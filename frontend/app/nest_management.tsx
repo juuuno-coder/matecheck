@@ -6,6 +6,7 @@ import { useUserStore } from '../store/userStore';
 import { API_URL } from '../constants/Config';
 import { THEMES } from '../constants/data';
 import { cn } from '../lib/utils';
+import * as ImagePicker from 'expo-image-picker';
 
 const PRESET_IMAGES = [
     "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800&q=80", // Cozy House
@@ -22,6 +23,19 @@ export default function NestManagementScreen() {
     const [selectedTheme, setSelectedTheme] = useState(nestTheme);
     const [imageUrl, setImageUrl] = useState(nestImage || PRESET_IMAGES[0]);
     const [isSaving, setIsSaving] = useState(false);
+
+    const pickCustomImage = async () => {
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [16, 9],
+            quality: 0.8,
+        });
+
+        if (!result.canceled) {
+            setImageUrl(result.assets[0].uri);
+        }
+    };
 
     const handleSave = async () => {
         if (!name.trim()) {
@@ -131,13 +145,20 @@ export default function NestManagementScreen() {
                                 </TouchableOpacity>
                             ))}
                         </ScrollView>
-                        <Text className="text-gray-400 text-xs mt-2">* 원하는 사진의 URL을 직접 입력할 수도 있어요.</Text>
-                        <TextInput
-                            value={imageUrl}
-                            onChangeText={setImageUrl}
-                            className="mt-2 bg-white border border-gray-200 rounded-xl p-3 text-sm text-gray-500"
-                            placeholder="https://example.com/image.jpg"
-                        />
+
+                        {/* Custom Upload Button */}
+                        <TouchableOpacity
+                            onPress={pickCustomImage}
+                            className="mt-4 bg-white border-2 border-dashed border-gray-300 rounded-xl p-4 flex-row items-center justify-center gap-3 active:bg-gray-50"
+                        >
+                            <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center">
+                                <Ionicons name="cloud-upload-outline" size={20} color="#F97316" />
+                            </View>
+                            <View>
+                                <Text className="text-gray-900 font-bold">내 사진 업로드하기</Text>
+                                <Text className="text-gray-400 text-xs">갤러리에서 선택</Text>
+                            </View>
+                        </TouchableOpacity>
                     </View>
 
                     {/* Input: Theme Color */}

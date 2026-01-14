@@ -28,7 +28,7 @@ export default function SupportScreen() {
         cards: [
             { id: 'bug', title: "오류 제보하기", desc: "앱 사용 중 버그나 오류를 발견하셨나요? \n상세한 내용을 제보해주시면 빠르게 수정하겠습니다.", icon: "bug-outline", color: "text-red-500", bg: "bg-red-50", btn: "Report Bug ->" },
             { id: 'idea', title: "아이디어 제안하기", desc: "더 재미있는 앱을 위한 아이디어가 있으신가요? \n여러분의 소중한 의견을 들려주세요.", icon: "bulb-outline", color: "text-yellow-500", bg: "bg-yellow-50", btn: "Share Idea ->" },
-            { id: 'sponsor', title: "개발자 후원하기", desc: "인디 게임 개발자에게 커피 한 잔은 큰 힘이 됩니다. \n후원해주시는 모든 분들께 감사드립니다.", icon: "cafe-outline", color: "text-pink-500", bg: "bg-pink-50", btn: "Buy Me a Coffee ->" },
+            { id: 'sponsor', title: "개발자 후원하기", desc: "앱 개발자에게 커피 한 잔은 큰 힘이 됩니다. \n후원해주시는 모든 분들께 감사드립니다.", icon: "cafe-outline", color: "text-pink-500", bg: "bg-pink-50", btn: "Buy Me a Coffee ->" },
         ],
         form: { title_pl: "제목을 입력해주세요", content_pl: "내용을 입력해주세요", cancel: "취소", submit: "보내기" }
     } : {
@@ -50,9 +50,7 @@ export default function SupportScreen() {
 
     const handleCardPress = (id: string) => {
         if (id === 'sponsor') {
-            // Placeholder link or Alert
-            Alert.alert("후원하기", "준비 중입니다! 마음만이라도 감사합니다. 🙇‍♂️");
-            // Linking.openURL('https://buymeacoffee.com/...');
+            Linking.openURL('https://buymeacoffee.com/bababapet');
         } else {
             setModalType(id as 'bug' | 'idea');
             setTitle('');

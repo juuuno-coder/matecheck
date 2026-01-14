@@ -121,19 +121,30 @@ export default function AccountManagementScreen() {
                 </View>
 
                 {/* 회원 탈퇴 섹션 */}
-                <View className="border-t border-gray-100 pt-8">
-                    <Text className="text-lg font-bold text-red-500 mb-2">회원 탈퇴</Text>
-                    <Text className="text-gray-400 text-sm mb-4 leading-5">
-                        탈퇴 시 모든 데이터(닉네임, 프로필, 활동 기록 등)가 삭제되며 복구할 수 없습니다.
-                    </Text>
+                <View className="mt-8 pt-8 border-t border-gray-100">
+                    <View className="flex-row items-center gap-2 mb-4">
+                        <Ionicons name="warning-outline" size={24} color="#EF4444" />
+                        <Text className="text-lg font-bold text-red-500">회원 탈퇴</Text>
+                    </View>
+
+                    <View className="bg-red-50 p-5 rounded-2xl mb-6 border border-red-100">
+                        <Text className="text-gray-700 font-bold mb-2">⚠ 주의사항</Text>
+                        <Text className="text-gray-600 text-sm leading-6 mb-2">
+                            • 탈퇴 시 닉네임, 프로필, 활동 기록 등 계정 정보가 즉시 삭제되며 복구할 수 없습니다.
+                        </Text>
+                        <Text className="text-gray-600 text-sm leading-6">
+                            • <Text className="font-bold text-gray-800">보금자리는 유지됩니다.</Text> 다른 가족 구성원이 있다면 그들은 계속해서 보금자리를 이용할 수 있습니다. (단, 혼자 사용 중인 경우 보금자리도 함께 삭제됩니다.)
+                        </Text>
+                    </View>
 
                     <TouchableOpacity
                         onPress={() => setDeleteModalVisible(true)}
-                        className="py-4 border border-red-100 bg-red-50 rounded-xl items-center"
+                        className="py-4 bg-white border border-red-200 rounded-xl items-center shadow-sm active:bg-red-50"
                     >
-                        <Text className="text-red-500 font-bold">계정 삭제하기</Text>
+                        <Text className="text-red-500 font-bold text-lg">계정 영구 삭제</Text>
                     </TouchableOpacity>
                 </View>
+
             </Animated.ScrollView>
 
             {/* 탈퇴 확인 모달 */}

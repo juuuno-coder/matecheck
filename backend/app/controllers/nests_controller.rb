@@ -7,7 +7,8 @@ class NestsController < ApplicationController
   def create
     invite_code = SecureRandom.alphanumeric(6).upcase
     nest_params = params[:nest] || {}
-    nest = Nest.new(name: nest_params[:name], theme_id: nest_params[:theme_id], invite_code: invite_code)
+    nest_params = params[:nest] || {}
+    nest = Nest.new(name: nest_params[:name], theme_id: nest_params[:theme_id], invite_code: invite_code, image_url: nest_params[:image_url])
     
     if nest.save
       user = User.find_by(email: params[:email]) 
@@ -69,6 +70,16 @@ class NestsController < ApplicationController
     end
   end
 
+  def update
+    nest = Nest.find(params[:id])
+    nest_params = params[:nest] || {}
+    if nest.update(nest_params.permit(:name, :theme_id, :image_url))
+      render json: nest_data(nest)
+    else
+      render json: { errors: nest.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def nest_data(nest)
@@ -76,8 +87,9 @@ class NestsController < ApplicationController
       id: nest.id,
       name: nest.name,
       theme_id: nest.theme_id,
+      image_url: nest.image_url,
       invite_code: nest.invite_code,
-      members: nest.users.where(nest_status: 'active').map { |u| { id: u.id, nickname: u.nickname, avatar_id: u.avatar_id } }
+      members: nest.users.where(nest_status: 'active').map { |u| { id: u.id, nickname: u.nickname, avatar_id: u.avatar_id, member_type: u.member_type } }
     }
   end
 end

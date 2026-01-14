@@ -128,9 +128,16 @@ export default function SettingsScreen() {
 
                 <View className="mb-2">
                     <Text className="px-6 py-2 text-xs font-bold text-gray-400 uppercase">{t.nest_section}</Text>
-                    <SettingItem icon="rocket-outline" label={t.nest_info} value={nestName} />
+                    {/* Nest Management (New) */}
+                    <SettingItem
+                        icon="home-outline"
+                        label={language === 'ko' ? "보금자리 관리" : "Nest Management"}
+                        value={nestName}
+                        onPress={() => router.push('/nest_management')}
+                    />
 
-                    <TouchableOpacity onPress={() => router.push('/add_member')} className="flex-row items-center justify-between py-4 border-b border-gray-100 bg-white px-6">
+                    {/* Member Management (Old "Basic Management" / "Member Management") */}
+                    <TouchableOpacity onPress={() => router.push('/member_management')} className="flex-row items-center justify-between py-4 border-b border-gray-100 bg-white px-6">
                         <View className="flex-row items-center gap-3">
                             <View className="w-8 h-8 rounded-full items-center justify-center bg-gray-50">
                                 <Ionicons name="people-outline" size={18} color="#4B5563" />

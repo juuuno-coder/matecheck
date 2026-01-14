@@ -60,6 +60,7 @@ interface UserState {
     // Nest
     nestName: string;
     nestTheme: number;
+    nestImage?: string;
     nestId: string;
     inviteCode: string;
     isLoggedIn: boolean;
@@ -87,7 +88,7 @@ interface UserState {
     // Actions
     setProfile: (nickname: string, avatarId: number) => void;
     setEmail: (email: string) => void;
-    setNest: (nestName: string, nestTheme: number, inviteCode?: string, nestId?: string) => void;
+    setNest: (nestName: string, nestTheme: number, inviteCode?: string, nestId?: string, nestImage?: string) => void;
     setMembers: (members: User[]) => void;
     logout: () => void;
     completeTutorial: () => void;
@@ -137,6 +138,7 @@ export const useUserStore = create<UserState>((set) => ({
     userEmail: '',
     nestName: '',
     nestTheme: 0,
+    nestImage: '',
     nestId: '',
     inviteCode: '',
     isLoggedIn: false,
@@ -155,7 +157,7 @@ export const useUserStore = create<UserState>((set) => ({
     // Actions
     setProfile: (nickname, avatarId) => set({ nickname, avatarId }),
     setEmail: (userEmail) => set({ userEmail }),
-    setNest: (nestName, nestTheme, inviteCode = '', nestId = '') => set({ nestName, nestTheme, inviteCode, nestId, isLoggedIn: true }),
+    setNest: (nestName, nestTheme, inviteCode = '', nestId = '', nestImage = '') => set({ nestName, nestTheme, inviteCode, nestId, nestImage, isLoggedIn: true }),
     setMembers: (members) => set({ members }),
     completeTutorial: () => set({ hasSeenTutorial: true }),
 

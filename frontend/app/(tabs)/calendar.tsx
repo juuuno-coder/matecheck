@@ -33,6 +33,8 @@ export default function CalendarScreen() {
     const [eventText, setEventText] = useState('');
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [endDate, setEndDate] = useState<string | null>(null);
+    const [eventTime, setEventTime] = useState<string>('');
+    const [isTimeEnabled, setIsTimeEnabled] = useState(false);
 
     const handleDayPress = (day: DateData) => setSelectedDate(day.dateString);
 
@@ -51,10 +53,13 @@ export default function CalendarScreen() {
 
     const onAddEvent = () => {
         if (!eventText.trim()) return;
-        addEvent(eventText, selectedDate, selectedImage || undefined, endDate || undefined);
+        const timeToSend = isTimeEnabled && eventTime.trim() ? eventTime.trim() : undefined;
+        addEvent(eventText, selectedDate, selectedImage || undefined, endDate || undefined, timeToSend);
         setEventText('');
         setSelectedImage(null);
         setEndDate(null);
+        setEventTime('');
+        setIsTimeEnabled(false);
         setModalVisible(false);
     };
 
@@ -178,7 +183,10 @@ export default function CalendarScreen() {
                                         <View className="flex-1 ml-3">
                                             <View className="flex-row justify-between items-start">
                                                 <View>
-                                                    <Text className="text-gray-800 font-bold text-lg">{evt.title}</Text>
+                                                    <Text className="text-gray-800 font-bold text-lg">
+                                                        {evt.title}
+                                                        {evt.time && <Text className={cn("text-base font-medium", themeText)}>  {evt.time}</Text>}
+                                                    </Text>
                                                     {isMultiDay && (
                                                         <Text className="text-xs text-blue-500 font-bold mb-1">
                                                             {evt.date} ~ {evt.endDate}
@@ -245,28 +253,53 @@ export default function CalendarScreen() {
                             placeholderTextColor="#9CA3AF"
                         />
 
-                        {/* End Date Toggle */}
-                        <View className="mb-6">
-                            {!endDate ? (
-                                <TouchableOpacity onPress={() => setEndDate(addDays(selectedDate, 1))}>
-                                    <Text className={cn("text-sm font-bold underline", themeText)}>+ 종료일 입력하기</Text>
-                                </TouchableOpacity>
-                            ) : (
-                                <View className="flex-row items-center justify-between bg-gray-50 p-3 rounded-xl border border-gray-200">
-                                    <View>
-                                        <Text className="text-xs text-gray-400">종료일</Text>
-                                        <Text className="text-lg font-bold text-gray-800">{endDate}</Text>
+                        {/* Date & Time Settings */}
+                        <View className="mb-6 space-y-3">
+                            <View>
+                                {!endDate ? (
+                                    <TouchableOpacity onPress={() => setEndDate(addDays(selectedDate, 1))}>
+                                        <Text className={cn("text-sm font-bold underline mb-2", themeText)}>+ 종료일 입력하기</Text>
+                                    </TouchableOpacity>
+                                ) : (
+                                    <View className="flex-row items-center justify-between bg-gray-50 p-3 rounded-xl border border-gray-200 mb-2">
+                                        <View>
+                                            <Text className="text-xs text-gray-400">종료일</Text>
+                                            <Text className="text-lg font-bold text-gray-800">{endDate}</Text>
+                                        </View>
+                                        <View className="flex-row gap-2">
+                                            <TouchableOpacity onPress={() => setEndDate(addDays(endDate, 1))} className="bg-white border border-gray-200 px-3 py-1 rounded-lg">
+                                                <Text className="font-bold text-gray-600">+1일</Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity onPress={() => setEndDate(null)}>
+                                                <Ionicons name="close-circle" size={24} color="#9CA3AF" />
+                                            </TouchableOpacity>
+                                        </View>
                                     </View>
-                                    <View className="flex-row gap-2">
-                                        <TouchableOpacity onPress={() => setEndDate(addDays(endDate, 1))} className="bg-white border border-gray-200 px-3 py-1 rounded-lg">
-                                            <Text className="font-bold text-gray-600">+1일</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity onPress={() => setEndDate(null)}>
-                                            <Ionicons name="close-circle" size={24} color="#9CA3AF" />
+                                )}
+                            </View>
+
+                            <View>
+                                {!isTimeEnabled ? (
+                                    <TouchableOpacity onPress={() => setIsTimeEnabled(true)}>
+                                        <Text className={cn("text-sm font-bold underline", themeText)}>+ 시간 입력하기</Text>
+                                    </TouchableOpacity>
+                                ) : (
+                                    <View className="flex-row items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                                        <Ionicons name="time-outline" size={20} color="#6B7280" />
+                                        <TextInput
+                                            value={eventTime}
+                                            onChangeText={setEventTime}
+                                            placeholder="시간 (예: 19:00)"
+                                            placeholderTextColor="#9CA3AF"
+                                            className="flex-1 text-base font-bold text-gray-800"
+                                            autoFocus
+                                        />
+                                        <TouchableOpacity onPress={() => { setIsTimeEnabled(false); setEventTime(''); }}>
+                                            <Ionicons name="close-circle" size={20} color="#9CA3AF" />
                                         </TouchableOpacity>
                                     </View>
-                                </View>
-                            )}
+                                )}
+                            </View>
                         </View>
 
                         {/* Image Picker */}

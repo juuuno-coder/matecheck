@@ -31,6 +31,7 @@ export interface CalendarEvent {
     creatorId: string;
     imageUrl?: string;
     endDate?: string; // Optional end date for events
+    time?: string; // Optional time (e.g. "19:00")
 }
 
 export interface BudgetTransaction {
@@ -107,7 +108,7 @@ interface UserState {
     deleteAccount: (password: string) => Promise<{ success: boolean, error?: string }>;
 
     // Calendar Actions
-    addEvent: (title: string, date: string, imageUrl?: string, endDate?: string) => void;
+    addEvent: (title: string, date: string, imageUrl?: string, endDate?: string, time?: string) => void;
     voteEvent: (eventId: string, date: string, userId: string) => void;
     deleteEvent: (id: string) => void;
 
@@ -397,7 +398,7 @@ export const useUserStore = create<UserState>((set) => ({
     },
 
     // Calendar Actions
-    addEvent: async (title: string, date: string, imageUrl?: string, endDate?: string) => {
+    addEvent: async (title: string, date: string, imageUrl?: string, endDate?: string, time?: string) => {
         const { nestId, avatarId } = useUserStore.getState();
         if (nestId) {
             try {
@@ -408,7 +409,8 @@ export const useUserStore = create<UserState>((set) => ({
                         calendar_event: {
                             title, date, end_date: endDate,
                             creator_id: avatarId, image_url: imageUrl,
-                            event_type: 'event'
+                            event_type: 'event',
+                            time // Added time
                         }
                     })
                 });
@@ -423,7 +425,8 @@ export const useUserStore = create<UserState>((set) => ({
                             type: data.event_type || 'event',
                             votes: {},
                             creatorId: String(data.creator_id),
-                            imageUrl: data.image_url
+                            imageUrl: data.image_url,
+                            time: data.time
                         }]
                     }));
                 }
@@ -435,7 +438,8 @@ export const useUserStore = create<UserState>((set) => ({
                     title, date, endDate, type: 'vote',
                     votes: { [date]: [String(state.avatarId)] },
                     creatorId: String(state.avatarId),
-                    imageUrl
+                    imageUrl,
+                    time
                 }]
             }));
         }
@@ -668,6 +672,7 @@ export const useUserStore = create<UserState>((set) => ({
                     title: e.title,
                     date: e.date,
                     endDate: e.end_date,
+                    time: e.time,
                     type: e.event_type || 'event',
                     creatorId: String(e.creator_id),
                     imageUrl: e.image_url,

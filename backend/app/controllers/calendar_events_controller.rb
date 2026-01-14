@@ -27,6 +27,6 @@ class CalendarEventsController < ApplicationController
   end
 
   def event_params
-    params.require(:calendar_event).permit(:title, :date, :end_date, :creator_id, :image_url, :event_type)
+    params.require(:calendar_event).permit(:title, :date, :end_date, :creator_id, :image_url, :event_type, :time)
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_14_113521) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_14_114107) do
   create_table "calendar_events", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "creator_id"
@@ -19,6 +19,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_14_113521) do
     t.string "event_type"
     t.string "image_url"
     t.integer "nest_id", null: false
+    t.string "time"
     t.string "title"
     t.datetime "updated_at", null: false
     t.index ["nest_id"], name: "index_calendar_events_on_nest_id"

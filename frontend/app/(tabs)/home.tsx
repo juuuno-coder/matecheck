@@ -1,6 +1,9 @@
-import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, Dimensions, Platform } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
+import TutorialOverlay from '../../components/TutorialOverlay';
+
+const { width, height } = Dimensions.get('window');
 import { useUserStore } from '../../store/userStore';
 import { cn } from '../../lib/utils';
 import { AVATARS, THEMES } from '../../constants/data';
@@ -26,7 +29,7 @@ export default function HomeScreen() {
     const router = useRouter();
     const {
         nickname, avatarId, nestName, nestTheme, nestId,
-        todos, events, goals, members, language,
+        todos, events, goals, members, language, hasSeenTutorial, completeTutorial,
         syncMissions, syncEvents, syncGoals, syncTransactions
     } = useUserStore();
     const t = translations[language].home;
@@ -228,6 +231,31 @@ export default function HomeScreen() {
 
                 </View>
             </ScrollView>
+
+            <TutorialOverlay
+                visible={!hasSeenTutorial}
+                onComplete={completeTutorial}
+                steps={[
+                    {
+                        target: { x: 20, y: 170, width: width - 40, height: 260, borderRadius: 24 },
+                        title: "오늘의 체크리스트",
+                        description: "우리 가족이 오늘 해야 할 미션들을 한눈에 확인하고 체크할 수 있어요.",
+                        position: "bottom"
+                    },
+                    {
+                        target: { x: 20, y: 450, width: width - 40, height: 180, borderRadius: 24 },
+                        title: "다가오는 일정",
+                        description: "가족 행사나 중요한 일정을 놓치지 않도록 이곳에서 미리 알려드려요.",
+                        position: "top"
+                    },
+                    {
+                        target: { x: 0, y: height - (Platform.OS === 'ios' ? 95 : 70), width: width, height: 90, borderRadius: 0 },
+                        title: "편리한 하단 메뉴",
+                        description: "미션, 일정, 목표, 가계부 등 원하는 기능으로 언제든 빠르게 이동할 수 있어요.",
+                        position: "top"
+                    }
+                ]}
+            />
         </View>
     );
 }

@@ -63,6 +63,7 @@ interface UserState {
     nestId: string;
     inviteCode: string;
     isLoggedIn: boolean;
+    hasSeenTutorial: boolean;
 
     // Features - Todo
     todos: Todo[];
@@ -89,6 +90,7 @@ interface UserState {
     setNest: (nestName: string, nestTheme: number, inviteCode?: string, nestId?: string) => void;
     setMembers: (members: User[]) => void;
     logout: () => void;
+    completeTutorial: () => void;
     addMember: (nickname: string, avatarId: number) => void;
     addManagedMember: (nickname: string, avatarId: number, memberType: string) => Promise<void>;
 
@@ -138,6 +140,7 @@ export const useUserStore = create<UserState>((set) => ({
     nestId: '',
     inviteCode: '',
     isLoggedIn: false,
+    hasSeenTutorial: false,
 
     members: [],
     todos: [],
@@ -154,6 +157,7 @@ export const useUserStore = create<UserState>((set) => ({
     setEmail: (userEmail) => set({ userEmail }),
     setNest: (nestName, nestTheme, inviteCode = '', nestId = '') => set({ nestName, nestTheme, inviteCode, nestId, isLoggedIn: true }),
     setMembers: (members) => set({ members }),
+    completeTutorial: () => set({ hasSeenTutorial: true }),
 
     fetchJoinRequests: async () => {
         const { nestId } = useUserStore.getState();
@@ -202,8 +206,10 @@ export const useUserStore = create<UserState>((set) => ({
         events: [],
         transactions: [],
         goals: [],
+        goals: [],
         pendingRequests: [],
-        language: 'ko'
+        language: 'ko',
+        hasSeenTutorial: false // Reset tutorial on logout? Maybe yes for demo purposes.
     }),
     addMember: (nickname, avatarId) => set((state: UserState) => ({
         members: [...state.members, { id: Math.random().toString(36).substr(2, 9), nickname, avatarId }]

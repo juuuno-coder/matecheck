@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUserStore } from '../../store/userStore';
 import { API_URL } from '../../constants/Config';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import DateTimePicker from '@react-native-community/datetimepicker';
 
 interface Anniversary {
     id: number;
@@ -19,8 +18,7 @@ export default function AnniversaryScreen() {
     const [anniversaries, setAnniversaries] = useState<Anniversary[]>([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [title, setTitle] = useState('');
-    const [date, setDate] = useState(new Date());
-    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [dateString, setDateString] = useState('');
     const [isRecurring, setIsRecurring] = useState(false);
     const [category, setCategory] = useState('기타');
 
@@ -55,7 +53,7 @@ export default function AnniversaryScreen() {
                 body: JSON.stringify({
                     anniversary: {
                         title,
-                        anniversary_date: date.toISOString().split('T')[0],
+                        anniversary_date: dateString,
                         is_recurring: isRecurring,
                         category
                     }
@@ -90,7 +88,7 @@ export default function AnniversaryScreen() {
 
     const resetForm = () => {
         setTitle('');
-        setDate(new Date());
+        setDateString('');
         setIsRecurring(false);
         setCategory('기타');
     };
@@ -249,24 +247,12 @@ export default function AnniversaryScreen() {
 
                             {/* Date */}
                             <Text className="text-sm font-bold text-gray-700 mb-2">날짜</Text>
-                            <TouchableOpacity
-                                onPress={() => setShowDatePicker(true)}
-                                className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4"
-                            >
-                                <Text className="text-gray-900">{date.toLocaleDateString('ko-KR')}</Text>
-                            </TouchableOpacity>
-
-                            {showDatePicker && (
-                                <DateTimePicker
-                                    value={date}
-                                    mode="date"
-                                    display="default"
-                                    onChange={(event, selectedDate) => {
-                                        setShowDatePicker(false);
-                                        if (selectedDate) setDate(selectedDate);
-                                    }}
-                                />
-                            )}
+                            <TextInput
+                                value={dateString}
+                                onChangeText={setDateString}
+                                className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4 text-gray-900"
+                                placeholder="YYYY-MM-DD (예: 2026-12-25)"
+                            />
 
                             {/* Recurring */}
                             <TouchableOpacity

@@ -48,7 +48,7 @@ export default function ActivityScreen() {
         user: members[0] || { nickname: 'Admin', avatarId: 0 },
         date: today,
         message: language === 'ko' ? "보금자리가 개설되었어요 🎉" : "The nest was created 🎉",
-        targetPath: '/(tabs)/settings'
+        targetPath: '/(tabs)/home'
     };
 
     // 2. Member Join Logs

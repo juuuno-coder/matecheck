@@ -94,8 +94,8 @@ export default function AnniversaryScreen() {
     return (
         <View className="flex-1 bg-gray-50">
             {/* Header (Modern Simple Style) */}
-            <View className="pt-16 pb-6 px-6 bg-white shadow-sm rounded-b-[40px] z-20 mb-6 flex-row justify-between items-center">
-                <Text className="text-3xl font-black text-gray-900">{t.title}</Text>
+            <View className="pt-12 pb-6 px-6 bg-white shadow-sm rounded-b-[40px] z-20 mb-6 flex-row justify-between items-center">
+                <Text className="text-2xl font-black text-gray-900">{t.title}</Text>
                 <TouchableOpacity
                     onPress={() => setModalVisible(true)}
                     className="w-12 h-12 rounded-full items-center justify-center shadow-lg shadow-orange-200 bg-orange-500"

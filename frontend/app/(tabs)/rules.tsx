@@ -216,9 +216,9 @@ export default function RulesScreen() {
     return (
         <View className="flex-1 bg-gray-50">
             {/* Header (Modern Simple Style) */}
-            <View className="pt-16 pb-6 px-6 bg-white shadow-sm rounded-b-[40px] z-20 mb-6 flex-row justify-between items-center">
+            <View className="pt-12 pb-6 px-6 bg-white shadow-sm rounded-b-[40px] z-20 mb-6 flex-row justify-between items-center">
                 <View className="flex-row items-center gap-2">
-                    <Text className="text-3xl font-black text-gray-900">
+                    <Text className="text-2xl font-black text-gray-900">
                         {language === 'ko' ? "약속" : "Promises"}
                     </Text>
                     <TouchableOpacity onPress={() => setShowTutorial(true)} className="mt-1">

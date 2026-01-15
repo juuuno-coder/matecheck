@@ -218,8 +218,8 @@ export default function ActivityScreen() {
     return (
         <View className="flex-1 bg-gray-50">
             {/* Header */}
-            <View className="pt-16 pb-4 px-6 bg-white border-b border-gray-100 shadow-sm z-10">
-                <Text className="text-2xl font-bold text-gray-800">
+            <View className="pt-12 pb-4 px-6 bg-white border-b border-gray-100 shadow-sm z-10">
+                <Text className="text-2xl font-black text-gray-800">
                     {language === 'ko' ? "활동 기록 👀" : "Activity Log 👀"}
                 </Text>
             </View>

@@ -109,9 +109,9 @@ export default function SettingsScreen() {
     return (
         <View className="flex-1 bg-gray-50">
             {/* Header / Profile Section */}
-            <View className="pt-16 pb-8 px-6 bg-white shadow-sm rounded-b-[40px] mb-8 z-10">
+            <View className="pt-12 pb-8 px-6 bg-white shadow-sm rounded-b-[40px] mb-8 z-10">
                 <View className="flex-row justify-between items-start mb-6">
-                    <Text className="text-3xl font-black text-gray-900">{t.title}</Text>
+                    <Text className="text-2xl font-black text-gray-900">{t.title}</Text>
                     <TouchableOpacity onPress={() => setShowTutorial(true)} className="p-2 bg-gray-50 rounded-full">
                         <Ionicons name="help" size={20} color="#6B7280" />
                     </TouchableOpacity>

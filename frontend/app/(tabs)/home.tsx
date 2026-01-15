@@ -88,7 +88,7 @@ export default function HomeScreen() {
             <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
 
                 {/* Nest Header (Modern & Simple) */}
-                <View className={cn("pt-16 pb-8 px-6 rounded-b-[40px] mb-8 items-center", themeItemBg)}>
+                <View className={cn("pt-12 pb-8 px-6 rounded-b-[40px] mb-8 items-center", themeItemBg)}>
                     <View className="w-20 h-20 bg-white rounded-[32px] items-center justify-center mb-4 shadow-sm overflow-hidden p-3 transform rotate-3">
                         <Image
                             source={(NEST_AVATARS.find((a: any) => a.id === nestAvatarId) || NEST_AVATARS[0]).image}

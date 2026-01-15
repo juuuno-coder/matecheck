@@ -7,7 +7,10 @@
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    origins "*"
+    origins "https://matecheck-pearl.vercel.app", 
+            "http://localhost:8081",
+            "http://localhost:19006",
+            /^https:\/\/matecheck-.*\.vercel\.app$/
 
     resource "*",
       headers: :any,

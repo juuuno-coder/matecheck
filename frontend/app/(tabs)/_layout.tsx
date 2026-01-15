@@ -60,7 +60,7 @@ export default function TabLayout() {
                 options={{
                     title: titles.rules,
                     tabBarIcon: ({ color, focused }) => (
-                        <Ionicons name={focused ? "list" : "list-outline"} size={24} color={color} />
+                        <Ionicons name={focused ? "document-text" : "document-text-outline"} size={24} color={color} />
                     )
                 }}
             />
@@ -74,11 +74,11 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="activity"
+                name="budget"
                 options={{
-                    title: titles.activity,
+                    title: titles.budget,
                     tabBarIcon: ({ color, focused }) => (
-                        <Ionicons name={focused ? "notifications" : "notifications-outline"} size={24} color={color} />
+                        <Ionicons name={focused ? "wallet" : "wallet-outline"} size={24} color={color} />
                     )
                 }}
             />
@@ -94,9 +94,9 @@ export default function TabLayout() {
 
             {/* Hidden Tabs (accessible via navigation, but not on tab bar) */}
             <Tabs.Screen
-                name="budget"
+                name="activity"
                 options={{
-                    title: titles.budget,
+                    title: titles.activity,
                     href: null,
                 }}
             />

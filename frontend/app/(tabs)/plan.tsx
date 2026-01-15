@@ -72,11 +72,12 @@ export default function PlanScreen() {
         setSelectionModalVisible(true);
     };
 
-    const handleSelectAction = (action: 'event' | 'todo') => {
+    const handleSelectAction = (action: 'event' | 'todo' | 'rotation') => {
         setSelectionModalVisible(false);
         setTimeout(() => {
             if (action === 'event') setCalModalVisible(true);
-            else setTodoModalVisible(true);
+            else if (action === 'todo') setTodoModalVisible(true);
+            else if (action === 'rotation') router.push('/chore_rotation');
         }, 300);
     };
 
@@ -309,11 +310,20 @@ export default function PlanScreen() {
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => handleSelectAction('todo')}
-                            className="p-5 flex-row items-center justify-center bg-white active:bg-gray-100"
+                            className="p-5 border-b border-gray-100 flex-row items-center justify-center bg-white active:bg-gray-100"
                         >
                             <Text className="text-2xl mr-3">✅</Text>
                             <Text className="text-lg font-bold text-gray-800">
                                 {language === 'ko' ? "할 일 추가하기" : "Add Todo"}
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => handleSelectAction('rotation')}
+                            className="p-5 flex-row items-center justify-center bg-white active:bg-gray-100"
+                        >
+                            <Text className="text-2xl mr-3">🔄</Text>
+                            <Text className="text-lg font-bold text-gray-800">
+                                {language === 'ko' ? "당번 규칙 정하기" : "Set Rotation"}
                             </Text>
                         </TouchableOpacity>
                     </Animated.View>

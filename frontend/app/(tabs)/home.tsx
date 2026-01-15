@@ -107,6 +107,13 @@ export default function HomeScreen() {
                     </View>
 
                     <TouchableOpacity
+                        className="absolute top-16 right-16 p-2 rounded-full bg-white/50"
+                        onPress={() => router.push('/(tabs)/activity')}
+                    >
+                        <Ionicons name="notifications-outline" size={20} color="#4B5563" />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
                         className="absolute top-16 right-6 p-2 rounded-full bg-white/50"
                         onPress={() => router.push('/(tabs)/settings')}
                     >
@@ -179,7 +186,7 @@ export default function HomeScreen() {
 
                     {/* 2. Upcoming Schedule (Pretty UI) */}
                     <View>
-                        <SectionHeader title="돌아오는 일정 📅" onPress={() => router.push('/(tabs)/calendar')} />
+                        <SectionHeader title="돌아오는 일정 📅" onPress={() => router.push('/(tabs)/plan')} />
                         {upcomingEvents.length === 0 ? (
                             <View className="bg-gray-50 p-6 rounded-2xl items-center border border-gray-100 border-dashed">
                                 <Text className="text-gray-400">예정된 일정이 없어요.</Text>
@@ -221,7 +228,7 @@ export default function HomeScreen() {
                         )}
                         {upcomingEvents.length > 0 && (
                             <TouchableOpacity
-                                onPress={() => router.push('/(tabs)/calendar')}
+                                onPress={() => router.push('/(tabs)/plan')}
                                 className="mt-4 flex-row justify-center items-center py-3 bg-gray-50 rounded-xl"
                             >
                                 <Text className="text-gray-500 font-medium text-sm">전체 일정 보기</Text>

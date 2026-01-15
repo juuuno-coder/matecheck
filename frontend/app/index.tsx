@@ -19,27 +19,29 @@ import { translations } from '../constants/I18n';
 const { width, height } = Dimensions.get('window');
 
 const REVIEWS = [
-    "가족 간 소통이 많아졌어요 ❤️",
-    "집안일이 재미있어졌어요 ✨",
-    "반려동물과 함께라서 좋아요 🐶",
-    "아이들이 스스로 해요 👶",
-    "부모님과 더 가까워졌어요 🏡",
+    "룸메이트랑 안 싸우게 됐어요 ✌️",
+    "정산이 너무 편해졌어요 💸",
+    "집안일 분담이 확실해요 ✨",
+    "초대 코드로 친구 부르기 🏠",
+    "공유 달력 진짜 꿀팁! 📅",
 ];
 
 const FloatingReview = ({ text, index, total }: { text: string, index: number, total: number }) => {
     const translateY = useSharedValue(height);
     const opacity = useSharedValue(0);
-    const [randomX] = React.useState(() => (Math.random() * 0.4 + 0.3) * width);
-    const [randomDuration] = React.useState(() => 10000 + Math.random() * 5000);
+    const [randomX] = React.useState(() => (Math.random() * 0.6 + 0.2) * width);
+    // 50% slower duration (increased from 10k-15k to 20k-30k)
+    const [randomDuration] = React.useState(() => 20000 + Math.random() * 10000);
 
     useEffect(() => {
-        const delay = index * 2000;
+        const delay = index * 3000;
 
         translateY.value = withDelay(
             delay,
             withRepeat(
                 withSequence(
-                    withTiming(-150, { duration: randomDuration, easing: Easing.out(Easing.quad) }),
+                    // Stop at height * 0.5 (middle of the screen, before logo)
+                    withTiming(height * 0.5, { duration: randomDuration, easing: Easing.linear }),
                     withTiming(height, { duration: 0 })
                 ),
                 -1,
@@ -51,9 +53,9 @@ const FloatingReview = ({ text, index, total }: { text: string, index: number, t
             delay,
             withRepeat(
                 withSequence(
-                    withTiming(0.6, { duration: 2000 }),
-                    withTiming(0.6, { duration: randomDuration - 4000 }),
-                    withTiming(0, { duration: 2000 })
+                    withTiming(0.7, { duration: 3000 }),
+                    withTiming(0.7, { duration: randomDuration - 6000 }),
+                    withTiming(0, { duration: 3000 })
                 ),
                 -1,
                 false

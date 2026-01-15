@@ -198,21 +198,22 @@ export default function PlanScreen() {
     return (
         <View className="flex-1 bg-white">
             {/* Header */}
-            <View className="pt-16 pb-4 px-6 bg-white flex-row justify-between items-center shadow-sm z-10">
+            {/* Header (Modern Simple Style) */}
+            <View className="pt-16 pb-6 px-6 bg-white shadow-sm rounded-b-[40px] z-20 mb-6 flex-row justify-between items-center">
                 <View className="flex-row items-center gap-2">
-                    <Text className="text-2xl font-bold text-gray-900">
+                    <Text className="text-3xl font-black text-gray-900">
                         {tCalendar.title}
                     </Text>
-                    <TouchableOpacity onPress={() => setShowTutorial(true)}>
-                        <Ionicons name="help-circle-outline" size={20} color="#9CA3AF" />
+                    <TouchableOpacity onPress={() => setShowTutorial(true)} className="mt-1">
+                        <Ionicons name="help-circle-outline" size={24} color="#9CA3AF" />
                     </TouchableOpacity>
                 </View>
                 {/* Global Add Button */}
                 <TouchableOpacity
                     onPress={handleAddButtonPress}
-                    className={cn("w-10 h-10 rounded-full items-center justify-center shadow-md", themeBg)}
+                    className={cn("w-12 h-12 rounded-full items-center justify-center shadow-lg shadow-orange-200", themeBg)}
                 >
-                    <Ionicons name="add" size={24} color="white" />
+                    <Ionicons name="add" size={28} color="white" />
                 </TouchableOpacity>
             </View>
 

@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, ScrollView, Modal, TextInput, Alert, Image } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import { useUserStore, Goal } from '../../store/userStore';
+// import { useUserStore, Goal } from '../../store/userStore'; // Removed duplicate
 import { cn } from '../../lib/utils';
 import { THEMES } from '../../constants/data';
 import Animated, { FadeInDown, FadeInUp, Layout } from 'react-native-reanimated';
@@ -13,14 +13,8 @@ import { Dimensions } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
-// Types for House Rules
-interface HouseRule {
-    id: number;
-    title: string;
-    description: string;
-    rule_type: string;
-    priority: number;
-}
+// Types for House Rules (Now imported from store)
+import { useUserStore, HouseRule, Goal } from '../../store/userStore';
 
 const RULE_TYPES = [
     { id: 'quiet_hours', label: '조용한 시간', icon: 'moon', color: 'bg-indigo-500' },
@@ -31,7 +25,10 @@ const RULE_TYPES = [
 ];
 
 export default function RulesScreen() {
-    const { nestTheme, goals, addGoal, incrementGoalProgress, decrementGoalProgress, deleteGoal, language, nestId } = useUserStore();
+    const {
+        nestTheme, goals, addGoal, incrementGoalProgress, decrementGoalProgress, deleteGoal,
+        language, nestId, rules, addRule, deleteRule, syncRules
+    } = useUserStore();
     const router = useRouter();
     const params = useLocalSearchParams<{ action?: string }>();
 
@@ -54,7 +51,6 @@ export default function RulesScreen() {
     const [goalUnit, setGoalUnit] = useState('회');
 
     // --- RULE STATE ---
-    const [rules, setRules] = useState<HouseRule[]>([]);
     const [ruleModalVisible, setRuleModalVisible] = useState(false);
     const [ruleTitle, setRuleTitle] = useState('');
     const [ruleDescription, setRuleDescription] = useState('');
@@ -64,7 +60,7 @@ export default function RulesScreen() {
     // Fetch Rules & Handle Deep Linking
     useEffect(() => {
         if (nestId) {
-            fetchRules();
+            syncRules();
         }
     }, [nestId]);
 
@@ -77,18 +73,6 @@ export default function RulesScreen() {
             router.setParams({ action: '' });
         }
     }, [params.action]);
-
-    const fetchRules = async () => {
-        try {
-            const response = await fetch(`${API_URL}/nests/${nestId}/house_rules`);
-            if (response.ok) {
-                const data = await response.json();
-                setRules(data);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
 
     // --- ACTIONS ---
     const handleAddButtonPress = () => {
@@ -124,50 +108,26 @@ export default function RulesScreen() {
         );
     };
 
-    const addRule = async () => {
+    const handleAddRule = async () => {
         if (!ruleTitle.trim()) {
             Alert.alert(tCommon.error, '제목을 입력해주세요.');
             return;
         }
 
-        try {
-            const response = await fetch(`${API_URL}/nests/${nestId}/house_rules`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    house_rule: {
-                        title: ruleTitle,
-                        description: ruleDescription,
-                        rule_type: ruleType,
-                        priority: rules.length + 1
-                    }
-                })
-            });
-
-            if (response.ok) {
-                const newRule = await response.json();
-                setRules([...rules, newRule]);
-                resetRuleForm();
-                setRuleModalVisible(false);
-            }
-        } catch (error) {
-            console.error(error);
-            Alert.alert(tCommon.error, '규칙 추가 실패');
-        }
+        await addRule(ruleTitle, ruleDescription, ruleType);
+        resetRuleForm();
+        setRuleModalVisible(false);
     };
 
-    const deleteRule = async (id: number) => {
-        try {
-            const response = await fetch(`${API_URL}/nests/${nestId}/house_rules/${id}`, {
-                method: 'DELETE'
-            });
-
-            if (response.ok) {
-                setRules(rules.filter(r => r.id !== id));
-            }
-        } catch (error) {
-            console.error(error);
-        }
+    const confirmDeleteRule = (id: number) => {
+        Alert.alert(
+            tCommon.delete,
+            language === 'ko' ? '이 규칙을 삭제하시겠습니까?' : 'Delete this rule?',
+            [
+                { text: tCommon.cancel, style: 'cancel' },
+                { text: tCommon.delete, style: 'destructive', onPress: () => deleteRule(id) }
+            ]
+        );
     };
 
     const resetRuleForm = () => {
@@ -255,33 +215,32 @@ export default function RulesScreen() {
 
     return (
         <View className="flex-1 bg-gray-50">
-            {/* Header */}
-            <View className="pt-16 pb-4 px-6 bg-white flex-row justify-between items-center shadow-sm z-10">
+            {/* Header (Modern Simple Style) */}
+            <View className="pt-16 pb-6 px-6 bg-white shadow-sm rounded-b-[40px] z-20 mb-6 flex-row justify-between items-center">
                 <View className="flex-row items-center gap-2">
-                    <Text className="text-2xl font-bold text-gray-900">
+                    <Text className="text-3xl font-black text-gray-900">
                         {language === 'ko' ? "약속" : "Promises"}
                     </Text>
-                    <TouchableOpacity onPress={() => setShowTutorial(true)}>
-                        <Ionicons name="help-circle-outline" size={20} color="#9CA3AF" />
+                    <TouchableOpacity onPress={() => setShowTutorial(true)} className="mt-1">
+                        <Ionicons name="help-circle-outline" size={24} color="#9CA3AF" />
                     </TouchableOpacity>
                 </View>
 
                 <TouchableOpacity
                     onPress={handleAddButtonPress}
-                    className={cn("w-10 h-10 rounded-full items-center justify-center shadow-md", themeBg)}
+                    className={cn("w-12 h-12 rounded-full items-center justify-center shadow-lg shadow-orange-200", themeBg)}
                 >
-                    <Ionicons name="add" size={24} color="white" />
+                    <Ionicons name="add" size={28} color="white" />
                 </TouchableOpacity>
             </View>
 
             {/* Content Info */}
-            <ScrollView className="flex-1 p-6" showsVerticalScrollIndicator={false}>
+            <ScrollView className="flex-1 px-6" contentContainerStyle={{ paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
 
-                {/* Goals Section (Moved to Top) */}
-                <View className="mb-12">
-                    <View className="flex-row items-center mb-5 ml-1">
-                        <Text className="text-2xl mr-2">🏆</Text>
-                        <Text className="text-2xl font-bold text-gray-900">{language === 'ko' ? "우리의 목표" : "Our Goals"}</Text>
+                {/* Goals Section */}
+                <View className="mb-10">
+                    <View className="flex-row items-center mb-4 px-1">
+                        <Text className="text-xl font-black text-gray-900">🏆 {language === 'ko' ? "우리의 목표" : "Our Goals"}</Text>
                     </View>
 
                     {goals.length === 0 ? (
@@ -311,9 +270,8 @@ export default function RulesScreen() {
 
                 {/* Rules Section (Moved to Bottom) */}
                 <View className="mb-24">
-                    <View className="flex-row items-center mb-5 ml-1">
-                        <Text className="text-2xl mr-2">📜</Text>
-                        <Text className="text-2xl font-bold text-gray-900">{language === 'ko' ? "우리 집 규칙" : "House Rules"}</Text>
+                    <View className="flex-row items-center mb-4 px-1">
+                        <Text className="text-xl font-black text-gray-900">📜 {language === 'ko' ? "우리 집 규칙" : "House Rules"}</Text>
                     </View>
 
                     {rules.length === 0 ? (
@@ -463,7 +421,7 @@ export default function RulesScreen() {
                             />
                         </ScrollView>
 
-                        <TouchableOpacity onPress={addRule} className={cn("py-4 rounded-xl items-center", themeBg)}>
+                        <TouchableOpacity onPress={handleAddRule} className={cn("py-4 rounded-xl items-center", themeBg)}>
                             <Text className="text-white font-bold text-lg">{tCommon.add}</Text>
                         </TouchableOpacity>
                     </View>

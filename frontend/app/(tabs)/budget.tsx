@@ -313,7 +313,7 @@ export default function BudgetScreen() {
                 <View className="flex-1 justify-end bg-black/40">
                     <TouchableOpacity activeOpacity={1} style={{ flex: 1 }} onPress={() => setFixedModalVisible(false)} />
                     <View className="bg-white rounded-t-[40px] p-8 pb-12">
-                        <Text className="text-2xl font-black text-gray-900 mb-6">고정 지출 추가 🏡</Text>
+                        <Text className="text-2xl font-black text-gray-900 mb-6">예상 고정 지출 추가 🏡</Text>
 
                         <TextInput
                             value={tempTitle}

@@ -1,132 +1,164 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, Dimensions, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { cn } from '../lib/utils'; // Assuming this exists or similar
+import { cn } from '../lib/utils';
+import Animated, { FadeIn, FadeInDown, FadeOut, SlideInDown, SlideOutDown } from 'react-native-reanimated';
 
 interface FloatingActionMenuProps {
-    themeBg?: string; // e.g. 'bg-orange-500'
+    themeBg?: string;
 }
+
+const { width } = Dimensions.get('window');
 
 export default function FloatingActionMenu({ themeBg = 'bg-orange-500' }: FloatingActionMenuProps) {
     const router = useRouter();
     const [visible, setVisible] = useState(false);
-    const [animation] = useState(new Animated.Value(0));
 
     const toggleMenu = () => {
-        const toValue = visible ? 0 : 1;
-
-        Animated.spring(animation, {
-            toValue,
-            useNativeDriver: true,
-            friction: 5,
-        }).start();
-
         setVisible(!visible);
     };
 
     const handleAction = (path: any) => {
-        toggleMenu(); // Close menu
-        // Small timeout to allow animation close before nav if needed, but not strictly necessary
+        setVisible(false);
         setTimeout(() => {
             router.push(path);
-        }, 100);
+        }, 200);
     };
 
     const menuItems = [
         {
-            label: '하우스 룰',
-            icon: 'document-text-outline',
-            color: 'bg-indigo-500',
-            path: { pathname: '/(tabs)/rules', params: { action: 'add_rule' } }
+            label: '목표 추가',
+            subLabel: '함께 달성할 목표',
+            icon: 'trophy',
+            color: 'bg-yellow-500',
+            textColor: 'text-yellow-600',
+            bgColor: 'bg-yellow-50',
+            path: { pathname: '/(tabs)/rules', params: { action: 'add_goal' } }
         },
         {
-            label: '공동 정산',
-            icon: 'cash-outline',
-            color: 'bg-pink-500',
-            path: '/(tabs)/budget'
-        },
-        {
-            label: '로테이션',
-            icon: 'refresh-outline',
-            color: 'bg-green-500',
-            path: '/chore_rotation'
-        },
-        {
-            label: '일정',
-            icon: 'calendar-outline',
+            label: '일정 추가',
+            subLabel: '중요한 약속 공유',
+            icon: 'calendar',
             color: 'bg-blue-500',
+            textColor: 'text-blue-600',
+            bgColor: 'bg-blue-50',
             path: { pathname: '/(tabs)/plan', params: { action: 'add' } }
         },
         {
-            label: '목표',
-            icon: 'trophy-outline',
-            color: 'bg-yellow-500',
-            path: { pathname: '/(tabs)/rules', params: { action: 'add_goal' } }
-        }
+            label: '하우스 룰',
+            subLabel: '우리만의 약속',
+            icon: 'document-text', // Changed from document-text-outline for filled style
+            color: 'bg-indigo-500',
+            textColor: 'text-indigo-600',
+            bgColor: 'bg-indigo-50',
+            path: { pathname: '/(tabs)/rules', params: { action: 'add_rule' } }
+        },
+        {
+            label: '공금 내역',
+            subLabel: '투명한 정산',
+            icon: 'wallet', // Changed icon
+            color: 'bg-pink-500',
+            textColor: 'text-pink-600',
+            bgColor: 'bg-pink-50',
+            path: '/(tabs)/budget'
+        },
+        {
+            label: '집안일',
+            subLabel: '역할 분담',
+            icon: 'refresh',
+            color: 'bg-green-500',
+            textColor: 'text-green-600',
+            bgColor: 'bg-green-50',
+            path: '/chore_rotation'
+        },
+        // Placeholder for Grid balance if needed
     ];
-
-    const rotateInterp = animation.interpolate({
-        inputRange: [0, 1],
-        outputRange: ['0deg', '45deg'],
-    });
-
-    const bgStyle = {
-        transform: [{ scale: animation }],
-        opacity: animation
-    };
 
     return (
         <>
-            {/* Backdrop Modal */}
-            <Modal visible={visible} transparent animationType="none">
-                <TouchableWithoutFeedback onPress={toggleMenu}>
-                    <View className="flex-1 bg-black/30 w-full h-full relative" />
-                </TouchableWithoutFeedback>
+            <Modal visible={visible} transparent animationType="none" onRequestClose={toggleMenu}>
+                <View className="flex-1 justify-end">
+                    {/* Backdrop */}
+                    <TouchableWithoutFeedback onPress={toggleMenu}>
+                        <Animated.View
+                            entering={FadeIn}
+                            exiting={FadeOut}
+                            className="absolute top-0 left-0 w-full h-full bg-black/40 backdrop-blur-sm"
+                        />
+                    </TouchableWithoutFeedback>
 
-                {/* Menu Items */}
-                <View className="absolute bottom-48 right-6 items-end gap-3 pr-1 pointer-events-box-none">
-                    {menuItems.map((item, index) => {
-                        const translateY = animation.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [20 * (menuItems.length - index), 0]
-                        });
-                        const opacity = animation;
+                    {/* Bottom Sheet Panel */}
+                    <Animated.View
+                        entering={SlideInDown.springify().damping(18)}
+                        exiting={SlideOutDown}
+                        className="bg-white rounded-t-[32px] overflow-hidden shadow-2xl pb-10"
+                    >
+                        {/* Header */}
+                        <View className="flex-row items-center justify-between px-8 pt-8 pb-6 bg-white border-b border-gray-50">
+                            <View>
+                                <Text className="text-2xl font-black text-gray-900 mb-1">새로운 활동 ✨</Text>
+                                <Text className="text-gray-400 font-medium text-sm">무엇을 추가하시겠어요?</Text>
+                            </View>
+                            <TouchableOpacity onPress={toggleMenu} className="bg-gray-100 p-2 rounded-full">
+                                <Ionicons name="close" size={24} color="#9CA3AF" />
+                            </TouchableOpacity>
+                        </View>
 
-                        return (
-                            <Animated.View
-                                key={item.label}
-                                style={{ transform: [{ translateY }], opacity }}
-                                className="flex-row items-center gap-3"
-                            >
-                                <View className="bg-white px-3 py-1.5 rounded-lg shadow-sm">
-                                    <Text className="font-bold text-gray-700">{item.label}</Text>
-                                </View>
-                                <TouchableOpacity
-                                    onPress={() => handleAction(item.path)}
-                                    className={cn("w-12 h-12 rounded-full items-center justify-center shadow-lg", item.color)}
+                        {/* Grid Layout */}
+                        <View className="flex-row flex-wrap px-6 pt-4">
+                            {menuItems.map((item, index) => (
+                                <Animated.View
+                                    key={index}
+                                    entering={FadeInDown.delay(index * 50 + 100).springify()}
+                                    className="w-1/2 p-2"
                                 >
-                                    <Ionicons name={item.icon as any} size={24} color="white" />
-                                </TouchableOpacity>
-                            </Animated.View>
-                        )
-                    })}
+                                    <TouchableOpacity
+                                        onPress={() => handleAction(item.path)}
+                                        activeOpacity={0.7}
+                                        className={cn(
+                                            "p-5 rounded-3xl border flex-row items-center gap-4 shadow-sm",
+                                            item.bgColor,
+                                            "border-white" // Using border-white to blend or border-transparent
+                                        )}
+                                        style={{
+                                            // Optional: Add subtle border matching color with low opacity 
+                                            borderColor: item.color.replace('bg-', '') === 'yellow-500' ? '#FEF08A' : undefined
+                                        }}
+                                    >
+                                        <View className={cn("w-12 h-12 rounded-2xl items-center justify-center shadow-sm", item.color)}>
+                                            <Ionicons name={item.icon as any} size={24} color="white" />
+                                        </View>
+                                        <View className="flex-1">
+                                            <Text className={cn("font-bold text-base mb-0.5", item.textColor)}>{item.label}</Text>
+                                            <Text className="text-xs text-gray-500 font-medium" numberOfLines={1}>{item.subLabel}</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                </Animated.View>
+                            ))}
+                        </View>
+
+                        {/* Bottom Safe Area Spacer */}
+                        <View className="h-8" />
+                    </Animated.View>
                 </View>
             </Modal>
 
             {/* FAB Button */}
-            <TouchableOpacity
-                onPress={toggleMenu}
-                activeOpacity={0.8}
-                className={cn(
-                    "absolute bottom-32 right-6 w-14 h-14 rounded-full items-center justify-center shadow-lg shadow-orange-300 z-50",
-                    themeBg
-                )}
-            >
-                <Animated.View style={{ transform: [{ rotate: rotateInterp }] }}>
-                    <Ionicons name="add" size={32} color="white" />
+            {!visible && (
+                <Animated.View entering={FadeIn.duration(200)} exiting={FadeOut.duration(200)} style={{ position: 'absolute', bottom: 120, right: 24, zIndex: 50 }}>
+                    <TouchableOpacity
+                        onPress={toggleMenu}
+                        activeOpacity={0.8}
+                        className={cn(
+                            "w-16 h-16 rounded-full items-center justify-center shadow-xl shadow-orange-200 border-4 border-white",
+                            themeBg
+                        )}
+                    >
+                        <Ionicons name="add" size={36} color="white" />
+                    </TouchableOpacity>
                 </Animated.View>
-            </TouchableOpacity>
+            )}
         </>
     );
 }

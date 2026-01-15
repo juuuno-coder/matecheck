@@ -58,6 +58,22 @@ export interface Goal {
     unit: string;
 }
 
+export interface HouseRule {
+    id: number;
+    title: string;
+    description: string;
+    rule_type: string;
+    priority: number;
+}
+
+export interface Anniversary {
+    id: number;
+    title: string;
+    anniversary_date: string;
+    is_recurring: boolean;
+    category: string;
+}
+
 interface UserState {
     // Profile
     nickname: string;
@@ -87,6 +103,12 @@ interface UserState {
 
     // Features - Goals
     goals: Goal[];
+
+    // Features - House Rules
+    rules: HouseRule[];
+
+    // Features - Anniversaries
+    anniversaries: Anniversary[];
 
     // Features - Members
     members: User[];
@@ -136,11 +158,21 @@ interface UserState {
     decrementGoalProgress: (id: string) => void;
     deleteGoal: (id: string) => void;
 
+    // House Rule Actions
+    addRule: (title: string, description: string, rule_type: string) => Promise<void>;
+    deleteRule: (id: number) => Promise<void>;
+
+    // Anniversary Actions
+    addAnniversary: (title: string, date: string, isRecurring: boolean, category: string) => Promise<void>;
+    deleteAnniversary: (id: number) => Promise<void>;
+
     // Sync Actions
     syncMissions: () => Promise<void>;
     syncEvents: () => Promise<void>;
     syncGoals: () => Promise<void>;
     syncTransactions: () => Promise<void>;
+    syncRules: () => Promise<void>;
+    syncAnniversaries: () => Promise<void>;
 }
 
 export const useUserStore = create<UserState>((set) => ({
@@ -166,6 +198,8 @@ export const useUserStore = create<UserState>((set) => ({
         { id: '1', title: '🏠 관리비', amount: 150000, day: 1 }
     ],
     goals: [],
+    rules: [],
+    anniversaries: [],
 
     pendingRequests: [],
     language: 'ko',
@@ -661,6 +695,96 @@ export const useUserStore = create<UserState>((set) => ({
         }
     },
 
+    // House Rule Actions Implementation
+    addRule: async (title, description, rule_type) => {
+        const { nestId, rules } = useUserStore.getState();
+        if (!nestId) return;
+
+        try {
+            const response = await fetch(`${API_URL}/nests/${nestId}/house_rules`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    house_rule: {
+                        title,
+                        description,
+                        rule_type,
+                        priority: rules.length + 1
+                    }
+                })
+            });
+
+            if (response.ok) {
+                const newRule = await response.json();
+                set((state: UserState) => ({
+                    rules: [...state.rules, newRule]
+                }));
+            }
+        } catch (error) { console.error(error); }
+    },
+
+    deleteRule: async (id) => {
+        const { nestId } = useUserStore.getState();
+        if (!nestId) return;
+
+        try {
+            const response = await fetch(`${API_URL}/nests/${nestId}/house_rules/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                set((state: UserState) => ({
+                    rules: state.rules.filter(r => r.id !== id)
+                }));
+            }
+        } catch (error) { console.error(error); }
+    },
+
+    // Anniversary Actions Implementation
+    addAnniversary: async (title, date, isRecurring, category) => {
+        const { nestId } = useUserStore.getState();
+        if (!nestId) return;
+
+        try {
+            const response = await fetch(`${API_URL}/nests/${nestId}/anniversaries`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    anniversary: {
+                        title,
+                        anniversary_date: date,
+                        is_recurring: isRecurring,
+                        category
+                    }
+                })
+            });
+
+            if (response.ok) {
+                const newAnniversary = await response.json();
+                set((state: UserState) => ({
+                    anniversaries: [...state.anniversaries, newAnniversary]
+                }));
+            }
+        } catch (error) { console.error(error); }
+    },
+
+    deleteAnniversary: async (id) => {
+        const { nestId } = useUserStore.getState();
+        if (!nestId) return;
+
+        try {
+            const response = await fetch(`${API_URL}/nests/${nestId}/anniversaries/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                set((state: UserState) => ({
+                    anniversaries: state.anniversaries.filter(a => a.id !== id)
+                }));
+            }
+        } catch (error) { console.error(error); }
+    },
+
     // Sync Implementations
     syncMissions: async () => {
         const { nestId } = useUserStore.getState();
@@ -745,6 +869,31 @@ export const useUserStore = create<UserState>((set) => ({
                     payerId: String(t.payer_id)
                 }));
                 set({ transactions: mapped });
+            }
+        } catch (error) { console.error(error); }
+    },
+
+    syncRules: async () => {
+        const { nestId } = useUserStore.getState();
+        if (!nestId) return;
+        try {
+            const response = await fetch(`${API_URL}/nests/${nestId}/house_rules`);
+            if (response.ok) {
+                const data = await response.json();
+                // Ensure data structure matches interface
+                set({ rules: data });
+            }
+        } catch (error) { console.error(error); }
+    },
+
+    syncAnniversaries: async () => {
+        const { nestId } = useUserStore.getState();
+        if (!nestId) return;
+        try {
+            const response = await fetch(`${API_URL}/nests/${nestId}/anniversaries`);
+            if (response.ok) {
+                const data = await response.json();
+                set({ anniversaries: data });
             }
         } catch (error) { console.error(error); }
     },

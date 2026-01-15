@@ -1,23 +1,19 @@
 import { View, Text, TouchableOpacity, ScrollView, Modal, TextInput, Alert, Platform } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { useUserStore } from '../../store/userStore';
+// import { useUserStore } from '../../store/userStore'; // Removed duplicate
 import { API_URL } from '../../constants/Config';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { translations, Language } from '../../constants/I18n';
 
-interface Anniversary {
-    id: number;
-    title: string;
-    anniversary_date: string;
-    is_recurring: boolean;
-    category: string;
-}
+// Anniversary interface is now imported from store
+import { useUserStore } from '../../store/userStore';
 
 export default function AnniversaryScreen() {
-    const { nestId, language } = useUserStore();
+    const { nestId, language, anniversaries, addAnniversary, deleteAnniversary, syncAnniversaries } = useUserStore();
     const t = translations[language as Language].anniversary;
-    const [anniversaries, setAnniversaries] = useState<Anniversary[]>([]);
+
+    // Local UI state
     const [modalVisible, setModalVisible] = useState(false);
     const [title, setTitle] = useState('');
     const [dateString, setDateString] = useState('');
@@ -29,70 +25,22 @@ export default function AnniversaryScreen() {
 
     useEffect(() => {
         if (nestId) {
-            fetchAnniversaries();
+            syncAnniversaries();
         }
     }, [nestId]);
 
-    const fetchAnniversaries = async () => {
-        if (!nestId) return;
-        try {
-            const response = await fetch(`${API_URL}/nests/${nestId}/anniversaries`);
-            if (response.ok) {
-                const data = await response.json();
-                setAnniversaries(data);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const addAnniversary = async () => {
+    const handleAddAnniversary = async () => {
         if (!title.trim()) {
-            Alert.alert(translations[language].common.error, t.form_title_placeholder); // Using placeholder as hint
+            Alert.alert(translations[language as Language].common.error, t.form_title_placeholder);
             return;
         }
-        if (!nestId) return;
 
-        try {
-            const response = await fetch(`${API_URL}/nests/${nestId}/anniversaries`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    anniversary: {
-                        title,
-                        anniversary_date: dateString,
-                        is_recurring: isRecurring,
-                        category
-                    }
-                })
-            });
-
-            if (response.ok) {
-                const newAnniversary = await response.json();
-                setAnniversaries([...anniversaries, newAnniversary]);
-                setModalVisible(false);
-                resetForm();
-            }
-        } catch (error) {
-            console.error(error);
-            Alert.alert(translations[language].common.error, translations[language].common.network_error);
-        }
+        await addAnniversary(title, dateString, isRecurring, category);
+        setModalVisible(false);
+        resetForm();
     };
 
-    const deleteAnniversary = async (id: number) => {
-        if (!nestId) return;
-        try {
-            const response = await fetch(`${API_URL}/nests/${nestId}/anniversaries/${id}`, {
-                method: 'DELETE'
-            });
-
-            if (response.ok) {
-                setAnniversaries(anniversaries.filter(a => a.id !== id));
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
+    // deleteAnniversary is imported from store and used directly in Alert callbacks
 
     const resetForm = () => {
         setTitle('');
@@ -145,21 +93,19 @@ export default function AnniversaryScreen() {
 
     return (
         <View className="flex-1 bg-gray-50">
-            {/* Header */}
-            <View className="pt-16 pb-6 px-6 bg-white border-b border-gray-100">
-                <View className="flex-row items-center justify-between">
-                    <Text className="text-2xl font-bold text-gray-900">{t.title}</Text>
-                    <TouchableOpacity
-                        onPress={() => setModalVisible(true)}
-                        className="bg-orange-500 px-4 py-2 rounded-xl"
-                    >
-                        <Text className="text-white font-bold">{t.add_btn}</Text>
-                    </TouchableOpacity>
-                </View>
+            {/* Header (Modern Simple Style) */}
+            <View className="pt-16 pb-6 px-6 bg-white shadow-sm rounded-b-[40px] z-20 mb-6 flex-row justify-between items-center">
+                <Text className="text-3xl font-black text-gray-900">{t.title}</Text>
+                <TouchableOpacity
+                    onPress={() => setModalVisible(true)}
+                    className="w-12 h-12 rounded-full items-center justify-center shadow-lg shadow-orange-200 bg-orange-500"
+                >
+                    <Ionicons name="add" size={28} color="white" />
+                </TouchableOpacity>
             </View>
 
             {/* Anniversary List */}
-            <ScrollView className="flex-1 p-6">
+            <ScrollView className="flex-1 px-6" contentContainerStyle={{ paddingBottom: 120 }}>
                 {anniversaries.length === 0 ? (
                     <View className="items-center justify-center py-20">
                         <Text className="text-6xl mb-4">📅</Text>
@@ -282,7 +228,7 @@ export default function AnniversaryScreen() {
 
                         {/* Add Button */}
                         <TouchableOpacity
-                            onPress={addAnniversary}
+                            onPress={handleAddAnniversary}
                             className="bg-orange-500 py-4 rounded-xl items-center"
                         >
                             <Text className="text-white font-bold text-lg">{t.add_confirm}</Text>

@@ -103,7 +103,7 @@ export default function BudgetScreen() {
                     {/* Header Row */}
                     <View className="flex-row justify-between items-center mb-8">
                         <Text className="text-gray-900 text-lg font-bold">{t.goal_title}</Text>
-                        <TouchableOpacity onPress={() => setGoalModalVisible(true)} className="bg-white/40 px-4 py-1.5 rounded-full">
+                        <TouchableOpacity onPress={() => setGoalModalVisible(true)} className="bg-white px-4 py-1.5 rounded-full shadow-sm">
                             <Text className="text-gray-900 text-sm font-bold">수정</Text>
                         </TouchableOpacity>
                     </View>
@@ -117,7 +117,7 @@ export default function BudgetScreen() {
                         </Text>
                     </View>
 
-                    <View className="flex-row justify-between mb-3 bg-white/30 p-4 rounded-3xl">
+                    <View className="flex-row justify-between mb-3 bg-white p-4 rounded-3xl shadow-sm">
                         <View>
                             <Text className="text-gray-600 text-[10px] uppercase font-bold tracking-wider mb-1">Total Spent</Text>
                             <Text className="text-gray-900 font-bold text-lg">{totalSpent.toLocaleString()}원</Text>
@@ -256,7 +256,7 @@ export default function BudgetScreen() {
                             onChangeText={setTempGoal}
                             placeholder="0"
                             keyboardType="numeric"
-                            className="bg-gray-50 border border-gray-100 rounded-2xl p-6 text-gray-900 font-black text-3xl mb-10"
+                            className="bg-white border border-gray-200 rounded-2xl p-6 text-gray-900 font-black text-3xl mb-10 shadow-sm"
                         />
 
                         <TouchableOpacity onPress={handleSetGoal} className={cn("w-full py-5 rounded-2xl items-center shadow-lg shadow-orange-200", themeBg)}>
@@ -278,7 +278,7 @@ export default function BudgetScreen() {
                                 value={tempTitle}
                                 onChangeText={setTempTitle}
                                 placeholder="어디에 썼나요? (예: 마트 장보기)"
-                                className="bg-gray-50 border border-gray-100 rounded-2xl p-4 text-gray-900 font-bold text-lg mb-4"
+                                className="bg-white border border-gray-200 rounded-2xl p-4 text-gray-900 font-bold text-lg mb-4 shadow-sm"
                             />
 
                             <TextInput
@@ -286,7 +286,7 @@ export default function BudgetScreen() {
                                 onChangeText={setTempAmount}
                                 placeholder="얼마를 썼나요? (원)"
                                 keyboardType="numeric"
-                                className="bg-gray-50 border border-gray-100 rounded-2xl p-4 text-gray-900 font-black text-2xl mb-8"
+                                className="bg-white border border-gray-200 rounded-2xl p-4 text-gray-900 font-black text-2xl mb-8 shadow-sm"
                             />
 
                             <TouchableOpacity onPress={handleAddTransaction} className={cn("w-full py-5 rounded-2xl items-center", themeBg)}>
@@ -308,7 +308,7 @@ export default function BudgetScreen() {
                             value={tempTitle}
                             onChangeText={setTempTitle}
                             placeholder="지출 항목 (예: 관리비, 월세)"
-                            className="bg-gray-50 border border-gray-100 rounded-2xl p-4 text-gray-900 font-bold text-lg mb-4"
+                            className="bg-white border border-gray-200 rounded-2xl p-4 text-gray-900 font-bold text-lg mb-4 shadow-sm"
                         />
 
                         <TextInput
@@ -316,7 +316,7 @@ export default function BudgetScreen() {
                             onChangeText={setTempAmount}
                             placeholder="금액 (원)"
                             keyboardType="numeric"
-                            className="bg-gray-50 border border-gray-100 rounded-2xl p-4 text-gray-900 font-bold text-lg mb-4"
+                            className="bg-white border border-gray-200 rounded-2xl p-4 text-gray-900 font-bold text-lg mb-4 shadow-sm"
                         />
 
                         <View className="flex-row items-center gap-4 mb-8">
@@ -327,7 +327,7 @@ export default function BudgetScreen() {
                                 placeholder="1"
                                 keyboardType="numeric"
                                 maxLength={2}
-                                className="bg-gray-50 border border-gray-100 rounded-xl p-3 text-gray-900 font-bold w-16 text-center"
+                                className="bg-white border border-gray-200 rounded-xl p-3 text-gray-900 font-bold w-16 text-center shadow-sm"
                             />
                             <Text className="text-gray-500 font-bold">일</Text>
                         </View>

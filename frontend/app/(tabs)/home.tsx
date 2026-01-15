@@ -119,7 +119,7 @@ export default function HomeScreen() {
                     </View>
 
                     <TouchableOpacity
-                        className="absolute top-14 right-4 w-10 h-10 items-center justify-center rounded-full bg-white/60"
+                        className="absolute top-14 right-4 w-10 h-10 items-center justify-center rounded-full bg-white shadow-sm"
                         onPress={() => router.push('/(tabs)/settings')}
                     >
                         <Ionicons name="settings-outline" size={22} color="#1F2937" />

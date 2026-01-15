@@ -100,17 +100,23 @@ export default function BudgetScreen() {
             <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
                 {/* Summary Card */}
                 <Animated.View entering={SlideInUp.delay(100)} className={cn("m-4 p-6 rounded-[40px] shadow-2xl", themeBg)}>
-                    <View className="flex-row justify-between items-start mb-6">
-                        <View>
-                            <Text className="text-white/90 font-medium mb-1">{t.goal_title}</Text>
-                            <Text className="text-white text-3xl font-black">
-                                {remaining.toLocaleString()}원
-                            </Text>
-                            <Text className="text-white/80 text-sm mt-1">남은 예산 💰</Text>
-                        </View>
+                    {/* Header Row */}
+                    <View className="flex-row justify-between items-center mb-6">
+                        <Text className="text-white/80 font-medium">{t.goal_title}</Text>
                         <TouchableOpacity onPress={() => setGoalModalVisible(true)} className="bg-white/20 px-3 py-1.5 rounded-full">
                             <Text className="text-white text-xs font-bold">수정</Text>
                         </TouchableOpacity>
+                    </View>
+
+                    {/* Center Hero Section */}
+                    <View className="items-center mb-8">
+                        <View className="bg-white/10 px-3 py-1 rounded-full mb-2">
+                            <Text className="text-white/90 text-xs font-bold">💰 남은 예산</Text>
+                        </View>
+                        <Text className="text-white text-4xl font-black tracking-tight" style={{ includeFontPadding: false }}>
+                            {remaining.toLocaleString()}
+                            <Text className="text-2xl font-bold">원</Text>
+                        </Text>
                     </View>
 
                     <View className="flex-row justify-between mb-3">

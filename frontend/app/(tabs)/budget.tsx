@@ -5,6 +5,7 @@ import { cn } from '../../lib/utils';
 import Animated, { FadeIn, FadeInDown, SlideInUp, Layout } from 'react-native-reanimated';
 import { useUserStore, BudgetTransaction, FixedExpense } from '../../store/userStore';
 import { THEMES, AVATARS } from '../../constants/data';
+import { translations } from '../../constants/I18n';
 import { Ionicons } from '@expo/vector-icons';
 import TutorialOverlay from '../../components/TutorialOverlay';
 import Avatar from '../../components/Avatar';
@@ -15,8 +16,10 @@ export default function BudgetScreen() {
     const {
         nestTheme, budgetGoal, transactions, addTransaction,
         fixedExpenses, setBudgetGoal, addFixedExpense, deleteFixedExpense,
-        avatarId, language
+        avatarId, language: langFromStore
     } = useUserStore();
+    const language = langFromStore as 'ko' | 'en';
+    const t = (translations[language] as any).budget;
 
     const themeBg = THEMES[nestTheme]?.color || 'bg-orange-500';
     const themeText = THEMES[nestTheme]?.color?.replace('bg-', 'text-') || 'text-orange-600';
@@ -81,7 +84,7 @@ export default function BudgetScreen() {
             {/* Header */}
             <View className="pt-16 pb-4 px-6 bg-white border-b border-gray-100 flex-row justify-between items-center z-20">
                 <View className="flex-row items-center gap-2">
-                    <Text className="text-2xl font-bold text-gray-900">공동 가계부 💰</Text>
+                    <Text className="text-2xl font-bold text-gray-900">{t.title} 💰</Text>
                     <TouchableOpacity onPress={() => setShowTutorial(true)}>
                         <Ionicons name="help-circle-outline" size={20} color="#9CA3AF" />
                     </TouchableOpacity>
@@ -98,7 +101,7 @@ export default function BudgetScreen() {
                 {/* Summary Card */}
                 <Animated.View entering={SlideInUp.delay(100)} className={cn("m-4 p-6 rounded-[40px] shadow-2xl", themeBg)}>
                     <View className="flex-row justify-between items-center mb-2">
-                        <Text className="text-white/80 font-medium">이번 달 남은 보금자리 예산</Text>
+                        <Text className="text-white/80 font-medium">{t.goal_title}</Text>
                         <TouchableOpacity onPress={() => setGoalModalVisible(true)} className="bg-white/20 px-3 py-1 rounded-full">
                             <Text className="text-white text-xs font-bold">수정</Text>
                         </TouchableOpacity>
@@ -237,8 +240,8 @@ export default function BudgetScreen() {
                 <View className="flex-1 justify-end bg-black/40">
                     <TouchableOpacity activeOpacity={1} style={{ flex: 1 }} onPress={() => setGoalModalVisible(false)} />
                     <Animated.View entering={SlideInUp} className="bg-white rounded-t-[40px] p-8 pb-12">
-                        <Text className="text-2xl font-black text-gray-900 mb-2">보금자리 공금 설정 💰</Text>
-                        <Text className="text-gray-500 mb-8">우리 동거 메이트들이 이번 달 함께 사용할 총 예산을 정해주세요.</Text>
+                        <Text className="text-2xl font-black text-gray-900 mb-2">{t.goal_title} 💰</Text>
+                        <Text className="text-gray-500 mb-8">{t.goal_desc}</Text>
 
                         <Text className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-widest">Total Budget Amount</Text>
                         <TextInput

@@ -114,7 +114,9 @@ export default function HomeScreen() {
                                 />
                             ))}
                         </View>
-                        <Text className="text-gray-600 font-semibold text-xs">{t.mate_count.replace('{count}', members.length.toString())}</Text>
+                        <Text className="text-gray-600 font-semibold text-xs">
+                            {members.length === 0 ? t.empty_mate : t.mate_count.replace('{count}', members.length.toString())}
+                        </Text>
                     </View>
 
                     <TouchableOpacity

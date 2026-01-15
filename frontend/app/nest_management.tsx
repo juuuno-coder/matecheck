@@ -4,9 +4,10 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useUserStore } from '../store/userStore';
 import { API_URL } from '../constants/Config';
-import { THEMES } from '../constants/data';
+import { THEMES, NEST_AVATARS } from '../constants/data';
 import { cn } from '../lib/utils';
 import * as ImagePicker from 'expo-image-picker';
+import AvatarPicker from '../components/AvatarPicker';
 
 const PRESET_IMAGES = [
     "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800&q=80", // Cozy House
@@ -17,12 +18,15 @@ const PRESET_IMAGES = [
 
 export default function NestManagementScreen() {
     const router = useRouter();
-    const { nestName, nestTheme, nestImage, nestId, setNest, inviteCode } = useUserStore();
+    const { nestName, nestTheme, nestImage, nestId, setNest, inviteCode, nestAvatarId } = useUserStore();
+    const { language } = useUserStore();
 
     const [name, setName] = useState(nestName);
     const [selectedTheme, setSelectedTheme] = useState(nestTheme);
-    const [imageUrl, setImageUrl] = useState(nestImage || PRESET_IMAGES[0]);
+    const [selectedAvatarId, setSelectedAvatarId] = useState(nestAvatarId || 100);
+    const [imageUrl, setImageUrl] = useState(nestImage || '');
     const [isSaving, setIsSaving] = useState(false);
+    const [pickerVisible, setPickerVisible] = useState(false);
 
     const pickCustomImage = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
@@ -52,6 +56,7 @@ export default function NestManagementScreen() {
                     nest: {
                         name,
                         theme_id: selectedTheme,
+                        avatar_id: selectedAvatarId,
                         image_url: imageUrl
                     }
                 })
@@ -60,7 +65,7 @@ export default function NestManagementScreen() {
             if (response.ok) {
                 const data = await response.json();
                 // Update local store
-                setNest(data.name, data.theme_id, data.invite_code, data.id, data.image_url);
+                setNest(data.name, data.theme_id, data.invite_code, data.id.toString(), data.image_url, data.avatar_id);
                 Alert.alert("저장 완료", "보금자리 정보가 수정되었습니다.", [
                     { text: "확인", onPress: () => router.back() }
                 ]);
@@ -99,18 +104,29 @@ export default function NestManagementScreen() {
 
                     {/* Preview Section */}
                     <View className="items-center">
-                        <View className="w-full h-48 rounded-3xl overflow-hidden shadow-lg mb-4 bg-gray-200 relative">
+                        <TouchableOpacity
+                            onPress={() => setPickerVisible(true)}
+                            className="w-40 h-40 rounded-full overflow-hidden shadow-lg mb-4 bg-white border-4 border-white relative items-center justify-center"
+                        >
                             <Image
-                                source={{ uri: imageUrl }}
-                                className="w-full h-full"
-                                resizeMode="cover"
+                                source={(NEST_AVATARS.find(a => a.id === selectedAvatarId) || NEST_AVATARS[0]).image}
+                                className="w-32 h-32"
+                                resizeMode="contain"
                             />
-                            <View className="absolute bottom-0 w-full bg-black/40 p-4">
-                                <Text className="text-white text-2xl font-bold text-center">{name || "보금자리 이름"}</Text>
+                            <View className="absolute bottom-2 right-2 bg-gray-900 p-2 rounded-full border-2 border-white">
+                                <Ionicons name="camera" size={16} color="white" />
                             </View>
-                        </View>
-                        <Text className="text-gray-400 text-xs">미리보기</Text>
+                        </TouchableOpacity>
+                        <Text className="text-gray-400 text-xs">아이콘을 터치해 변경하세요</Text>
                     </View>
+
+                    <AvatarPicker
+                        visible={pickerVisible}
+                        onClose={() => setPickerVisible(false)}
+                        onSelect={(id) => setSelectedAvatarId(id)}
+                        selectedId={selectedAvatarId}
+                        avatars={NEST_AVATARS}
+                    />
 
                     {/* Input: Name */}
                     <View>

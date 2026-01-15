@@ -70,6 +70,7 @@ export const translations = {
             greeting_afternoon: "오후도 힘내세요! ☕️",
             greeting_evening: "오늘 하루도 고생했어요 🌙",
             mate_count: "{count}명의 메이트와 함께",
+            empty_mate: "함께할 메이트를 추가해주세요",
             briefing_title: "오늘의 브리핑",
             upcoming_events: "다가오는 일정 📅",
             no_events: "당분간은 일정이 없네요, 여유로워요 🌿",
@@ -139,7 +140,9 @@ export const translations = {
         },
         // 가계부
         budget: {
-            title: "정산하기",
+            title: "공동 가계부",
+            goal_title: "이번 달 공금 예산",
+            goal_desc: "우리 메이트들이 함께 사용할 이번 달 공금을 설정해주세요.",
             add_transaction: "내역 기록하기",
             type_income: "들어온 돈",
             type_expense: "나간 돈",
@@ -371,6 +374,7 @@ export const translations = {
             greeting_afternoon: "Good afternoon! ☕️",
             greeting_evening: "Good night! 🌙",
             mate_count: "{count} Mates in MateHome",
+            empty_mate: "Add mates to join you",
             briefing_title: "SMART BRIEFING",
             upcoming_events: "Upcoming Events 📅",
             no_events: "No upcoming events.",
@@ -440,7 +444,9 @@ export const translations = {
         },
         // Budget
         budget: {
-            title: "Budget",
+            title: "Shared Budget",
+            goal_title: "Monthly Shared Budget",
+            goal_desc: "Set the shared budget for you and your mates to use this month.",
             add_transaction: "Add Transaction",
             type_income: "Income",
             type_expense: "Expense",

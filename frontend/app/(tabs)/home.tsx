@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { useUserStore } from '../../store/userStore';
 import { cn } from '../../lib/utils';
-import { AVATARS, THEMES } from '../../constants/data';
+import { AVATARS, THEMES, NEST_AVATARS } from '../../constants/data';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { translations } from '../../constants/I18n';
@@ -31,7 +31,7 @@ const getDDay = (dateStr: string) => {
 export default function HomeScreen() {
     const router = useRouter();
     const {
-        nickname, avatarId, nestName, nestTheme, nestId,
+        nickname, avatarId, nestName, nestTheme, nestId, nestAvatarId,
         todos, events, goals, members, language: langFromStore, hasSeenTutorial, completeTutorial,
         syncMissions, syncEvents, syncGoals, syncTransactions
     } = useUserStore();
@@ -89,8 +89,12 @@ export default function HomeScreen() {
 
                 {/* Nest Header (Centered & Large) */}
                 <View className={cn("pt-20 pb-10 px-6 rounded-b-[50px] mb-6 items-center", themeItemBg)}>
-                    <View className="w-24 h-24 bg-white rounded-full items-center justify-center mb-4 shadow-sm">
-                        <Text className="text-5xl">🪐</Text>
+                    <View className="w-24 h-24 bg-white rounded-full items-center justify-center mb-4 shadow-sm overflow-hidden p-2">
+                        <Image
+                            source={(NEST_AVATARS.find((a: any) => a.id === nestAvatarId) || NEST_AVATARS[0]).image}
+                            className="w-full h-full"
+                            resizeMode="contain"
+                        />
                     </View>
 
                     <Text className="text-gray-500 font-medium text-sm mb-1 text-center">{greeting}</Text>

@@ -67,6 +67,7 @@ interface UserState {
     // Nest
     nestName: string;
     nestTheme: number;
+    nestAvatarId: number;
     nestImage?: string;
     nestId: string;
     inviteCode: string;
@@ -96,7 +97,7 @@ interface UserState {
     // Actions
     setProfile: (nickname: string, avatarId: number) => void;
     setEmail: (email: string) => void;
-    setNest: (nestName: string, nestTheme: number, inviteCode?: string, nestId?: string, nestImage?: string) => void;
+    setNest: (nestName: string, nestTheme: number, inviteCode?: string, nestId?: string, nestImage?: string, nestAvatarId?: number) => void;
     setMembers: (members: User[]) => void;
     logout: () => void;
     completeTutorial: () => void;
@@ -149,6 +150,7 @@ export const useUserStore = create<UserState>((set) => ({
     userEmail: '',
     nestName: '',
     nestTheme: 0,
+    nestAvatarId: 100, // Default to House line art
     nestImage: '',
     nestId: '',
     inviteCode: '',
@@ -171,7 +173,8 @@ export const useUserStore = create<UserState>((set) => ({
     // Actions
     setProfile: (nickname, avatarId) => set({ nickname, avatarId }),
     setEmail: (userEmail) => set({ userEmail }),
-    setNest: (nestName, nestTheme, inviteCode = '', nestId = '', nestImage = '') => set({ nestName, nestTheme, inviteCode, nestId, nestImage, isLoggedIn: true }),
+    setNest: (nestName, nestTheme, inviteCode = '', nestId = '', nestImage = '', nestAvatarId = 100) =>
+        set({ nestName, nestTheme, inviteCode, nestId, nestImage, nestAvatarId, isLoggedIn: true }),
     setMembers: (members) => set({ members }),
     completeTutorial: () => set({ hasSeenTutorial: true }),
 
@@ -250,7 +253,7 @@ export const useUserStore = create<UserState>((set) => ({
         } catch (error) { return { success: false, error: "Network error" }; }
     },
 
-    deleteAccount: async (password) => {
+    deleteAccount: async (password: string): Promise<{ success: boolean; error?: string }> => {
         const { userEmail } = useUserStore.getState();
         try {
             const response = await fetch(`${API_URL}/users`, {
@@ -332,7 +335,7 @@ export const useUserStore = create<UserState>((set) => ({
             } catch (error) { console.error(error); }
         } else {
             // Fallback to local
-            const selectedMembers = members.filter(m => assigneeIds.includes(m.id));
+            const selectedMembers = members.filter((m: any) => assigneeIds.includes(m.id));
             set((state: UserState) => ({
                 todos: [
                     {
@@ -368,11 +371,11 @@ export const useUserStore = create<UserState>((set) => ({
                 });
                 if (response.ok) {
                     set((state: UserState) => ({
-                        todos: state.todos.map((t) =>
+                        todos: state.todos.map((t: any) =>
                             t.id === id
-                                ? { ...t, isCompleted: nextStatus, completedBy: nextStatus ? memberId : undefined }
+                                ? { ...t, isCompleted: nextStatus, completedBy: memberId }
                                 : t
-                        ).sort((a, b) => Number(a.isCompleted) - Number(b.isCompleted))
+                        ).sort((a: any, b: any) => Number(a.isCompleted) - Number(b.isCompleted))
                     }));
                 }
             } catch (error) { console.error(error); }
@@ -606,7 +609,7 @@ export const useUserStore = create<UserState>((set) => ({
                 });
                 if (response.ok) {
                     set((state: UserState) => ({
-                        goals: state.goals.map((g: Goal) => g.id === id ? { ...g, current: nextVal } : g)
+                        goals: state.goals.map((g: any) => g.id === id ? { ...g, current: nextVal } : g)
                     }));
                 }
             } catch (error) { console.error(error); }
@@ -633,7 +636,7 @@ export const useUserStore = create<UserState>((set) => ({
                 });
                 if (response.ok) {
                     set((state: UserState) => ({
-                        goals: state.goals.map(g => g.id === id ? { ...g, current: nextVal } : g)
+                        goals: state.goals.map((g: any) => g.id === id ? { ...g, current: nextVal } : g)
                     }));
                 }
             } catch (error) { console.error(error); }

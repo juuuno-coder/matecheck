@@ -14,6 +14,13 @@ export const AVATARS = [
     { id: 9, emoji: '🤖', label: '로봇', image: { uri: 'https://api.dicebear.com/9.x/bottts-neutral/png?seed=Mate&backgroundColor=f3f4f6' } },
 ];
 
+export const NEST_AVATARS = [
+    { id: 100, emoji: '🏠', label: '코지 하우스', image: require('../assets/nests/nest_house.png') },
+    { id: 101, emoji: '🏢', label: '심플 아파트', image: require('../assets/nests/nest_apartment.png') },
+    { id: 102, emoji: '🪐', label: '우리 행성', image: require('../assets/nests/nest_planet.png') },
+    { id: 103, emoji: '🏠', label: '포근 개집', image: require('../assets/nests/nest_doghouse.png') },
+];
+
 export const THEMES: Record<string, { color: string, bg: string, emoji: string }> = {
     'theme_cozy': { color: 'bg-orange-100', bg: 'bg-orange-50', emoji: '🧡' },
     'theme_cool': { color: 'bg-blue-100', bg: 'bg-blue-50', emoji: '💙' },

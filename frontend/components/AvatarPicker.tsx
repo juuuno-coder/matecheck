@@ -10,9 +10,10 @@ interface AvatarPickerProps {
     onClose: () => void;
     onSelect: (avatarId: number) => void;
     selectedId: number;
+    avatars?: any[];
 }
 
-export default function AvatarPicker({ visible, onClose, onSelect, selectedId }: AvatarPickerProps) {
+export default function AvatarPicker({ visible, onClose, onSelect, selectedId, avatars = AVATARS }: AvatarPickerProps) {
     if (!visible) return null;
 
     return (
@@ -33,11 +34,11 @@ export default function AvatarPicker({ visible, onClose, onSelect, selectedId }:
 
                             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
                                 <View className="flex-row flex-wrap gap-4 justify-between">
-                                    {AVATARS.map((avatar, index) => (
+                                    {avatars.map((avatar) => (
                                         <TouchableOpacity
                                             key={avatar.id}
                                             onPress={() => {
-                                                onSelect(index);
+                                                onSelect(avatar.id);
                                                 onClose();
                                             }}
                                             className="w-[47%] bg-gray-50 rounded-2xl p-4 items-center border border-gray-100 relative"
@@ -50,7 +51,7 @@ export default function AvatarPicker({ visible, onClose, onSelect, selectedId }:
 
                                             <Text className="font-bold text-gray-800 mb-1">{avatar.label}</Text>
 
-                                            {selectedId === index && (
+                                            {selectedId === avatar.id && (
                                                 <View className="absolute inset-0 bg-orange-500/10 rounded-2xl border-2 border-orange-500 items-center justify-center">
                                                     <View className="absolute top-2 left-2 bg-orange-500 rounded-full p-1">
                                                         <Ionicons name="checkmark" size={12} color="white" />

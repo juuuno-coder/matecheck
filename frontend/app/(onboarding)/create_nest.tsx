@@ -6,14 +6,14 @@ import { cn } from '../../lib/utils';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { API_URL } from '../../constants/Config';
 import { translations } from '../../constants/I18n';
-import { AVATARS } from '../../constants/data';
+import { AVATARS, NEST_AVATARS } from '../../constants/data';
 import { Ionicons } from '@expo/vector-icons';
 import AvatarPicker from '../../components/AvatarPicker';
 
 export default function CreateNestScreen() {
     const router = useRouter();
-    const { setNest, nickname, avatarId, userEmail, language, setProfile } = useUserStore();
-    const t = translations[language].onboarding;
+    const { setNest, nickname, avatarId, nestAvatarId, userEmail, language, setProfile } = useUserStore();
+    const t = (translations[language as keyof typeof translations] as any).onboarding;
 
     const [name, setName] = useState('');
     const [pickerVisible, setPickerVisible] = useState(false);
@@ -27,7 +27,7 @@ export default function CreateNestScreen() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: userEmail,
-                    nest: { name: name, theme_id: 0 },
+                    nest: { name: name, theme_id: 0, avatar_id: nestAvatarId },
                     user: {
                         nickname: nickname || userEmail.split('@')[0],
                         avatar_id: avatarId || 0
@@ -38,7 +38,7 @@ export default function CreateNestScreen() {
             const data = await response.json();
 
             if (response.ok) {
-                setNest(data.name, data.theme_id, data.invite_code, data.id.toString());
+                setNest(data.name, data.theme_id, data.invite_code, data.id.toString(), '', data.avatar_id);
                 router.replace('/(tabs)/home');
             } else {
                 Alert.alert("Error", data.errors?.join(', ') || "Failed to create.");
@@ -63,8 +63,9 @@ export default function CreateNestScreen() {
                         className="items-center relative"
                     >
                         <Image
-                            source={(AVATARS[avatarId] || AVATARS[0]).image}
+                            source={(NEST_AVATARS.find(a => a.id === nestAvatarId) || NEST_AVATARS[0]).image}
                             className="w-24 h-24 rounded-full border-4 border-white shadow-sm bg-gray-50"
+                            resizeMode="contain"
                         />
                         <View className="absolute bottom-0 right-0 bg-gray-900 p-2 rounded-full border-2 border-white">
                             <Ionicons name="camera" size={14} color="white" />
@@ -76,8 +77,9 @@ export default function CreateNestScreen() {
                 <AvatarPicker
                     visible={pickerVisible}
                     onClose={() => setPickerVisible(false)}
-                    onSelect={(id) => setProfile(nickname, id)}
-                    selectedId={avatarId}
+                    onSelect={(id) => useUserStore.setState({ nestAvatarId: id })}
+                    selectedId={nestAvatarId}
+                    avatars={NEST_AVATARS}
                 />
 
                 <Text className="text-base font-semibold text-gray-700 mb-3 ml-1">{t.nest_name_label}</Text>

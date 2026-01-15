@@ -101,21 +101,19 @@ export default function BudgetScreen() {
                 {/* Summary Card */}
                 <Animated.View entering={SlideInUp.delay(100)} className={cn("m-4 p-6 rounded-[40px] shadow-2xl", themeBg)}>
                     {/* Header Row */}
-                    <View className="flex-row justify-between items-center mb-6">
-                        <Text className="text-white/80 font-medium">{t.goal_title}</Text>
-                        <TouchableOpacity onPress={() => setGoalModalVisible(true)} className="bg-white/20 px-3 py-1.5 rounded-full">
-                            <Text className="text-white text-xs font-bold">수정</Text>
+                    <View className="flex-row justify-between items-center mb-8">
+                        <Text className="text-white text-lg font-bold">{t.goal_title}</Text>
+                        <TouchableOpacity onPress={() => setGoalModalVisible(true)} className="bg-white/20 px-4 py-1.5 rounded-full">
+                            <Text className="text-white text-sm font-bold">수정</Text>
                         </TouchableOpacity>
                     </View>
 
                     {/* Center Hero Section */}
-                    <View className="items-center mb-8">
-                        <View className="bg-white/10 px-3 py-1 rounded-full mb-2">
-                            <Text className="text-white/90 text-xs font-bold">💰 남은 예산</Text>
-                        </View>
-                        <Text className="text-white text-4xl font-black tracking-tight" style={{ includeFontPadding: false }}>
+                    <View className="items-center mb-10">
+                        <Text className="text-white text-sm font-bold mb-2 opacity-90">💰 남은 예산</Text>
+                        <Text className="text-white text-5xl font-black tracking-tighter" style={{ includeFontPadding: false }}>
                             {remaining.toLocaleString()}
-                            <Text className="text-2xl font-bold">원</Text>
+                            <Text className="text-3xl font-bold">원</Text>
                         </Text>
                     </View>
 

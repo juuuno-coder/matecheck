@@ -25,10 +25,13 @@ export default function AnniversaryScreen() {
     const categories = ['생일', '결혼기념일', '연애기념일', '입사기념일', '기타'];
 
     useEffect(() => {
-        fetchAnniversaries();
-    }, []);
+        if (nestId) {
+            fetchAnniversaries();
+        }
+    }, [nestId]);
 
     const fetchAnniversaries = async () => {
+        if (!nestId) return;
         try {
             const response = await fetch(`${API_URL}/nests/${nestId}/anniversaries`);
             if (response.ok) {
@@ -45,6 +48,7 @@ export default function AnniversaryScreen() {
             Alert.alert('오류', '제목을 입력해주세요.');
             return;
         }
+        if (!nestId) return;
 
         try {
             const response = await fetch(`${API_URL}/nests/${nestId}/anniversaries`, {
@@ -73,6 +77,7 @@ export default function AnniversaryScreen() {
     };
 
     const deleteAnniversary = async (id: number) => {
+        if (!nestId) return;
         try {
             const response = await fetch(`${API_URL}/nests/${nestId}/anniversaries/${id}`, {
                 method: 'DELETE'

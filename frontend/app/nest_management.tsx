@@ -77,42 +77,88 @@ export default function NestManagementScreen() {
 
     return (
         <View className="flex-1 bg-gray-50">
-            {/* Header */}
-            <View className="pt-16 pb-6 px-6 bg-white border-b border-gray-100">
-                <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center">
-                        <TouchableOpacity onPress={() => router.back()} className="mr-4">
-                            <Ionicons name="arrow-back" size={24} color="#111827" />
-                        </TouchableOpacity>
-                        <Text className="text-xl font-bold text-gray-900">보금자리 관리</Text>
-                    </View>
-                    <TouchableOpacity onPress={handleSave} disabled={isSaving}>
-                        <Text className={cn("text-lg font-bold", isSaving ? "text-gray-300" : "text-orange-600")}>
-                            {isSaving ? "저장 중" : "완료"}
-                        </Text>
+            {/* Header (Modern Simple) */}
+            <View className="pt-16 pb-6 px-6 bg-white shadow-sm rounded-b-[40px] mb-8 z-10 flex-row justify-between items-center">
+                <View className="flex-row items-center gap-3">
+                    <TouchableOpacity onPress={() => router.back()} className="w-10 h-10 bg-gray-50 rounded-full items-center justify-center">
+                        <Ionicons name="arrow-back" size={24} color="#374151" />
                     </TouchableOpacity>
+                    <Text className="text-2xl font-black text-gray-900">보금자리 관리</Text>
                 </View>
+                <TouchableOpacity
+                    onPress={handleSave}
+                    disabled={isSaving}
+                    className={cn("px-5 py-2 rounded-full", isSaving ? "bg-gray-200" : "bg-gray-900")}
+                >
+                    <Text className={cn("text-sm font-bold", isSaving ? "text-gray-400" : "text-white")}>
+                        {isSaving ? "저장 중..." : "저장"}
+                    </Text>
+                </TouchableOpacity>
             </View>
 
-            <ScrollView className="flex-1">
-                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="p-6 gap-8">
+            <ScrollView className="flex-1 px-6" contentContainerStyle={{ paddingBottom: 50 }}>
+                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="gap-8">
 
-                    {/* Preview Section */}
-                    <View className="items-center">
-                        <TouchableOpacity
-                            onPress={() => setPickerVisible(true)}
-                            className="w-40 h-40 rounded-full overflow-hidden shadow-lg mb-4 bg-white border-4 border-white relative items-center justify-center"
-                        >
-                            <Image
-                                source={(NEST_AVATARS.find(a => a.id === selectedAvatarId) || NEST_AVATARS[0]).image}
-                                style={{ width: 128, height: 128 }}
-                                resizeMode="contain"
-                            />
-                            <View className="absolute bottom-2 right-2 bg-gray-900 p-2 rounded-full border-2 border-white">
-                                <Ionicons name="camera" size={16} color="white" />
+                    {/* 1. Nest Profile Card */}
+                    <View>
+                        <Text className="text-sm font-bold text-gray-400 mb-3 px-2 uppercase tracking-wider">Basic Info</Text>
+                        <View className="bg-white rounded-[32px] p-8 shadow-sm border border-gray-100 items-center">
+
+                            {/* Avatar Picker Trigger */}
+                            <TouchableOpacity
+                                onPress={() => setPickerVisible(true)}
+                                className="w-32 h-32 rounded-[32px] bg-gray-50 items-center justify-center mb-6 shadow-orange-500/20 shadow-xl border-4 border-white relative"
+                            >
+                                <Image
+                                    source={(NEST_AVATARS.find(a => a.id === selectedAvatarId) || NEST_AVATARS[0]).image}
+                                    style={{ width: '80%', height: '80%' }}
+                                    resizeMode="contain"
+                                />
+                                <View className="absolute -bottom-2 -right-2 bg-gray-900 w-10 h-10 rounded-full border-4 border-white items-center justify-center">
+                                    <Ionicons name="camera" size={16} color="white" />
+                                </View>
+                            </TouchableOpacity>
+
+                            <Text className="text-gray-400 text-xs font-bold mb-6">아이콘을 눌러 변경해보세요</Text>
+
+                            {/* Name Input */}
+                            <View className="w-full">
+                                <Text className="text-xs font-bold text-gray-900 mb-2 ml-2">보금자리 이름</Text>
+                                <TextInput
+                                    value={name}
+                                    onChangeText={setName}
+                                    className="bg-gray-50 border border-gray-100 rounded-2xl p-5 text-lg text-gray-900 font-bold w-full"
+                                    placeholder="우리 가족만의 이름을 지어주세요"
+                                />
                             </View>
-                        </TouchableOpacity>
-                        <Text className="text-gray-400 text-xs">아이콘을 터치해 변경하세요</Text>
+                        </View>
+                    </View>
+
+                    {/* 2. Theme Selection Card */}
+                    <View>
+                        <Text className="text-sm font-bold text-gray-400 mb-3 px-2 uppercase tracking-wider">Theme Color</Text>
+                        <View className="bg-white rounded-[32px] p-6 shadow-sm border border-gray-100">
+                            <View className="flex-row gap-4 justify-between">
+                                {Object.entries(THEMES).map(([id, theme]: [string, any]) => {
+                                    const isSelected = selectedTheme === Number(id);
+                                    return (
+                                        <TouchableOpacity
+                                            key={id}
+                                            onPress={() => setSelectedTheme(Number(id))}
+                                            className={cn(
+                                                "w-14 h-14 rounded-2xl items-center justify-center transition-all",
+                                                isSelected ? "bg-gray-900 shadow-md transform scale-110" : "bg-gray-50"
+                                            )}
+                                        >
+                                            <Text className="text-2xl">{theme.emoji}</Text>
+                                            {isSelected && (
+                                                <View className={cn("absolute -bottom-2 w-1.5 h-1.5 rounded-full", theme.bg.replace("bg-", "bg-"))} />
+                                            )}
+                                        </TouchableOpacity>
+                                    );
+                                })}
+                            </View>
+                        </View>
                     </View>
 
                     <AvatarPicker
@@ -122,37 +168,6 @@ export default function NestManagementScreen() {
                         selectedId={selectedAvatarId}
                         avatars={NEST_AVATARS}
                     />
-
-                    {/* Input: Name */}
-                    <View>
-                        <Text className="text-sm font-bold text-gray-900 mb-2">보금자리 이름</Text>
-                        <TextInput
-                            value={name}
-                            onChangeText={setName}
-                            className="bg-white border border-gray-200 rounded-xl p-4 text-lg text-gray-900 shadow-sm"
-                            placeholder="우리 가족만의 이름을 지어주세요"
-                        />
-                    </View>
-
-                    {/* Input: Theme Color */}
-                    <View>
-                        <Text className="text-sm font-bold text-gray-900 mb-3">테마 컬러</Text>
-                        <View className="flex-row gap-3">
-                            {Object.entries(THEMES).map(([id, theme]: [string, any]) => (
-                                <TouchableOpacity
-                                    key={id}
-                                    onPress={() => setSelectedTheme(Number(id))}
-                                    className={cn(
-                                        "w-12 h-12 rounded-full items-center justify-center shadow-sm border-2",
-                                        selectedTheme === Number(id) ? "border-gray-900" : "border-white",
-                                        theme.bg
-                                    )}
-                                >
-                                    <Text className="text-xl">{theme.emoji}</Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-                    </View>
 
                 </KeyboardAvoidingView>
             </ScrollView>

@@ -134,7 +134,8 @@ export const translations = {
             cancel: "취소",
             no_goals: "아직 목표가 없어요. 같이 힘을 합쳐볼까요? 🔥",
             progress: "달성률",
-            achieved: "목표 달성! 🎊"
+            achieved: "목표 달성! 🎊",
+            delete_msg: "이 목표를 정말 삭제하시겠습니까?"
         },
         // 가계부
         budget: {
@@ -434,7 +435,8 @@ export const translations = {
             cancel: "Cancel",
             no_goals: "No goals set.",
             progress: "Progress",
-            achieved: "Achieved!"
+            achieved: "Achieved!",
+            delete_msg: "Are you sure you want to delete this goal?"
         },
         // Budget
         budget: {

@@ -267,8 +267,40 @@ export default function RulesScreen() {
             {/* Content Info */}
             <ScrollView className="flex-1 p-6" showsVerticalScrollIndicator={false}>
 
-                {/* Rules Section */}
+                {/* Goals Section (Moved to Top) */}
                 <View className="mb-12">
+                    <View className="flex-row items-center mb-5 ml-1">
+                        <Text className="text-2xl mr-2">🏆</Text>
+                        <Text className="text-2xl font-bold text-gray-900">{language === 'ko' ? "우리의 목표" : "Our Goals"}</Text>
+                    </View>
+
+                    {goals.length === 0 ? (
+                        <TouchableOpacity
+                            onPress={() => setGoalModalVisible(true)}
+                            className="bg-white rounded-3xl p-10 items-center justify-center border border-gray-100 shadow-sm active:bg-gray-50 bg-white"
+                        >
+                            <View className="w-16 h-16 bg-yellow-50 rounded-full items-center justify-center mb-4">
+                                <Ionicons name="trophy-outline" size={32} color="#fbbf24" />
+                            </View>
+                            <Text className="text-gray-900 font-bold text-lg mb-2">
+                                {language === 'ko' ? "목표를 세워보세요" : "Set your goals"}
+                            </Text>
+                            <Text className="text-gray-400 text-center text-sm leading-5">
+                                {language === 'ko' ? "함께 이루고 싶은 꿈이 있나요?\n터치해서 목표를 추가해보세요!" : "Dreaming of something together?\nTap to add a new goal!"}
+                            </Text>
+                        </TouchableOpacity>
+                    ) : (
+                        <>
+                            <GoalSection type="vision" label={language === 'ko' ? "우리의 꿈 (Vision)" : "Our Vision"} icon="✨" />
+                            <GoalSection type="year" label={language === 'ko' ? "올해의 목표" : "Yearly Goals"} icon="📅" />
+                            <GoalSection type="month" label={language === 'ko' ? "이번 달 목표" : "Monthly Goals"} icon="🎯" />
+                            <GoalSection type="week" label={language === 'ko' ? "이번 주 목표" : "Weekly Goals"} icon="🔥" />
+                        </>
+                    )}
+                </View>
+
+                {/* Rules Section (Moved to Bottom) */}
+                <View className="mb-24">
                     <View className="flex-row items-center mb-5 ml-1">
                         <Text className="text-2xl mr-2">📜</Text>
                         <Text className="text-2xl font-bold text-gray-900">{language === 'ko' ? "우리 집 규칙" : "House Rules"}</Text>
@@ -330,38 +362,6 @@ export default function RulesScreen() {
                                 </Animated.View>
                             );
                         })
-                    )}
-                </View>
-
-                {/* Goals Section */}
-                <View className="mb-24">
-                    <View className="flex-row items-center mb-5 ml-1">
-                        <Text className="text-2xl mr-2">🏆</Text>
-                        <Text className="text-2xl font-bold text-gray-900">{language === 'ko' ? "우리의 목표" : "Our Goals"}</Text>
-                    </View>
-
-                    {goals.length === 0 ? (
-                        <TouchableOpacity
-                            onPress={() => setGoalModalVisible(true)}
-                            className="bg-white rounded-3xl p-10 items-center justify-center border border-gray-100 shadow-sm active:bg-gray-50 bg-white"
-                        >
-                            <View className="w-16 h-16 bg-yellow-50 rounded-full items-center justify-center mb-4">
-                                <Ionicons name="trophy-outline" size={32} color="#fbbf24" />
-                            </View>
-                            <Text className="text-gray-900 font-bold text-lg mb-2">
-                                {language === 'ko' ? "목표를 세워보세요" : "Set your goals"}
-                            </Text>
-                            <Text className="text-gray-400 text-center text-sm leading-5">
-                                {language === 'ko' ? "함께 이루고 싶은 꿈이 있나요?\n터치해서 목표를 추가해보세요!" : "Dreaming of something together?\nTap to add a new goal!"}
-                            </Text>
-                        </TouchableOpacity>
-                    ) : (
-                        <>
-                            <GoalSection type="vision" label={language === 'ko' ? "우리의 꿈 (Vision)" : "Our Vision"} icon="✨" />
-                            <GoalSection type="year" label={language === 'ko' ? "올해의 목표" : "Yearly Goals"} icon="📅" />
-                            <GoalSection type="month" label={language === 'ko' ? "이번 달 목표" : "Monthly Goals"} icon="🎯" />
-                            <GoalSection type="week" label={language === 'ko' ? "이번 주 목표" : "Weekly Goals"} icon="🔥" />
-                        </>
                     )}
                 </View>
             </ScrollView>

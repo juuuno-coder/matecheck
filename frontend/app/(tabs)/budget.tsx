@@ -135,35 +135,35 @@ export default function BudgetScreen() {
                                 <Text className={cn("font-bold text-sm", themeText)}>+ 추가하기</Text>
                             </TouchableOpacity>
                         </View>
-                        <View className="bg-white p-2 rounded-3xl border border-gray-100 shadow-sm">
+                        <View className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
                             {fixedExpenses.length === 0 ? (
                                 <View className="py-8 items-center">
                                     <Text className="text-gray-400">등록된 고정 지출이 없어요.</Text>
                                 </View>
                             ) : (
                                 fixedExpenses.map((f: FixedExpense, i: number) => (
-                                    <View key={f.id} className={cn("flex-row justify-between items-center p-4", i !== fixedExpenses.length - 1 && "border-b border-gray-50")}>
-                                        <View className="flex-row items-center gap-3">
-                                            <View className="w-10 h-10 rounded-2xl bg-blue-50 items-center justify-center">
-                                                <Text className="text-blue-600 font-bold text-xs">{f.day}일</Text>
+                                    <View key={f.id} className={cn("flex-row justify-between items-center py-4", i !== fixedExpenses.length - 1 && "border-b border-gray-100")}>
+                                        <View className="flex-row items-center gap-3 flex-1">
+                                            <View className="w-12 h-12 rounded-2xl bg-blue-50 items-center justify-center">
+                                                <Text className="text-blue-600 font-bold text-sm">{f.day}일</Text>
                                             </View>
-                                            <View>
-                                                <Text className="font-bold text-gray-800">{f.title}</Text>
+                                            <View className="flex-1">
+                                                <Text className="font-bold text-gray-900 text-base mb-1">{f.title}</Text>
                                                 <Text className="text-gray-400 text-xs">매달 자동 환산</Text>
                                             </View>
                                         </View>
                                         <View className="flex-row items-center gap-3">
-                                            <Text className="font-bold text-gray-900">{f.amount.toLocaleString()}원</Text>
-                                            <TouchableOpacity onPress={() => deleteFixedExpense(f.id)}>
-                                                <Ionicons name="close-circle" size={20} color="#EF4444" />
+                                            <Text className="font-black text-gray-900 text-lg">{f.amount.toLocaleString()}원</Text>
+                                            <TouchableOpacity onPress={() => deleteFixedExpense(f.id)} className="w-8 h-8 items-center justify-center">
+                                                <Ionicons name="close-circle" size={22} color="#EF4444" />
                                             </TouchableOpacity>
                                         </View>
                                     </View>
                                 ))
                             )}
-                            <View className="p-4 bg-gray-50 rounded-2xl flex-row justify-between items-center mt-2">
-                                <Text className="text-gray-500 text-xs font-bold">총 고정 지출액</Text>
-                                <Text className="text-gray-900 font-black">{fixedTotal.toLocaleString()}원</Text>
+                            <View className="p-4 bg-orange-50 rounded-2xl flex-row justify-between items-center mt-3 border border-orange-100">
+                                <Text className="text-orange-700 text-sm font-bold">총 고정 지출액</Text>
+                                <Text className="text-orange-600 font-black text-xl">{fixedTotal.toLocaleString()}원</Text>
                             </View>
                         </View>
                     </View>

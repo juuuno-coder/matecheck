@@ -45,7 +45,9 @@ export default function AvatarPicker({ visible, onClose, onSelect, selectedId, a
                                         >
                                             <Image
                                                 source={avatar.image}
-                                                className="w-20 h-20 rounded-full mb-3 bg-white"
+                                                style={{ width: 80, height: 80 }}
+                                                className="mb-3 bg-white rounded-full"
+                                                resizeMode="contain"
                                             />
                                             <Text className="text-2xl absolute top-2 right-2">{avatar.emoji}</Text>
 

@@ -92,7 +92,7 @@ export default function HomeScreen() {
                     <View className="w-24 h-24 bg-white rounded-full items-center justify-center mb-4 shadow-sm overflow-hidden p-2">
                         <Image
                             source={(NEST_AVATARS.find((a: any) => a.id === nestAvatarId) || NEST_AVATARS[0]).image}
-                            className="w-full h-full"
+                            style={{ width: '100%', height: '100%' }}
                             resizeMode="contain"
                         />
                     </View>

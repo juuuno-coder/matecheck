@@ -9,12 +9,7 @@ import { cn } from '../lib/utils';
 import * as ImagePicker from 'expo-image-picker';
 import AvatarPicker from '../components/AvatarPicker';
 
-const PRESET_IMAGES = [
-    "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800&q=80", // Cozy House
-    "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80", // Planet/Space
-    "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=800&q=80", // Dog House / Puppy
-    "https://images.unsplash.com/photo-1628155930542-3c7a64e2c833?w=800&q=80", // Fantasy/Illustration
-];
+
 
 export default function NestManagementScreen() {
     const router = useRouter();
@@ -110,7 +105,7 @@ export default function NestManagementScreen() {
                         >
                             <Image
                                 source={(NEST_AVATARS.find(a => a.id === selectedAvatarId) || NEST_AVATARS[0]).image}
-                                className="w-32 h-32"
+                                style={{ width: 128, height: 128 }}
                                 resizeMode="contain"
                             />
                             <View className="absolute bottom-2 right-2 bg-gray-900 p-2 rounded-full border-2 border-white">
@@ -137,44 +132,6 @@ export default function NestManagementScreen() {
                             className="bg-white border border-gray-200 rounded-xl p-4 text-lg text-gray-900 shadow-sm"
                             placeholder="우리 가족만의 이름을 지어주세요"
                         />
-                    </View>
-
-                    {/* Input: Image Preset */}
-                    <View>
-                        <Text className="text-sm font-bold text-gray-900 mb-3">대표 이미지 선택</Text>
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="gap-3">
-                            {PRESET_IMAGES.map((url, index) => (
-                                <TouchableOpacity
-                                    key={index}
-                                    onPress={() => setImageUrl(url)}
-                                    className={cn(
-                                        "w-24 h-24 rounded-xl overflow-hidden border-2",
-                                        imageUrl === url ? "border-orange-500" : "border-gray-100"
-                                    )}
-                                >
-                                    <Image source={{ uri: url }} className="w-full h-full" resizeMode="cover" />
-                                    {imageUrl === url && (
-                                        <View className="absolute inset-0 bg-orange-500/20 items-center justify-center">
-                                            <Ionicons name="checkmark-circle" size={24} color="white" />
-                                        </View>
-                                    )}
-                                </TouchableOpacity>
-                            ))}
-                        </ScrollView>
-
-                        {/* Custom Upload Button */}
-                        <TouchableOpacity
-                            onPress={pickCustomImage}
-                            className="mt-4 bg-white border-2 border-dashed border-gray-300 rounded-xl p-4 flex-row items-center justify-center gap-3 active:bg-gray-50"
-                        >
-                            <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center">
-                                <Ionicons name="cloud-upload-outline" size={20} color="#F97316" />
-                            </View>
-                            <View>
-                                <Text className="text-gray-900 font-bold">내 사진 업로드하기</Text>
-                                <Text className="text-gray-400 text-xs">갤러리에서 선택</Text>
-                            </View>
-                        </TouchableOpacity>
                     </View>
 
                     {/* Input: Theme Color */}

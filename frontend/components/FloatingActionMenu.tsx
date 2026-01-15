@@ -85,7 +85,7 @@ export default function FloatingActionMenu({ themeBg = 'bg-orange-500' }: Floati
                 </TouchableWithoutFeedback>
 
                 {/* Menu Items */}
-                <View className="absolute bottom-48 right-6 items-end gap-4 pointer-events-box-none">
+                <View className="absolute bottom-48 right-6 items-end gap-3 pr-1 pointer-events-box-none">
                     {menuItems.map((item, index) => {
                         const translateY = animation.interpolate({
                             inputRange: [0, 1],

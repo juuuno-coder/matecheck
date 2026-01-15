@@ -1,5 +1,4 @@
 class AnnouncementsController < ApplicationController
-  skip_before_action :verify_authenticity_token
 
   def index
     @announcements = Announcement.where('published_at <= ?', Time.current)

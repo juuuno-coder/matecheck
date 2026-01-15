@@ -106,9 +106,12 @@ export default function BudgetScreen() {
                             <Text className="text-white text-xs font-bold">수정</Text>
                         </TouchableOpacity>
                     </View>
-                    <Text className="text-white text-4xl font-black mb-6">
-                        {remaining.toLocaleString()}원
-                    </Text>
+                    <View className="mb-6">
+                        <Text className="text-white/70 text-sm font-medium mb-2">💰 남은 예산</Text>
+                        <Text className="text-white text-4xl font-black">
+                            {remaining.toLocaleString()}원
+                        </Text>
+                    </View>
 
                     <View className="flex-row justify-between mb-3">
                         <View>
@@ -161,7 +164,7 @@ export default function BudgetScreen() {
                                     </View>
                                 ))
                             )}
-                            <View className="p-4 bg-orange-50 rounded-2xl flex-row justify-between items-center mt-3 border border-orange-100">
+                            <View className="p-4 bg-orange-50 rounded-2xl flex-row justify-between items-center mt-3">
                                 <Text className="text-orange-700 text-sm font-bold">총 고정 지출액</Text>
                                 <Text className="text-orange-600 font-black text-xl">{fixedTotal.toLocaleString()}원</Text>
                             </View>

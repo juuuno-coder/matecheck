@@ -57,6 +57,7 @@ export default function PlanScreen() {
     const [selectedAssigneeIds, setSelectedAssigneeIds] = useState<string[]>([members[0]?.id || '0']);
     const [repeatOption, setRepeatOption] = useState<'none' | 'daily' | 'weekly' | 'monthly'>('none');
     const [isRepeatEnabled, setIsRepeatEnabled] = useState(false);
+    const [repeatEndDate, setRepeatEndDate] = useState<string | null>(null);
 
     // Handle Deep Linking / Params
     React.useEffect(() => {
@@ -134,10 +135,16 @@ export default function PlanScreen() {
     const dailyMissions = todos.filter(t => t.repeat !== 'weekly');
     const weeklyMissions = todos.filter(t => t.repeat === 'weekly');
 
+    const getFutureDate = (months: number) => {
+        const d = new Date();
+        d.setMonth(d.getMonth() + months);
+        return d.toISOString().split('T')[0];
+    };
+
     const handleAddTodo = () => {
         if (newTodoTitle.trim()) {
             addTodo(newTodoTitle, selectedAssigneeIds, repeatOption, selectedImage || undefined);
-            setNewTodoTitle(''); setRepeatOption('none'); setIsRepeatEnabled(false); setSelectedImage(null); setTodoModalVisible(false);
+            setNewTodoTitle(''); setRepeatOption('none'); setIsRepeatEnabled(false); setSelectedImage(null); setRepeatEndDate(null); setTodoModalVisible(false);
         }
     };
 
@@ -181,6 +188,7 @@ export default function PlanScreen() {
                 <Text className="text-2xl font-bold text-gray-900">
                     {tCalendar.title}
                 </Text>
+                {/* Global Add Button */}
                 <TouchableOpacity
                     onPress={handleAddButtonPress}
                     className={cn("w-10 h-10 rounded-full items-center justify-center shadow-md", themeBg)}
@@ -204,9 +212,22 @@ export default function PlanScreen() {
 
                 {/* Selected Date Events */}
                 <View className="px-6 mb-8">
-                    <Text className="text-lg font-bold text-gray-800 mb-4 flex-row items-center">
-                        📅 {selectedDate.split('-')[1]}월 {selectedDate.split('-')[2]}일 일정
-                    </Text>
+                    {/* Date Header + Inline Add Button */}
+                    <View className="flex-row items-center justify-between mb-4">
+                        <Text className="text-lg font-bold text-gray-800 flex-row items-center">
+                            📅 {Number(selectedDate.split('-')[1])}월 {Number(selectedDate.split('-')[2])}일
+                        </Text>
+                        <TouchableOpacity
+                            onPress={() => setCalModalVisible(true)}
+                            className="bg-white border border-gray-200 px-3 py-1.5 rounded-full flex-row items-center shadow-sm active:bg-gray-50"
+                        >
+                            <Ionicons name="add" size={14} color="#374151" />
+                            <Text className="text-xs font-bold text-gray-700 ml-1">
+                                {language === 'ko' ? "이 날짜에 추가" : "Add to this date"}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+
                     {selectedEvents.length === 0 ? (
                         <View className="bg-white rounded-2xl p-6 items-center justify-center border border-gray-100 border-dashed mb-2">
                             <Text className="text-gray-400 font-medium text-sm">{tCalendar.no_events}</Text>
@@ -245,7 +266,7 @@ export default function PlanScreen() {
                 {/* Todos Section */}
                 <View className="px-6">
                     <View className="flex-row items-center mb-4">
-                        <Text className="text-lg font-bold text-gray-800">✅ {tTodo.title || "미션 & 할 일"}</Text>
+                        <Text className="text-lg font-bold text-gray-800">✅ {language === 'ko' ? "할 일" : "Todo"}</Text>
                     </View>
 
                     {todos.length === 0 ? (
@@ -379,13 +400,47 @@ export default function PlanScreen() {
                         <TextInput value={newTodoTitle} onChangeText={setNewTodoTitle} placeholder={tTodo.placeholder_input} className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-gray-800 text-lg mb-4" />
 
                         <Text className="text-sm font-bold text-gray-500 mb-3">{tTodo.repeat_label}</Text>
-                        <View className="flex-row gap-2 bg-gray-50 p-2 rounded-xl mb-6">
+                        {/* Repeat Options */}
+                        <View className="flex-row gap-2 bg-gray-50 p-2 rounded-xl mb-4">
                             {(['none', 'daily', 'weekly'] as const).map((opt) => (
                                 <TouchableOpacity key={opt} onPress={() => setRepeatOption(opt as any)} className={cn("flex-1 py-2 rounded-lg items-center", repeatOption === opt ? "bg-white shadow-sm" : "")}>
-                                    <Text className={cn("font-bold text-xs", repeatOption === opt ? themeText : "text-gray-400")}>{opt}</Text>
+                                    <Text className={cn("font-bold text-xs", repeatOption === opt ? themeText : "text-gray-400")}>{opt === 'none' ? (language === 'ko' ? "반복 안함" : "None") : opt === 'daily' ? (language === 'ko' ? "매일" : "Daily") : (language === 'ko' ? "매주" : "Weekly")}</Text>
                                 </TouchableOpacity>
                             ))}
                         </View>
+
+                        {/* Repeat End Date (Advanced) */}
+                        {repeatOption !== 'none' && (
+                            <Animated.View entering={FadeInUp} className="mb-6 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                <Text className="text-xs font-bold text-gray-500 mb-2">
+                                    {language === 'ko' ? "언제까지 반복할까요?" : "Repeat until?"}
+                                </Text>
+                                <View className="flex-row gap-2 mb-2">
+                                    {[1, 3, 6].map(month => (
+                                        <TouchableOpacity
+                                            key={month}
+                                            onPress={() => setRepeatEndDate(getFutureDate(month))}
+                                            className={cn("px-3 py-1.5 rounded-lg border", repeatEndDate === getFutureDate(month) ? `bg-white ${themeBorder}` : "bg-white border-gray-200")}
+                                        >
+                                            <Text className={cn("text-xs font-medium", repeatEndDate === getFutureDate(month) ? themeText : "text-gray-500")}>
+                                                {month}{language === 'ko' ? "개월" : "m"}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                    <TouchableOpacity
+                                        onPress={() => setRepeatEndDate(null)}
+                                        className={cn("px-3 py-1.5 rounded-lg border", !repeatEndDate ? "bg-gray-200 border-transparent" : "bg-white border-gray-200")}
+                                    >
+                                        <Text className="text-xs font-medium text-gray-500">{language === 'ko' ? "계속(무제한)" : "Forever"}</Text>
+                                    </TouchableOpacity>
+                                </View>
+                                {repeatEndDate && (
+                                    <Text className="text-xs text-gray-400 text-right">
+                                        ~ {repeatEndDate} {language === 'ko' ? "종료" : "End"}
+                                    </Text>
+                                )}
+                            </Animated.View>
+                        )}
 
                         <TouchableOpacity onPress={handleAddTodo} disabled={!newTodoTitle.trim()} className={cn("w-full py-4 rounded-xl items-center shadow-lg", newTodoTitle.trim() ? themeBg : "bg-gray-200 shadow-none")}>
                             <Text className="text-white font-bold text-lg">{tCommon.add}</Text>

@@ -124,9 +124,18 @@ export default function SettingsScreen() {
                             borderColor="#E5E7EB"
                             borderWidth={1}
                         />
-                        <View>
-                            <Text className="text-xl font-bold text-gray-900">{nickname}</Text>
-                            <Text className="text-gray-500">{nestName}</Text>
+                        <View className="flex-row items-center justify-between flex-1">
+                            <View>
+                                <Text className="text-xl font-bold text-gray-900">{nickname}</Text>
+                                <Text className="text-gray-500">{nestName}</Text>
+                            </View>
+                            <TouchableOpacity
+                                onPress={handleLogout}
+                                className="flex-row items-center gap-1 bg-red-50 px-3 py-1.5 rounded-full border border-red-100"
+                            >
+                                <Ionicons name="log-out-outline" size={14} color="#EF4444" />
+                                <Text className="text-red-500 font-bold text-xs">{t.logout}</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </View>

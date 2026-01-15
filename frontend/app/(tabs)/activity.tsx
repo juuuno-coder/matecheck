@@ -1,40 +1,91 @@
-import { View, Text, ScrollView, Image } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { useUserStore } from '../../store/userStore';
 import { cn } from '../../lib/utils';
 import { THEMES, AVATARS } from '../../constants/data';
 import { Ionicons } from '@expo/vector-icons';
 import { translations, Language } from '../../constants/I18n';
+import { useRouter } from 'expo-router';
 
 export default function ActivityScreen() {
-    const { nestTheme, todos, events, members, language } = useUserStore();
+    const { nestTheme, todos, events, members, language, nestName } = useUserStore();
+    const router = useRouter();
     const t = translations[language as Language];
 
-    const themeBg = THEMES[nestTheme]?.color || 'bg-orange-500';
     const themeText = THEMES[nestTheme]?.color?.replace('bg-', 'text-') || 'text-orange-600';
 
-    // Combine Todos (Completed) and Events into a timeline
-    const completedTodos = todos.filter(todo => todo.isCompleted).map(todo => ({
+    // Helper to format date (mock)
+    const today = new Date().toISOString().split('T')[0];
+
+    // 1. Nest Creation Log (Mock - assumes first member created it)
+    const nestCreationLog = {
+        id: 'nest-created',
+        type: 'nest',
+        title: nestName,
+        user: members[0] || { nickname: 'Admin', avatarId: 0 },
+        date: today,
+        message: language === 'ko' ? "보금자리를 개설했어요 🎉" : "created the nest 🎉",
+        targetPath: '/(tabs)/settings'
+    };
+
+    // 2. Member Join Logs (Mock)
+    const memberJoinLogs = members.slice(1).map((m, i) => ({
+        id: `join-${m.id}`,
+        type: 'join',
+        title: nestName,
+        user: m,
+        date: today,
+        message: language === 'ko' ? "보금자리에 구성원으로 참여했어요 👋" : "joined the nest 👋",
+        targetPath: '/(tabs)/settings'
+    }));
+
+    // 3. Completed Todos
+    const completedTodosLogs = todos.filter(todo => todo.isCompleted).map(todo => ({
         id: `todo-${todo.id}`,
         type: 'todo',
         title: todo.title,
-        user: members.find(m => m.id === todo.completedBy) || members.find(m => m.id === todo.assignees[0]?.id) || members[0], // Fallback
-        date: new Date().toISOString().split('T')[0], // Mock date for now as we don't store completion date
-        message: language === 'ko' ? "할 일을 완료했어요!" : "completed a task!"
+        user: members.find(m => m.id === todo.completedBy) || members.find(m => m.id === todo.assignees[0]?.id) || members[0],
+        date: today,
+        message: language === 'ko' ? "할 일을 완료했어요 ✅" : "completed a task ✅",
+        targetPath: '/(tabs)/plan?action=todo' // We'll handle this param in Plan if needed, or just go to Plan
     }));
 
-    const createdEvents = events.map(event => ({
+    // 4. Events Created
+    const createdEventsLogs = events.map(event => ({
         id: `event-${event.id}`,
         type: 'event',
         title: event.title,
-        user: members.find(m => m.id === event.creatorId) || members[0],
+        user: members.find(m => m.id === event.creatorId) || members[0], // Fallback to first member if creator not found
         date: event.date,
-        message: language === 'ko' ? "새로운 일정을 등록했어요." : "added a new event."
+        message: language === 'ko' ? "일정을 추가했어요 📅" : "added a schedule 📅",
+        targetPath: '/(tabs)/plan'
     }));
 
-    // Merge and Sort (Mock sorting by ID or just mixing them for demo)
-    // In a real app, we would have 'createdAt' or 'completedAt' timestamps.
-    const activities = [...completedTodos, ...createdEvents].sort(() => Math.random() - 0.5);
+    // Merge all logs and sort by date (descending - mock logic putting Nest creation last)
+    // Actually, we want newest first. Since most dates are 'today', we'll rely on array order mostly.
+    const activities = [
+        ...completedTodosLogs,
+        ...createdEventsLogs,
+        ...memberJoinLogs,
+        nestCreationLog
+    ].sort((a, b) => {
+        // Simple sort: if dates are different, sort by date. If same, random(mock) or keep order.
+        if (a.date !== b.date) return b.date.localeCompare(a.date);
+        return 0; // Keep relative order for same day, roughly
+    });
+
+    const handlePress = (path: string) => {
+        // Simple navigation. For query params support, we might need adjustments in the target screens.
+        // Currently, direct push works for tab switching in Expo Router.
+        if (path.includes('?')) {
+            const [pathname, query] = path.split('?');
+            // Expo Router handle params slightly differently but for Tabs, simple push often works or use 'href'
+            // We'll use router.push with object for safer handling if needed, but string works for tabs usually.
+            router.push(path as any);
+        } else {
+            router.push(path as any);
+        }
+    };
 
     const ActivityItem = ({ item }: { item: any }) => (
         <View className="flex-row items-start mb-6 px-4">
@@ -46,27 +97,27 @@ export default function ActivityScreen() {
                 className="w-12 h-12 rounded-full bg-gray-100 border-2 border-white shadow-sm z-10"
             />
 
-            <View className="flex-1 ml-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+            <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => handlePress(item.targetPath)}
+                className="flex-1 ml-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100 active:bg-gray-50"
+            >
                 <View className="flex-row justify-between items-start mb-1">
-                    <Text className="font-bold text-gray-900 text-base">{item.user?.nickname || '알 수 없음'}</Text>
+                    <Text className="font-bold text-gray-900 text-base">
+                        {item.user?.nickname || (language === 'ko' ? '알 수 없음' : 'Unknown')}
+                    </Text>
                     <Text className="text-xs text-gray-400">{item.date}</Text>
                 </View>
-                <Text className="text-gray-600 mb-2">
-                    {item.message} <Text className={cn("font-bold", themeText)}>{item.title}</Text>
+                <Text className="text-gray-600 mb-1 leading-5">
+                    {item.user?.nickname} {language === 'ko' ? "님이" : ""} <Text className="font-medium text-gray-800">{item.title}</Text>
+                    {language === 'ko' ? (item.type === 'join' ? "에" : "을(를)") : ""} {item.message.replace(language === 'ko' ? "보금자리를 " : "", "").replace(language === 'ko' ? "보금자리에 " : "", "").replace(language === 'ko' ? "할 일을 " : "", "").replace(language === 'ko' ? "일정을 " : "", "")}
                 </Text>
-                {item.type === 'todo' && (
-                    <View className="flex-row items-center">
-                        <Ionicons name="checkbox" size={16} color="#4B5563" />
-                        <Text className="text-xs text-gray-500 ml-1">Mission Completed</Text>
-                    </View>
-                )}
-                {item.type === 'event' && (
-                    <View className="flex-row items-center">
-                        <Ionicons name="calendar" size={16} color="#4B5563" />
-                        <Text className="text-xs text-gray-500 ml-1">Event Created</Text>
-                    </View>
-                )}
-            </View>
+
+                {/* Simplified Message Display */}
+                <Text className="text-sm text-gray-500 mt-1">
+                    {item.message}
+                </Text>
+            </TouchableOpacity>
         </View>
     );
 
@@ -79,7 +130,7 @@ export default function ActivityScreen() {
                 </Text>
             </View>
 
-            <ScrollView className="flex-1 pt-6" contentContainerStyle={{ paddingBottom: 100 }}>
+            <ScrollView className="flex-1 pt-6" contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
                 {activities.length === 0 ? (
                     <View className="items-center justify-center py-20">
                         <Text className="text-5xl mb-4">📭</Text>

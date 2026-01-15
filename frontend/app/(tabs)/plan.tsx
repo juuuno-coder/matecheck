@@ -313,8 +313,41 @@ export default function PlanScreen() {
                             <Text className="text-xl font-bold text-gray-800">{tCalendar.add_event}</Text>
                             <TouchableOpacity onPress={() => setCalModalVisible(false)}><Text className="text-gray-400 text-lg">{tCommon.cancel}</Text></TouchableOpacity>
                         </View>
-                        <TextInput value={eventText} onChangeText={setEventText} placeholder={tCalendar.event_title_placeholder} className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-gray-900 text-lg mb-2 font-medium" />
+                        <TextInput
+                            value={eventText}
+                            onChangeText={setEventText}
+                            placeholder={tCalendar.event_title_placeholder}
+                            className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-gray-900 text-lg mb-2 font-medium"
+                        />
 
+                        {/* Time Input Toggle */}
+                        <View className="mb-4">
+                            {!isTimeEnabled ? (
+                                <TouchableOpacity onPress={() => setIsTimeEnabled(true)}>
+                                    <Text className={cn("text-sm font-bold underline ml-1", themeText)}>
+                                        + {language === 'ko' ? "시간 추가" : "Add Time"}
+                                    </Text>
+                                </TouchableOpacity>
+                            ) : (
+                                <View className="flex-row items-center gap-2">
+                                    <View className="flex-1">
+                                        <TextInput
+                                            value={eventTime}
+                                            onChangeText={setEventTime}
+                                            placeholder={language === 'ko' ? "예: 오후 2시" : "e.g. 2:00 PM"}
+                                            className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-gray-900"
+                                            autoFocus
+                                        />
+                                    </View>
+                                    <TouchableOpacity
+                                        onPress={() => { setIsTimeEnabled(false); setEventTime(''); }}
+                                        className="p-2 bg-gray-100 rounded-full"
+                                    >
+                                        <Ionicons name="close" size={16} color="#6B7280" />
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                        </View>
                         <View className="mb-6 space-y-3">
                             <View>
                                 {!endDate ? (

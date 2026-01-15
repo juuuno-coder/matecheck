@@ -38,13 +38,13 @@ export default function FloatingActionMenu({ themeBg = 'bg-orange-500' }: Floati
             label: '하우스 룰',
             icon: 'document-text-outline',
             color: 'bg-indigo-500',
-            path: '/house_rules'
+            path: { pathname: '/(tabs)/rules', params: { action: 'add_rule' } }
         },
         {
             label: '공동 정산',
             icon: 'cash-outline',
             color: 'bg-pink-500',
-            path: '/split_bills'
+            path: '/(tabs)/budget'
         },
         {
             label: '로테이션',
@@ -56,13 +56,13 @@ export default function FloatingActionMenu({ themeBg = 'bg-orange-500' }: Floati
             label: '일정',
             icon: 'calendar-outline',
             color: 'bg-blue-500',
-            path: { pathname: '/(tabs)/calendar', params: { action: 'add' } }
+            path: { pathname: '/(tabs)/plan', params: { action: 'add' } }
         },
         {
             label: '목표',
             icon: 'trophy-outline',
             color: 'bg-yellow-500',
-            path: { pathname: '/(tabs)/goal', params: { action: 'add' } }
+            path: { pathname: '/(tabs)/rules', params: { action: 'add_goal' } }
         }
     ];
 

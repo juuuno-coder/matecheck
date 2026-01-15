@@ -5,18 +5,23 @@ import { useUserStore } from '../../store/userStore';
 import React, { useEffect } from 'react';
 
 export default function TabLayout() {
-    const { isLoggedIn } = useUserStore();
+    const { isLoggedIn, language } = useUserStore();
     const router = useRouter();
 
     useEffect(() => {
         if (!isLoggedIn) {
             Alert.alert(
-                "로그인 필요",
-                "로그인이 필요한 서비스입니다.",
-                [{ text: "확인", onPress: () => router.replace('/') }]
+                language === 'ko' ? "로그인 필요" : "Login Required",
+                language === 'ko' ? "로그인이 필요한 서비스입니다." : "Please login to continue.",
+                [{ text: "OK", onPress: () => router.replace('/') }]
             );
         }
     }, [isLoggedIn]);
+
+    const titles = {
+        ko: { home: "우리 집", plan: "일정", rules: "약속", activity: "활동", settings: "설정", budget: "정산", anniversary: "기념일" },
+        en: { home: "Home", plan: "Plan", rules: "Rules", activity: "Activity", settings: "Settings", budget: "Budget", anniversary: "Anniversary" }
+    }[language] || { home: "Home", plan: "Plan", rules: "Rules", activity: "Activity", settings: "Settings", budget: "Budget", anniversary: "Anniversary" };
 
     return (
         <Tabs
@@ -44,64 +49,62 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="home"
                 options={{
-                    title: "보금자리",
+                    title: titles.home,
                     tabBarIcon: ({ color, focused }) => (
                         <Ionicons name={focused ? "home" : "home-outline"} size={24} color={color} />
                     )
                 }}
             />
             <Tabs.Screen
-                name="todo"
+                name="plan"
                 options={{
-                    title: "미션",
-                    tabBarIcon: ({ color, focused }) => (
-                        <Ionicons name={focused ? "checkbox" : "checkbox-outline"} size={24} color={color} />
-                    )
-                }}
-            />
-            <Tabs.Screen
-                name="calendar"
-                options={{
-                    title: "일정",
+                    title: titles.plan,
                     tabBarIcon: ({ color, focused }) => (
                         <Ionicons name={focused ? "calendar" : "calendar-outline"} size={24} color={color} />
                     )
                 }}
             />
             <Tabs.Screen
-                name="anniversary"
+                name="rules"
                 options={{
-                    title: "기념일",
+                    title: titles.rules,
                     tabBarIcon: ({ color, focused }) => (
-                        <Ionicons name={focused ? "heart" : "heart-outline"} size={24} color={color} />
+                        <Ionicons name={focused ? "list" : "list-outline"} size={24} color={color} />
                     )
                 }}
             />
             <Tabs.Screen
-                name="goal"
+                name="activity"
                 options={{
-                    title: "목표",
+                    title: titles.activity,
                     tabBarIcon: ({ color, focused }) => (
-                        <Ionicons name={focused ? "trophy" : "trophy-outline"} size={24} color={color} />
-                    )
-                }}
-            />
-            <Tabs.Screen
-                name="budget"
-                options={{
-                    title: "가계부",
-                    tabBarIcon: ({ color, focused }) => (
-                        <Ionicons name={focused ? "wallet" : "wallet-outline"} size={24} color={color} />
+                        <Ionicons name={focused ? "notifications" : "notifications-outline"} size={24} color={color} />
                     )
                 }}
             />
             <Tabs.Screen
                 name="settings"
                 options={{
-                    title: "설정",
+                    title: titles.settings,
                     tabBarIcon: ({ color, focused }) => (
                         <Ionicons name={focused ? "settings" : "settings-outline"} size={24} color={color} />
                     )
+                }}
+            />
+
+            {/* Hidden Tabs (accessible via navigation, but not on tab bar) */}
+            <Tabs.Screen
+                name="budget"
+                options={{
+                    title: titles.budget,
+                    href: null,
+                }}
+            />
+            <Tabs.Screen
+                name="anniversary"
+                options={{
+                    title: titles.anniversary,
+                    href: null,
                 }}
             />
         </Tabs>

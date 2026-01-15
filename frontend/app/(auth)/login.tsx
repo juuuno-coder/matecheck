@@ -137,6 +137,8 @@ export default function LoginScreen() {
                             className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-gray-900 text-base"
                             secureTextEntry
                             editable={!isLoading}
+                            onSubmitEditing={handleLogin}
+                            returnKeyType="go"
                         />
                     </View>
 

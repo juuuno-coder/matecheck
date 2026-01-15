@@ -34,23 +34,13 @@ export default function RulesScreen() {
     // Explicitly cast translations to avoid type errors
     const tCommon = translations[language as Language].common;
     const tGoals = translations[language as Language].goal;
-    // We'll reuse existing translations or add new ones inline for rules if needed.
-    // For now, hardcoded rule labels are adapted to Korean/English context broadly.
-
-    const [activeTab, setActiveTab] = useState<'goals' | 'rules'>('rules');
-
-    // Handle Deep Linking
-    useEffect(() => {
-        if (params.action === 'add_goal') {
-            setActiveTab('goals');
-            setGoalModalVisible(true);
-            router.setParams({ action: '' });
-        }
-    }, [params.action]);
 
     // Theme Colors
     const themeBg = THEMES[nestTheme]?.color || 'bg-orange-500';
     const themeText = THEMES[nestTheme]?.color?.replace('bg-', 'text-') || 'text-orange-600';
+
+    // --- SELECTION MODAL STATE ---
+    const [selectionModalVisible, setSelectionModalVisible] = useState(false);
 
     // --- GOAL STATE ---
     const [goalModalVisible, setGoalModalVisible] = useState(false);
@@ -66,12 +56,22 @@ export default function RulesScreen() {
     const [ruleDescription, setRuleDescription] = useState('');
     const [ruleType, setRuleType] = useState('other');
 
-    // Fetch Rules on Mount
+    // Fetch Rules & Handle Deep Linking
     useEffect(() => {
-        if (nestId && activeTab === 'rules') {
+        if (nestId) {
             fetchRules();
         }
-    }, [nestId, activeTab]);
+    }, [nestId]);
+
+    useEffect(() => {
+        if (params.action === 'add_goal') {
+            setGoalModalVisible(true);
+            router.setParams({ action: '' });
+        } else if (params.action === 'add_rule') {
+            setRuleModalVisible(true);
+            router.setParams({ action: '' });
+        }
+    }, [params.action]);
 
     const fetchRules = async () => {
         try {
@@ -85,7 +85,19 @@ export default function RulesScreen() {
         }
     };
 
-    // --- GOAL ACTIONS ---
+    // --- ACTIONS ---
+    const handleAddButtonPress = () => {
+        setSelectionModalVisible(true);
+    };
+
+    const handleSelectAction = (action: 'rule' | 'goal') => {
+        setSelectionModalVisible(false);
+        setTimeout(() => {
+            if (action === 'rule') setRuleModalVisible(true);
+            else setGoalModalVisible(true);
+        }, 300);
+    };
+
     const handleAddGoal = () => {
         if (goalTitle.trim()) {
             addGoal(selectedGoalType, goalTitle, Number(goalTarget), goalUnit);
@@ -107,7 +119,6 @@ export default function RulesScreen() {
         );
     };
 
-    // --- RULE ACTIONS ---
     const addRule = async () => {
         if (!ruleTitle.trim()) {
             Alert.alert(tCommon.error, '제목을 입력해주세요.');
@@ -177,10 +188,7 @@ export default function RulesScreen() {
 
                 {sectionGoals.length === 0 ? (
                     <View className="bg-gray-50 border border-gray-100 border-dashed rounded-2xl p-6 items-center">
-                        <Text className="text-gray-400">{tGoals.no_goals}</Text>
-                        <TouchableOpacity onPress={() => { setSelectedGoalType(type); setGoalModalVisible(true); }}>
-                            <Text className={cn("mt-2 font-bold", themeText)}>{tGoals.add_goal}</Text>
-                        </TouchableOpacity>
+                        <Text className="text-gray-400 text-sm">{language === 'ko' ? "아직 목표가 없어요" : "No goals yet"}</Text>
                     </View>
                 ) : (
                     sectionGoals.map((goal: Goal, index: number) => (
@@ -248,96 +256,132 @@ export default function RulesScreen() {
         <View className="flex-1 bg-gray-50">
             {/* Header */}
             <View className="pt-16 pb-4 px-6 bg-white flex-row justify-between items-center shadow-sm z-10">
-                <View className="flex-row gap-4">
-                    <TouchableOpacity onPress={() => setActiveTab('rules')} className="items-center">
-                        <Text className={cn("text-2xl font-bold transition-all", activeTab === 'rules' ? "text-gray-900" : "text-gray-300")}>
-                            {language === 'ko' ? "우리 집 규칙" : "House Rules"}
-                        </Text>
-                        {activeTab === 'rules' && <View className={cn("h-1 w-full rounded-full mt-1", themeBg)} />}
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setActiveTab('goals')} className="items-center">
-                        <Text className={cn("text-2xl font-bold transition-all", activeTab === 'goals' ? "text-gray-900" : "text-gray-300")}>
-                            {language === 'ko' ? "우리의 목표" : "Our Goals"}
-                        </Text>
-                        {activeTab === 'goals' && <View className={cn("h-1 w-full rounded-full mt-1", themeBg)} />}
-                    </TouchableOpacity>
-                </View>
+                <Text className="text-2xl font-bold text-gray-900">
+                    {language === 'ko' ? "약속" : "Promises"}
+                </Text>
 
                 <TouchableOpacity
-                    onPress={() => activeTab === 'rules' ? setRuleModalVisible(true) : setGoalModalVisible(true)}
+                    onPress={handleAddButtonPress}
                     className={cn("w-10 h-10 rounded-full items-center justify-center shadow-md", themeBg)}
                 >
                     <Ionicons name="add" size={24} color="white" />
                 </TouchableOpacity>
             </View>
 
-            {/* Content */}
-            <View className="flex-1">
-                {activeTab === 'rules' ? (
-                    <ScrollView className="flex-1 p-6" showsVerticalScrollIndicator={false}>
-                        {rules.length === 0 ? (
-                            <View className="items-center justify-center py-20">
-                                <Text className="text-6xl mb-4">📜</Text>
-                                <Text className="text-gray-400 text-lg">
-                                    {language === 'ko' ? "아직 규칙이 없어요" : "No rules yet"}
-                                </Text>
-                                <Text className="text-gray-300 text-sm mt-2">
-                                    {language === 'ko' ? "우리 집의 첫 규칙을 만들어보세요!" : "Create your first house rule!"}
-                                </Text>
-                            </View>
-                        ) : (
-                            rules.map((rule: HouseRule, index: number) => {
-                                const typeInfo = getRuleTypeInfo(rule.rule_type);
-                                return (
-                                    <Animated.View
-                                        key={rule.id}
-                                        entering={FadeInDown.delay(index * 100)}
-                                        className="bg-white rounded-2xl p-5 mb-3 shadow-sm border border-gray-100"
-                                    >
-                                        <View className="flex-row items-start justify-between mb-3">
-                                            <View className="flex-row items-center flex-1">
-                                                <View className={`${typeInfo.color} w-10 h-10 rounded-xl items-center justify-center mr-3`}>
-                                                    <Ionicons name={typeInfo.icon as any} size={20} color="white" />
-                                                </View>
-                                                <View className="flex-1">
-                                                    <Text className="text-xs text-gray-400 mb-1">{typeInfo.label}</Text>
-                                                    <Text className="text-lg font-bold text-gray-900">{rule.title}</Text>
-                                                </View>
+            {/* Single Page ScrollView */}
+            <ScrollView className="flex-1 p-6" showsVerticalScrollIndicator={false}>
+
+                {/* Rules Section */}
+                <View className="mb-10">
+                    <View className="flex-row items-center mb-4">
+                        <Text className="text-2xl font-bold bg-gray-900 text-white px-3 py-1 mr-2 rounded-lg">Rule</Text>
+                        <Text className="text-xl font-bold text-gray-800">{language === 'ko' ? "우리 집 규칙" : "House Rules"}</Text>
+                    </View>
+
+                    {rules.length === 0 ? (
+                        <View className="bg-white rounded-2xl p-8 items-center justify-center border border-gray-100 border-dashed">
+                            <Text className="text-4xl mb-2">📜</Text>
+                            <Text className="text-gray-400 text-center">
+                                {language === 'ko' ? "아직 규칙이 없어요.\n첫 규칙을 만들어보세요!" : "No rules yet.\nCreate your first rule!"}
+                            </Text>
+                        </View>
+                    ) : (
+                        rules.map((rule: HouseRule, index: number) => {
+                            const typeInfo = getRuleTypeInfo(rule.rule_type);
+                            return (
+                                <Animated.View
+                                    key={rule.id}
+                                    entering={FadeInDown.delay(index * 100)}
+                                    className="bg-white rounded-2xl p-5 mb-3 shadow-sm border border-gray-100"
+                                >
+                                    <View className="flex-row items-start justify-between mb-3">
+                                        <View className="flex-row items-center flex-1">
+                                            <View className={`${typeInfo.color} w-10 h-10 rounded-xl items-center justify-center mr-3`}>
+                                                <Ionicons name={typeInfo.icon as any} size={20} color="white" />
                                             </View>
-                                            <TouchableOpacity
-                                                onPress={() => {
-                                                    Alert.alert(
-                                                        tCommon.delete,
-                                                        language === 'ko' ? '이 규칙을 삭제하시겠습니까?' : 'Delete this rule?',
-                                                        [
-                                                            { text: tCommon.cancel, style: 'cancel' },
-                                                            { text: tCommon.delete, style: 'destructive', onPress: () => deleteRule(rule.id) }
-                                                        ]
-                                                    );
-                                                }}
-                                            >
-                                                <Ionicons name="trash-outline" size={20} color="#EF4444" />
-                                            </TouchableOpacity>
+                                            <View className="flex-1">
+                                                <Text className="text-xs text-gray-400 mb-1">{typeInfo.label}</Text>
+                                                <Text className="text-lg font-bold text-gray-900">{rule.title}</Text>
+                                            </View>
                                         </View>
-                                        {rule.description ? (
-                                            <Text className="text-gray-600 leading-6">{rule.description}</Text>
-                                        ) : null}
-                                    </Animated.View>
-                                );
-                            })
-                        )}
-                        <View className="h-20" />
-                    </ScrollView>
-                ) : (
-                    <ScrollView className="flex-1 p-6" showsVerticalScrollIndicator={false}>
-                        <GoalSection type="vision" label={language === 'ko' ? "우리의 꿈 (Vision)" : "Our Vision"} icon="✨" />
-                        <GoalSection type="year" label={language === 'ko' ? "올해의 목표" : "Yearly Goals"} icon="📅" />
-                        <GoalSection type="month" label={language === 'ko' ? "이번 달 목표" : "Monthly Goals"} icon="🎯" />
-                        <GoalSection type="week" label={language === 'ko' ? "이번 주 목표" : "Weekly Goals"} icon="🔥" />
-                        <View className="h-20" />
-                    </ScrollView>
-                )}
-            </View>
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                Alert.alert(
+                                                    tCommon.delete,
+                                                    language === 'ko' ? '이 규칙을 삭제하시겠습니까?' : 'Delete this rule?',
+                                                    [
+                                                        { text: tCommon.cancel, style: 'cancel' },
+                                                        { text: tCommon.delete, style: 'destructive', onPress: () => deleteRule(rule.id) }
+                                                    ]
+                                                );
+                                            }}
+                                        >
+                                            <Ionicons name="trash-outline" size={20} color="#EF4444" />
+                                        </TouchableOpacity>
+                                    </View>
+                                    {rule.description ? (
+                                        <Text className="text-gray-600 leading-6">{rule.description}</Text>
+                                    ) : null}
+                                </Animated.View>
+                            );
+                        })
+                    )}
+                </View>
+
+                {/* Goals Section */}
+                <View className="mb-10">
+                    <View className="flex-row items-center mb-6">
+                        <Text className="text-2xl font-bold bg-gray-900 text-white px-3 py-1 mr-2 rounded-lg">Goal</Text>
+                        <Text className="text-xl font-bold text-gray-800">{language === 'ko' ? "우리의 목표" : "Our Goals"}</Text>
+                    </View>
+
+                    <GoalSection type="vision" label={language === 'ko' ? "우리의 꿈 (Vision)" : "Our Vision"} icon="✨" />
+                    <GoalSection type="year" label={language === 'ko' ? "올해의 목표" : "Yearly Goals"} icon="📅" />
+                    <GoalSection type="month" label={language === 'ko' ? "이번 달 목표" : "Monthly Goals"} icon="🎯" />
+                    <GoalSection type="week" label={language === 'ko' ? "이번 주 목표" : "Weekly Goals"} icon="🔥" />
+                </View>
+
+                <View className="h-20" />
+            </ScrollView>
+
+            {/* --- SELECTION MODAL --- */}
+            <Modal visible={selectionModalVisible} animationType="fade" transparent>
+                <TouchableOpacity
+                    className="flex-1 bg-black/50 justify-end pb-10 px-4"
+                    activeOpacity={1}
+                    onPress={() => setSelectionModalVisible(false)}
+                >
+                    <Animated.View
+                        entering={FadeInUp.springify()}
+                        className="bg-white rounded-2xl overflow-hidden shadow-xl"
+                    >
+                        <TouchableOpacity
+                            onPress={() => handleSelectAction('rule')}
+                            className="p-5 border-b border-gray-100 flex-row items-center justify-center bg-gray-50 active:bg-gray-100"
+                        >
+                            <Text className="text-2xl mr-3">📜</Text>
+                            <Text className="text-lg font-bold text-gray-800">
+                                {language === 'ko' ? "규칙 추가하기" : "Add House Rule"}
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => handleSelectAction('goal')}
+                            className="p-5 flex-row items-center justify-center bg-white active:bg-gray-100"
+                        >
+                            <Text className="text-2xl mr-3">🏆</Text>
+                            <Text className="text-lg font-bold text-gray-800">
+                                {language === 'ko' ? "목표 추가하기" : "Add Goal"}
+                            </Text>
+                        </TouchableOpacity>
+                    </Animated.View>
+                    <TouchableOpacity
+                        onPress={() => setSelectionModalVisible(false)}
+                        className="bg-white rounded-xl p-4 mt-3 items-center shadow-lg"
+                    >
+                        <Text className="text-lg font-bold text-gray-900">{tCommon.cancel}</Text>
+                    </TouchableOpacity>
+                </TouchableOpacity>
+            </Modal>
 
             {/* --- ADD RULE MODAL --- */}
             <Modal visible={ruleModalVisible} animationType="slide" transparent>

@@ -22,7 +22,7 @@ LocaleConfig.defaultLocale = 'kr';
 
 export default function PlanScreen() {
     const router = useRouter();
-    const params = useLocalSearchParams();
+    const params = useLocalSearchParams<{ action?: string }>();
     const {
         nestTheme, events, addEvent, voteEvent, deleteEvent, avatarId,
         todos, addTodo, toggleTodo, deleteTodo, members, language
@@ -38,7 +38,8 @@ export default function PlanScreen() {
     const themeBorder = THEMES[nestTheme]?.color?.replace('bg-', 'border-') || 'border-orange-500';
     const activeColorHex = themeBg.includes('orange') ? '#FF7F50' : '#FF7F50';
 
-    const [activeTab, setActiveTab] = useState<'calendar' | 'todo'>('calendar');
+    // --- SELECTION MODAL STATE ---
+    const [selectionModalVisible, setSelectionModalVisible] = useState(false);
 
     // --- CALENDAR STATE ---
     const today = new Date().toISOString().split('T')[0];
@@ -57,15 +58,26 @@ export default function PlanScreen() {
     const [repeatOption, setRepeatOption] = useState<'none' | 'daily' | 'weekly' | 'monthly'>('none');
     const [isRepeatEnabled, setIsRepeatEnabled] = useState(false);
 
-
     // Handle Deep Linking / Params
     React.useEffect(() => {
         if (params.action === 'add') {
-            if (activeTab === 'calendar') setCalModalVisible(true);
-            else setTodoModalVisible(true);
+            setCalModalVisible(true); // Default to calendar add if general add
             router.setParams({ action: '' });
         }
-    }, [params.action, activeTab]);
+    }, [params.action]);
+
+    // --- ACTIONS ---
+    const handleAddButtonPress = () => {
+        setSelectionModalVisible(true);
+    };
+
+    const handleSelectAction = (action: 'event' | 'todo') => {
+        setSelectionModalVisible(false);
+        setTimeout(() => {
+            if (action === 'event') setCalModalVisible(true);
+            else setTodoModalVisible(true);
+        }, 300);
+    };
 
     // --- CALENDAR LOGIC ---
     const handleDayPress = (day: DateData) => setSelectedDate(day.dateString);
@@ -164,108 +176,134 @@ export default function PlanScreen() {
 
     return (
         <View className="flex-1 bg-white">
-            {/* Header with Tabs */}
+            {/* Header */}
             <View className="pt-16 pb-4 px-6 bg-white flex-row justify-between items-center shadow-sm z-10">
-                <View className="flex-row gap-4">
-                    <TouchableOpacity onPress={() => setActiveTab('calendar')} className="items-center">
-                        <Text className={cn("text-2xl font-bold transition-all", activeTab === 'calendar' ? "text-gray-900" : "text-gray-300")}>
-                            {tCalendar.title}
-                        </Text>
-                        {activeTab === 'calendar' && <View className={cn("h-1 w-full rounded-full mt-1", themeBg)} />}
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setActiveTab('todo')} className="items-center">
-                        <Text className={cn("text-2xl font-bold transition-all", activeTab === 'todo' ? "text-gray-900" : "text-gray-300")}>
-                            {tTodo.title}
-                        </Text>
-                        {activeTab === 'todo' && <View className={cn("h-1 w-full rounded-full mt-1", themeBg)} />}
-                    </TouchableOpacity>
-                </View>
-
+                <Text className="text-2xl font-bold text-gray-900">
+                    {tCalendar.title}
+                </Text>
                 <TouchableOpacity
-                    onPress={() => activeTab === 'calendar' ? setCalModalVisible(true) : setTodoModalVisible(true)}
+                    onPress={handleAddButtonPress}
                     className={cn("w-10 h-10 rounded-full items-center justify-center shadow-md", themeBg)}
                 >
                     <Ionicons name="add" size={24} color="white" />
                 </TouchableOpacity>
             </View>
 
-            {/* Content Area */}
-            <View className="flex-1 bg-gray-50">
-                {activeTab === 'calendar' ? (
-                    <View className="flex-1">
-                        <View className="bg-white pb-4 rounded-b-3xl shadow-sm z-0">
-                            <Calendar
-                                current={today}
-                                dayComponent={renderDay}
-                                key={JSON.stringify(events)}
-                                theme={{ arrowColor: activeColorHex, monthTextColor: '#1F2937', textMonthFontWeight: '800' }}
-                            />
+            {/* Single Page ScrollView */}
+            <ScrollView className="flex-1 bg-gray-50" contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+
+                {/* Calendar Section */}
+                <View className="bg-white pb-6 rounded-b-3xl shadow-sm mb-6">
+                    <Calendar
+                        current={today}
+                        dayComponent={renderDay}
+                        key={JSON.stringify(events)}
+                        theme={{ arrowColor: activeColorHex, monthTextColor: '#1F2937', textMonthFontWeight: '800' }}
+                    />
+                </View>
+
+                {/* Selected Date Events */}
+                <View className="px-6 mb-8">
+                    <Text className="text-lg font-bold text-gray-800 mb-4 flex-row items-center">
+                        📅 {selectedDate.split('-')[1]}월 {selectedDate.split('-')[2]}일 일정
+                    </Text>
+                    {selectedEvents.length === 0 ? (
+                        <View className="bg-white rounded-2xl p-6 items-center justify-center border border-gray-100 border-dashed mb-2">
+                            <Text className="text-gray-400 font-medium text-sm">{tCalendar.no_events}</Text>
                         </View>
-                        <View className="flex-1 px-6 pt-6">
-                            <Text className="text-lg font-bold text-gray-800 mb-4 flex-row items-center">
-                                {selectedDate.split('-')[1]}월 {selectedDate.split('-')[2]}일 일정
-                            </Text>
-                            <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
-                                {selectedEvents.length === 0 ? (
-                                    <View className="items-center justify-center py-12 opacity-50">
-                                        <Text className="text-4xl mb-4">🏝️</Text>
-                                        <Text className="text-gray-400 font-medium">{tCalendar.no_events}</Text>
-                                        <TouchableOpacity onPress={() => setCalModalVisible(true)} className="mt-4">
-                                            <Text className={cn("font-bold", themeText)}>{tCalendar.add_event}</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                ) : (
-                                    selectedEvents.map((evt, idx) => {
-                                        const isVote = evt.type === 'vote';
-                                        const voteCount = evt.votes[selectedDate]?.length || 0;
-                                        const hasVoted = evt.votes[selectedDate]?.includes(String(avatarId));
-                                        return (
-                                            <Animated.View key={evt.id} entering={FadeInUp.delay(idx * 100)} className="bg-white p-4 rounded-2xl mb-3 shadow-sm border border-gray-100">
-                                                <View className="flex-row items-start gap-3">
-                                                    <View className={cn("w-1 h-full rounded-full absolute left-0 top-0 bottom-0", themeBg)} />
-                                                    <View className="flex-1 ml-3">
-                                                        <View className="flex-row justify-between items-start">
-                                                            <View>
-                                                                <Text className="text-gray-800 font-bold text-lg">{evt.title} {evt.time && <Text className={cn("text-base font-medium", themeText)}> {evt.time}</Text>}</Text>
-                                                            </View>
-                                                            <TouchableOpacity onPress={() => deleteEvent(evt.id)}><Ionicons name="trash-outline" size={20} color="#9CA3AF" /></TouchableOpacity>
-                                                        </View>
-                                                        {evt.imageUrl && <Image source={{ uri: evt.imageUrl }} className="w-full h-32 rounded-lg my-2 bg-gray-100" resizeMode="cover" />}
-                                                        {isVote && (
-                                                            <TouchableOpacity onPress={() => voteEvent(evt.id, selectedDate, String(avatarId))} className={cn("flex-row items-center px-4 py-2 rounded-xl mt-2 border", hasVoted ? `${themeBg} border-transparent` : "bg-gray-50 border-gray-200")}>
-                                                                <Text className={cn("text-sm font-bold mr-2", hasVoted ? "text-white" : "text-gray-500")}>{hasVoted ? "참가 완료" : "참가하기"}</Text>
-                                                                <View className={cn("px-2 py-0.5 rounded-full", hasVoted ? "bg-white/20" : "bg-white border border-gray-200")}><Text className={cn("text-xs font-bold", hasVoted ? "text-white" : "text-gray-500")}>{voteCount}명</Text></View>
-                                                            </TouchableOpacity>
-                                                        )}
-                                                    </View>
+                    ) : (
+                        selectedEvents.map((evt, idx) => {
+                            const isVote = evt.type === 'vote';
+                            const voteCount = evt.votes[selectedDate]?.length || 0;
+                            const hasVoted = evt.votes[selectedDate]?.includes(String(avatarId));
+                            return (
+                                <Animated.View key={evt.id} entering={FadeInUp.delay(idx * 100)} className="bg-white p-4 rounded-2xl mb-3 shadow-sm border border-gray-100">
+                                    <View className="flex-row items-start gap-3">
+                                        <View className={cn("w-1 h-full rounded-full absolute left-0 top-0 bottom-0", themeBg)} />
+                                        <View className="flex-1 ml-3">
+                                            <View className="flex-row justify-between items-start">
+                                                <View>
+                                                    <Text className="text-gray-800 font-bold text-lg">{evt.title} {evt.time && <Text className={cn("text-base font-medium", themeText)}> {evt.time}</Text>}</Text>
                                                 </View>
-                                            </Animated.View>
-                                        );
-                                    })
-                                )}
-                            </ScrollView>
-                        </View>
+                                                <TouchableOpacity onPress={() => deleteEvent(evt.id)}><Ionicons name="trash-outline" size={20} color="#9CA3AF" /></TouchableOpacity>
+                                            </View>
+                                            {evt.imageUrl && <Image source={{ uri: evt.imageUrl }} className="w-full h-32 rounded-lg my-2 bg-gray-100" resizeMode="cover" />}
+                                            {isVote && (
+                                                <TouchableOpacity onPress={() => voteEvent(evt.id, selectedDate, String(avatarId))} className={cn("flex-row items-center px-4 py-2 rounded-xl mt-2 border", hasVoted ? `${themeBg} border-transparent` : "bg-gray-50 border-gray-200")}>
+                                                    <Text className={cn("text-sm font-bold mr-2", hasVoted ? "text-white" : "text-gray-500")}>{hasVoted ? "참가 완료" : "참가하기"}</Text>
+                                                    <View className={cn("px-2 py-0.5 rounded-full", hasVoted ? "bg-white/20" : "bg-white border border-gray-200")}><Text className={cn("text-xs font-bold", hasVoted ? "text-white" : "text-gray-500")}>{voteCount}명</Text></View>
+                                                </TouchableOpacity>
+                                            )}
+                                        </View>
+                                    </View>
+                                </Animated.View>
+                            );
+                        })
+                    )}
+                </View>
+
+                {/* Todos Section */}
+                <View className="px-6">
+                    <View className="flex-row items-center mb-4">
+                        <Text className="text-lg font-bold text-gray-800">✅ {tTodo.title || "미션 & 할 일"}</Text>
                     </View>
-                ) : (
-                    <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 100 }}>
-                        {todos.length === 0 ? (
-                            <View className="items-center justify-center py-20">
-                                <Text className="text-5xl mb-4">📝</Text>
-                                <Text className="text-gray-400 text-lg">{tTodo.empty_list_title}</Text>
-                                <TouchableOpacity onPress={() => setTodoModalVisible(true)}><Text className={cn("mt-2 font-bold", themeText)}>{tTodo.add_new}</Text></TouchableOpacity>
-                            </View>
-                        ) : (
-                            <>
-                                <Text className="text-lg font-bold text-gray-800 mb-3 ml-1">{tTodo.today}</Text>
-                                {dailyMissions.length > 0 ? dailyMissions.map((item, index) => <TodoItem key={item.id} item={item} index={index} />) : <Text className="text-gray-400 ml-1 mb-6">{tTodo.empty_today}</Text>}
-                                <View className="h-6" />
-                                <Text className="text-lg font-bold text-gray-800 mb-3 ml-1">{tTodo.weekly}</Text>
-                                {weeklyMissions.length > 0 ? weeklyMissions.map((item, index) => <TodoItem key={item.id} item={item} index={index} />) : <Text className="text-gray-400 ml-1">{tTodo.empty_weekly}</Text>}
-                            </>
-                        )}
-                    </ScrollView>
-                )}
-            </View>
+
+                    {todos.length === 0 ? (
+                        <View className="bg-white rounded-2xl p-8 items-center justify-center border border-gray-100 border-dashed">
+                            <Text className="text-gray-400 text-sm">{tTodo.empty_list_title}</Text>
+                        </View>
+                    ) : (
+                        <>
+                            <Text className="text-sm font-bold text-gray-500 mb-2 ml-1">{tTodo.today}</Text>
+                            {dailyMissions.length > 0 ? dailyMissions.map((item, index) => <TodoItem key={item.id} item={item} index={index} />) : <Text className="text-gray-400 ml-1 mb-6 text-xs">{tTodo.empty_today}</Text>}
+
+                            <View className="h-4" />
+
+                            <Text className="text-sm font-bold text-gray-500 mb-2 ml-1">{tTodo.weekly}</Text>
+                            {weeklyMissions.length > 0 ? weeklyMissions.map((item, index) => <TodoItem key={item.id} item={item} index={index} />) : <Text className="text-gray-400 ml-1 text-xs">{tTodo.empty_weekly}</Text>}
+                        </>
+                    )}
+                </View>
+            </ScrollView>
+
+            {/* --- SELECTION MODAL --- */}
+            <Modal visible={selectionModalVisible} animationType="fade" transparent>
+                <TouchableOpacity
+                    className="flex-1 bg-black/50 justify-end pb-10 px-4"
+                    activeOpacity={1}
+                    onPress={() => setSelectionModalVisible(false)}
+                >
+                    <Animated.View
+                        entering={FadeInUp.springify()}
+                        className="bg-white rounded-2xl overflow-hidden shadow-xl"
+                    >
+                        <TouchableOpacity
+                            onPress={() => handleSelectAction('event')}
+                            className="p-5 border-b border-gray-100 flex-row items-center justify-center bg-gray-50 active:bg-gray-100"
+                        >
+                            <Text className="text-2xl mr-3">📅</Text>
+                            <Text className="text-lg font-bold text-gray-800">
+                                {language === 'ko' ? "일정 추가하기" : "Add Event"}
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => handleSelectAction('todo')}
+                            className="p-5 flex-row items-center justify-center bg-white active:bg-gray-100"
+                        >
+                            <Text className="text-2xl mr-3">✅</Text>
+                            <Text className="text-lg font-bold text-gray-800">
+                                {language === 'ko' ? "할 일 추가하기" : "Add Todo"}
+                            </Text>
+                        </TouchableOpacity>
+                    </Animated.View>
+                    <TouchableOpacity
+                        onPress={() => setSelectionModalVisible(false)}
+                        className="bg-white rounded-xl p-4 mt-3 items-center shadow-lg"
+                    >
+                        <Text className="text-lg font-bold text-gray-900">{tCommon.cancel}</Text>
+                    </TouchableOpacity>
+                </TouchableOpacity>
+            </Modal>
 
             {/* Calendar Modal */}
             <Modal animationType="fade" transparent={true} visible={calModalVisible} onRequestClose={() => setCalModalVisible(false)}>

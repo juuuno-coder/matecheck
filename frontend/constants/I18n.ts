@@ -110,7 +110,7 @@ export const translations = {
             title: "공유 일정",
             add_event: "일정 추가",
             event_title_label: "일정 제목",
-            event_title_placeholder: "예: 집 비우는 날, 손님 초대",
+            event_title_placeholder: "예: 집 비우는 날, 손님 초대, 여행",
             start_date_label: "시작일",
             end_date_label: "종료일 (선택)",
             time_label: "시간 (선택)",
@@ -139,7 +139,7 @@ export const translations = {
         // 가계부
         budget: {
             title: "공동 정산",
-            add_transaction: "지출 추가",
+            add_transaction: "내역 추가",
             type_income: "수입",
             type_expense: "지출",
             amount_label: "금액",
@@ -186,7 +186,7 @@ export const translations = {
             saving: "저장 중",
             preview: "미리보기",
             name_label: "보금자리 이름",
-            name_placeholder: "우리 가족만의 이름을 지어주세요",
+            name_placeholder: "우리만의 특별한 이름을 지어주세요",
             image_label: "대표 이미지 선택",
             upload_button: "내 사진 업로드하기",
             upload_subtitle: "갤러리에서 선택",
@@ -264,6 +264,33 @@ export const translations = {
             success: "성공",
             confirm: "확인",
             network_error: "네트워크 오류가 발생했습니다."
+        },
+        // 기념일
+        anniversary: {
+            title: "기념일 📅",
+            add_btn: "+ 추가",
+            empty_desc: "등록된 기념일이 없습니다.",
+            empty_hint: "소중한 날을 기록해보세요!",
+            add_modal_title: "새 기념일 추가",
+            form_title: "제목",
+            form_title_placeholder: "예: 입주 1주년, 메이트 생일",
+            form_category: "카테고리",
+            form_date: "날짜",
+            form_date_placeholder: "YYYY-MM-DD (예: 2026-12-25)",
+            form_recurring: "매년 반복",
+            add_confirm: "기념일 추가",
+            delete_title: "삭제 확인",
+            delete_msg: "이 기념일을 삭제하시겠습니까?",
+            categories: {
+                birthday: "생일",
+                wedding: "결혼기념일",
+                love: "연애기념일",
+                work: "입사기념일",
+                etc: "기타"
+            },
+            d_day: "D-Day",
+            d_minus: "D-{days}",
+            d_plus: "D+{days}"
         }
     },
     en: {
@@ -537,6 +564,33 @@ export const translations = {
             success: "Success",
             confirm: "Confirm",
             network_error: "A network error occurred."
+        },
+        // Anniversary
+        anniversary: {
+            title: "Anniversaries 📅",
+            add_btn: "+ Add",
+            empty_desc: "No anniversaries yet.",
+            empty_hint: "Record your special days!",
+            add_modal_title: "Add New Anniversary",
+            form_title: "Title",
+            form_title_placeholder: "e.g. Move-in day, Birthday",
+            form_category: "Category",
+            form_date: "Date",
+            form_date_placeholder: "YYYY-MM-DD (e.g. 2026-12-25)",
+            form_recurring: "Repeat Yearly",
+            add_confirm: "Add Anniversary",
+            delete_title: "Delete Anniversary",
+            delete_msg: "Are you sure you want to delete this?",
+            categories: {
+                birthday: "Birthday",
+                wedding: "Wedding",
+                love: "Couple",
+                work: "Work",
+                etc: "Etc"
+            },
+            d_day: "D-Day",
+            d_minus: "D-{days}",
+            d_plus: "D+{days}"
         }
     }
 };

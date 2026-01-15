@@ -100,17 +100,17 @@ export default function BudgetScreen() {
             <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
                 {/* Summary Card */}
                 <Animated.View entering={SlideInUp.delay(100)} className={cn("m-4 p-6 rounded-[40px] shadow-2xl", themeBg)}>
-                    <View className="flex-row justify-between items-center mb-2">
-                        <Text className="text-white/80 font-medium">{t.goal_title}</Text>
-                        <TouchableOpacity onPress={() => setGoalModalVisible(true)} className="bg-white/20 px-3 py-1 rounded-full">
+                    <View className="flex-row justify-between items-start mb-6">
+                        <View>
+                            <Text className="text-white/90 font-medium mb-1">{t.goal_title}</Text>
+                            <Text className="text-white text-3xl font-black">
+                                {remaining.toLocaleString()}원
+                            </Text>
+                            <Text className="text-white/80 text-sm mt-1">남은 예산 💰</Text>
+                        </View>
+                        <TouchableOpacity onPress={() => setGoalModalVisible(true)} className="bg-white/20 px-3 py-1.5 rounded-full">
                             <Text className="text-white text-xs font-bold">수정</Text>
                         </TouchableOpacity>
-                    </View>
-                    <View className="mb-6">
-                        <Text className="text-white/70 text-sm font-medium mb-2">💰 남은 예산</Text>
-                        <Text className="text-white text-4xl font-black">
-                            {remaining.toLocaleString()}원
-                        </Text>
                     </View>
 
                     <View className="flex-row justify-between mb-3">

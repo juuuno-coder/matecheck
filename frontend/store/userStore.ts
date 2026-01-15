@@ -1,8 +1,41 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { persist, createJSONStorage, StateStorage } from 'zustand/middleware';
+import { Platform } from 'react-native';
 import { API_URL } from '../constants/Config';
 import { AVATARS } from '../constants/data';
+
+// Platform-specific storage
+const getStorage = (): StateStorage => {
+    if (Platform.OS === 'web') {
+        return {
+            getItem: (name: string) => {
+                const value = localStorage.getItem(name);
+                return value ?? null;
+            },
+            setItem: (name: string, value: string) => {
+                localStorage.setItem(name, value);
+            },
+            removeItem: (name: string) => {
+                localStorage.removeItem(name);
+            },
+        };
+    } else {
+        // For native platforms, use AsyncStorage
+        const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+        return {
+            getItem: async (name: string) => {
+                const value = await AsyncStorage.getItem(name);
+                return value ?? null;
+            },
+            setItem: async (name: string, value: string) => {
+                await AsyncStorage.setItem(name, value);
+            },
+            removeItem: async (name: string) => {
+                await AsyncStorage.removeItem(name);
+            },
+        };
+    }
+};
 
 // --- Interfaces ---
 
@@ -754,5 +787,5 @@ export const useUserStore = create<UserState>()(
             },
         }), {
         name: 'matecheck-storage',
-        storage: createJSONStorage(() => AsyncStorage),
+        storage: createJSONStorage(() => getStorage()),
     }));

@@ -37,8 +37,39 @@ export default function ActivityScreen() {
         }
     }, [nestId]);
 
-    // Helper to format date (mock)
-    const today = new Date().toISOString().split('T')[0];
+    // Helper to format date relative time
+    const formatRelativeTime = (dateString: string) => {
+        if (!dateString) return '';
+
+        const now = new Date();
+        const past = new Date(dateString);
+
+        // If dateString is just YYYY-MM-DD, fallback to original string (replace - with .)
+        if (dateString.length === 10) return dateString.replace(/-/g, '.');
+
+        const diffMS = now.getTime() - past.getTime();
+        const diffSec = Math.floor(diffMS / 1000);
+        const diffMin = Math.floor(diffSec / 60);
+        const diffHour = Math.floor(diffMin / 60);
+        const diffDay = Math.floor(diffHour / 24);
+
+        if (language === 'ko') {
+            if (diffSec < 60) return "방금 전";
+            if (diffMin < 60) return `${diffMin}분 전`;
+            if (diffHour < 24) return `${diffHour}시간 전`;
+            if (diffDay < 7) return `${diffDay}일 전`;
+            return `${past.getFullYear()}.${String(past.getMonth() + 1).padStart(2, '0')}.${String(past.getDate()).padStart(2, '0')}`;
+        } else {
+            if (diffSec < 60) return "Just now";
+            if (diffMin < 60) return `${diffMin}m ago`;
+            if (diffHour < 24) return `${diffHour}h ago`;
+            if (diffDay < 7) return `${diffDay}d ago`;
+            return past.toLocaleDateString();
+        }
+    };
+
+    // Use full ISO string for current activities to show "Just now" or "X mins ago"
+    const today = new Date().toISOString();
 
     // 1. Nest Creation Log
     const nestCreationLog = {
@@ -79,7 +110,7 @@ export default function ActivityScreen() {
         type: 'event',
         title: event.title,
         user: members.find(m => m.id === event.creatorId) || members[0],
-        date: event.date,
+        date: event.date, // This is YYYY-MM-DD, will be formatted as YYYY.MM.DD
         message: language === 'ko' ? "일정을 추가했어요 📅" : "added a schedule 📅",
         targetPath: '/(tabs)/plan'
     }));
@@ -90,7 +121,7 @@ export default function ActivityScreen() {
         type: 'goal',
         title: goal.title,
         user: members[0], // Goals are communal, attribution is less important or defaults to admin
-        date: today,
+        date: today, // Assuming newly added
         message: language === 'ko'
             ? `우리 보금자리 ${nestName}에\n새로운 목표가 추가되었어요 ✨`
             : `A new goal was added to\nour nest ${nestName} ✨`,
@@ -103,7 +134,7 @@ export default function ActivityScreen() {
         type: 'rule',
         title: rule.title,
         user: members[0], // Rules are communal
-        date: rule.created_at ? rule.created_at.split('T')[0] : today, // Use real date if available
+        date: rule.created_at || today, // Use real date if available, or today
         message: language === 'ko'
             ? `우리 보금자리 ${nestName}에\n새로운 규칙이 추가되었어요 📜`
             : `A new rule was added to\nour nest ${nestName} 📜`,
@@ -119,8 +150,8 @@ export default function ActivityScreen() {
         ...memberJoinLogs,
         nestCreationLog
     ].sort((a, b) => {
-        if (a.date !== b.date) return b.date.localeCompare(a.date);
-        return 0; // Simple stable sort
+        // Sort by full timestamp/date string
+        return b.date.localeCompare(a.date);
     });
 
     const handlePress = (path: string) => {
@@ -153,7 +184,7 @@ export default function ActivityScreen() {
                     <View className="flex-row justify-between items-start mb-2">
                         <View className="flex-row items-center gap-1">
                             {!isCommunal && <Text className="font-bold text-gray-900 text-base">{item.user?.nickname || 'Unknown'}</Text>}
-                            <Text className="text-xs text-gray-400 mt-0.5">{item.date}</Text>
+                            <Text className="text-xs text-gray-400 mt-0.5">{formatRelativeTime(item.date)}</Text>
                         </View>
                     </View>
 

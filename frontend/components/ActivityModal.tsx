@@ -137,7 +137,7 @@ export default function ActivityModal({ visible, onClose }: ActivityModalProps) 
                                             size="sm"
                                             className="z-10 bg-white"
                                         />
-                                        <View className="flex-1 ml-4 bg-gray-50/50 p-4 rounded-3xl border border-gray-100/50">
+                                        <View className="flex-1 ml-4 bg-gray-50 p-4 rounded-3xl border border-gray-100">
                                             <View className="flex-row justify-between items-center mb-1">
                                                 {!isCommunal && <Text className="font-bold text-gray-900 text-sm">{item.user?.nickname || 'Unknown'}</Text>}
                                                 <Text className="text-[10px] text-gray-400">{formatRelativeTime(item.date)}</Text>

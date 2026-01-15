@@ -13,6 +13,7 @@
     "@expo/vector-icons": "^15.0.3",
     "clsx": "^2.1.1",
     "expo": "~54.0.31",
+    "expo-clipboard": "~8.0.8",
     "expo-constants": "~18.0.13",
     "expo-image-picker": "~17.0.10",
     "expo-linking": "~8.0.11",

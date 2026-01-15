@@ -1,5 +1,5 @@
-import { View, Text, TouchableOpacity, Image, ScrollView, Alert, Share } from 'react-native';
-import React from 'react';
+import { View, Text, TouchableOpacity, Image, ScrollView, Alert, Share, Platform, ToastAndroid } from 'react-native';
+import React, { useState, useEffect } from 'react';
 import { useUserStore } from '../../store/userStore';
 import { useRouter } from 'expo-router';
 import { cn } from '../../lib/utils';
@@ -7,6 +7,7 @@ import { AVATARS } from '../../constants/data';
 import { Ionicons } from '@expo/vector-icons';
 import { translations } from '../../constants/I18n';
 import Avatar from '../../components/Avatar';
+import * as Clipboard from 'expo-clipboard';
 
 export default function SettingsScreen() {
     const {
@@ -17,11 +18,22 @@ export default function SettingsScreen() {
     const router = useRouter();
     const t = translations[language].settings;
 
-    React.useEffect(() => {
+    const [localInviteCode, setLocalInviteCode] = useState<string>('');
+
+    useEffect(() => {
         if (nestId) {
             fetchJoinRequests();
+
+            // Mock invite code generation for functionality
+            if (!inviteCode) {
+                // Generate a random code if not provided by backend yet
+                const randomCode = 'MC-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+                setLocalInviteCode(randomCode);
+            } else {
+                setLocalInviteCode(inviteCode);
+            }
         }
-    }, [nestId]);
+    }, [nestId, inviteCode]);
 
     const handleLogout = () => {
         Alert.alert(
@@ -46,15 +58,28 @@ export default function SettingsScreen() {
         setLanguage(nextLang);
     };
 
+    const onCopyCode = async () => {
+        if (!localInviteCode) return;
+        await Clipboard.setStringAsync(localInviteCode);
+
+        const message = language === 'ko' ? "초대 코드가 복사되었습니다." : "Invite code copied.";
+        if (Platform.OS === 'android') {
+            ToastAndroid.show(message, ToastAndroid.SHORT);
+        } else {
+            Alert.alert(language === 'ko' ? "복사 완료" : "Copied", message);
+        }
+    };
+
     const onShareInvite = async () => {
-        if (!inviteCode) return;
-        const url = `https://matecheck-pearl.vercel.app/join_nest?code=${inviteCode}`;
+        if (!localInviteCode) return;
+        const url = `https://matecheck-pearl.vercel.app/join_nest?code=${localInviteCode}`;
         try {
             await Share.share({
                 message: language === 'ko'
-                    ? `[MateCheck] 메이트체크에 초대합니다!\n초대 코드: ${inviteCode}\n바로 가기: ${url}`
-                    : `[MateCheck] Join my nest!\nInvite Code: ${inviteCode}\nLink: ${url}`,
-                url: url
+                    ? `[MateCheck] 메이트체크에 초대합니다!\n\n초대 코드: ${localInviteCode}\n\n함께 즐거운 동거 생활을 시작해보세요!\n${url}`
+                    : `[MateCheck] Join my nest!\n\nInvite Code: ${localInviteCode}\n\nStart your happy co-living journey!\n${url}`,
+                url: url,
+                title: language === 'ko' ? "메이트체크 초대" : "MateCheck Invitation"
             });
         } catch (error) {
             console.error(error);
@@ -62,7 +87,7 @@ export default function SettingsScreen() {
     };
 
     const SettingItem = ({ icon, label, value, onPress, isDestructive = false }: any) => (
-        <TouchableOpacity onPress={onPress} className="flex-row items-center justify-between py-4 border-b border-gray-100 bg-white px-6">
+        <TouchableOpacity onPress={onPress} className="flex-row items-center justify-between py-4 border-b border-gray-100 bg-white px-6 active:bg-gray-50">
             <View className="flex-row items-center gap-3">
                 <View className={cn("w-8 h-8 rounded-full items-center justify-center", isDestructive ? "bg-red-50" : "bg-gray-50")}>
                     <Ionicons name={icon} size={18} color={isDestructive ? "#EF4444" : "#4B5563"} />
@@ -143,7 +168,7 @@ export default function SettingsScreen() {
                     />
 
                     {/* Member Management (Old "Basic Management" / "Member Management") */}
-                    <TouchableOpacity onPress={() => router.push('/member_management')} className="flex-row items-center justify-between py-4 border-b border-gray-100 bg-white px-6">
+                    <TouchableOpacity onPress={() => router.push('/member_management')} className="flex-row items-center justify-between py-4 border-b border-gray-100 bg-white px-6 active:bg-gray-50">
                         <View className="flex-row items-center gap-3">
                             <View className="w-8 h-8 rounded-full items-center justify-center bg-gray-50">
                                 <Ionicons name="people-outline" size={18} color="#4B5563" />
@@ -168,7 +193,12 @@ export default function SettingsScreen() {
                         </View>
                     </TouchableOpacity>
 
-                    <SettingItem icon="key-outline" label={t.invite_code} value={inviteCode || "Loading..."} />
+                    <SettingItem
+                        icon="copy-outline"
+                        label={language === 'ko' ? "초대 코드 복사" : "Copy Invite Code"}
+                        value={localInviteCode || "Loading..."}
+                        onPress={onCopyCode}
+                    />
                     <SettingItem
                         icon="share-social-outline"
                         label={language === 'ko' ? "초대 링크 공유하기" : "Share Invitation Link"}

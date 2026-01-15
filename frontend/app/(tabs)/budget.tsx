@@ -99,36 +99,36 @@ export default function BudgetScreen() {
 
             <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
                 {/* Summary Card */}
-                <Animated.View entering={SlideInUp.delay(100)} className={cn("m-4 p-6 rounded-[40px] shadow-2xl", themeBg)}>
+                <Animated.View entering={SlideInUp.delay(100)} className={cn("m-4 p-6 rounded-[40px] shadow-xl border border-white/20", themeBg)}>
                     {/* Header Row */}
                     <View className="flex-row justify-between items-center mb-8">
-                        <Text className="text-white text-lg font-bold">{t.goal_title}</Text>
-                        <TouchableOpacity onPress={() => setGoalModalVisible(true)} className="bg-white/20 px-4 py-1.5 rounded-full">
-                            <Text className="text-white text-sm font-bold">수정</Text>
+                        <Text className="text-gray-900 text-lg font-bold">{t.goal_title}</Text>
+                        <TouchableOpacity onPress={() => setGoalModalVisible(true)} className="bg-white/40 px-4 py-1.5 rounded-full">
+                            <Text className="text-gray-900 text-sm font-bold">수정</Text>
                         </TouchableOpacity>
                     </View>
 
                     {/* Center Hero Section */}
                     <View className="items-center mb-10">
-                        <Text className="text-white text-sm font-bold mb-2 opacity-90">💰 남은 예산</Text>
-                        <Text className="text-white text-5xl font-black tracking-tighter" style={{ includeFontPadding: false }}>
+                        <Text className="text-gray-700 text-sm font-bold mb-2">💰 남은 예산</Text>
+                        <Text className="text-gray-900 text-5xl font-black tracking-tighter" style={{ includeFontPadding: false }}>
                             {remaining.toLocaleString()}
                             <Text className="text-3xl font-bold">원</Text>
                         </Text>
                     </View>
 
-                    <View className="flex-row justify-between mb-3">
+                    <View className="flex-row justify-between mb-3 bg-white/30 p-4 rounded-3xl">
                         <View>
-                            <Text className="text-white/60 text-[10px] uppercase font-bold tracking-wider mb-1">Total Spent</Text>
-                            <Text className="text-white font-bold">{totalSpent.toLocaleString()}원</Text>
+                            <Text className="text-gray-600 text-[10px] uppercase font-bold tracking-wider mb-1">Total Spent</Text>
+                            <Text className="text-gray-900 font-bold text-lg">{totalSpent.toLocaleString()}원</Text>
                         </View>
                         <View className="items-end">
-                            <Text className="text-white/60 text-[10px] uppercase font-bold tracking-wider mb-1">Target Fund</Text>
-                            <Text className="text-white font-bold">{budgetGoal.toLocaleString()}원</Text>
+                            <Text className="text-gray-600 text-[10px] uppercase font-bold tracking-wider mb-1">Target Fund</Text>
+                            <Text className="text-gray-900 font-bold text-lg">{budgetGoal.toLocaleString()}원</Text>
                         </View>
                     </View>
-                    <View className="w-full h-4 bg-black/10 rounded-full overflow-hidden border border-white/10">
-                        <Animated.View style={{ width: `${progress}%` }} className="h-full bg-white rounded-full" />
+                    <View className="w-full h-4 bg-gray-200 rounded-full overflow-hidden">
+                        <Animated.View style={{ width: `${progress}%` }} className="h-full bg-gray-900 rounded-full" />
                     </View>
                 </Animated.View>
 

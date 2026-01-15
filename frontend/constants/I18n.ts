@@ -4,10 +4,10 @@ export const translations = {
     ko: {
         // 인트로 화면
         intro: {
-            tagline: "룸메이트와 더 즐겁게,\n현명한 공동생활의 시작",
+            tagline: "룸메이트와 더 스마트하게,\n함께 사는 즐거움의 시작",
             login_btn: "이메일로 로그인",
             signup_prompt: "아직 메이트체크가 처음이신가요?",
-            signup_btn: "새로 시작하기"
+            signup_btn: "룸메이트와 시작하기"
         },
         // 인증
         auth: {
@@ -297,18 +297,18 @@ export const translations = {
     en: {
         // Intro Screen
         intro: {
-            tagline: "Precious daily moments,\nGoals and happiness together",
-            mission_card: "Mission",
-            mission_desc: "Make chores fun",
-            calendar_card: "Calendar",
-            calendar_desc: "Family schedule at a glance",
+            tagline: "Live smarter with roommates,\nThe start of shared happiness",
+            mission_card: "Missions",
+            mission_desc: "Shared chores made fun",
+            calendar_card: "Events",
+            calendar_desc: "Shared schedules at a glance",
             goal_card: "Goals",
-            goal_desc: "Grow together",
-            budget_card: "Budget",
-            budget_desc: "Family finances",
+            goal_desc: "Achieve together",
+            budget_card: "Expenses",
+            budget_desc: "Fair shared finances",
             login_btn: "Login",
-            signup_prompt: "Don't have an account?",
-            signup_btn: "Sign Up"
+            signup_prompt: "First time with roommates?",
+            signup_btn: "Start with Mates"
         },
         // Auth
         auth: {

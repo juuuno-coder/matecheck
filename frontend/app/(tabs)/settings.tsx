@@ -8,6 +8,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { translations } from '../../constants/I18n';
 import Avatar from '../../components/Avatar';
 import * as Clipboard from 'expo-clipboard';
+import TutorialOverlay from '../../components/TutorialOverlay';
+import { Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
 
 export default function SettingsScreen() {
     const {
@@ -16,9 +20,10 @@ export default function SettingsScreen() {
         language, setLanguage
     } = useUserStore();
     const router = useRouter();
-    const t = translations[language].settings;
+    const t = (translations[language as keyof typeof translations] as any).settings;
 
     const [localInviteCode, setLocalInviteCode] = useState<string>('');
+    const [showTutorial, setShowTutorial] = useState(false);
 
     useEffect(() => {
         if (nestId) {
@@ -103,19 +108,26 @@ export default function SettingsScreen() {
 
     return (
         <View className="flex-1 bg-gray-50">
-            <View className="pt-16 pb-6 px-6 bg-white mb-4 shadow-sm">
-                <Text className="text-2xl font-bold text-gray-800 mb-6 font-primary">{t.title}</Text>
+            <View className="pt-16 pb-6 px-6 bg-white mb-4 shadow-sm flex-row justify-between items-start">
+                <View className="flex-1">
+                    <View className="flex-row items-center gap-2 mb-6">
+                        <Text className="text-2xl font-bold text-gray-800 font-primary">{t.title}</Text>
+                        <TouchableOpacity onPress={() => setShowTutorial(true)}>
+                            <Ionicons name="help-circle-outline" size={20} color="#9CA3AF" />
+                        </TouchableOpacity>
+                    </View>
 
-                <View className="flex-row items-center gap-4">
-                    <Avatar
-                        source={(AVATARS[avatarId] || AVATARS[0]).image}
-                        size="lg"
-                        borderColor="#E5E7EB"
-                        borderWidth={1}
-                    />
-                    <View>
-                        <Text className="text-xl font-bold text-gray-900">{nickname}</Text>
-                        <Text className="text-gray-500">{nestName}</Text>
+                    <View className="flex-row items-center gap-4">
+                        <Avatar
+                            source={(AVATARS[avatarId] || AVATARS[0]).image}
+                            size="lg"
+                            borderColor="#E5E7EB"
+                            borderWidth={1}
+                        />
+                        <View>
+                            <Text className="text-xl font-bold text-gray-900">{nickname}</Text>
+                            <Text className="text-gray-500">{nestName}</Text>
+                        </View>
                     </View>
                 </View>
             </View>
@@ -125,10 +137,10 @@ export default function SettingsScreen() {
                 {pendingRequests.length > 0 && (
                     <View className="mb-4">
                         <Text className="px-6 py-2 text-xs font-bold text-orange-500 uppercase">{t.join_requests} ({pendingRequests.length})</Text>
-                        {pendingRequests.map((req) => (
+                        {pendingRequests.map((req: any) => (
                             <View key={req.id} className="flex-row items-center justify-between py-4 border-b border-gray-100 bg-orange-50/30 px-6">
                                 <View className="flex-row items-center gap-3">
-                                    <Image source={(AVATARS[req.avatarId] || AVATARS[0]).image} className="w-10 h-10 rounded-full" />
+                                    <Avatar source={(AVATARS[req.avatarId] || AVATARS[0]).image} size="sm" />
                                     <View>
                                         <Text className="text-base font-bold text-gray-800">{req.nickname}</Text>
                                         <Text className="text-gray-400 text-xs">{language === 'ko' ? '보금자리 참여를 요청했습니다.' : 'Requested to join MateHome.'}</Text>
@@ -178,11 +190,13 @@ export default function SettingsScreen() {
                         <View className="flex-row items-center">
                             <View className="flex-row pl-2">
                                 {members.slice(0, 3).map((m: any, i: number) => (
-                                    <Image
+                                    <Avatar
                                         key={m.id}
                                         source={(AVATARS[m.avatarId] || AVATARS[0]).image}
-                                        className="w-6 h-6 rounded-full border border-white -ml-2"
-                                        style={{ zIndex: 10 - i }}
+                                        size="xs"
+                                        className="-ml-2"
+                                        borderColor="#FFFFFF"
+                                        borderWidth={1}
                                     />
                                 ))}
                             </View>
@@ -220,6 +234,31 @@ export default function SettingsScreen() {
                     </View>
                 </View>
             </ScrollView>
+
+            <TutorialOverlay
+                visible={showTutorial}
+                onComplete={() => setShowTutorial(false)}
+                steps={[
+                    {
+                        target: { x: 20, y: 100, width: width - 40, height: 100, borderRadius: 24 },
+                        title: "내 프로필 관리 👤",
+                        description: "나만의 닉네임과 아바타를 변경하고 계정 설정을 관리하세요.",
+                        position: "bottom"
+                    },
+                    {
+                        target: { x: 20, y: 400, width: width - 40, height: 200, borderRadius: 24 },
+                        title: "보금자리(Nest) 설정 🏠",
+                        description: "우리 집의 이름, 테마를 바꾸고 새로운 메이트를 초대할 수 있는 기능들이 모여있어요.",
+                        position: "top"
+                    },
+                    {
+                        target: { x: 20, y: 550, width: width - 40, height: 100, borderRadius: 24 },
+                        title: "초대 코드 복사 🔗",
+                        description: "초대 코드를 복사해서 함께 살 룸메이트에게 보내보세요!",
+                        position: "top"
+                    }
+                ]}
+            />
         </View>
     );
 }

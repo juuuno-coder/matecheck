@@ -9,6 +9,11 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { translations, Language } from '../../constants/I18n';
+import Avatar from '../../components/Avatar';
+import TutorialOverlay from '../../components/TutorialOverlay';
+import { Dimensions } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
 
 // --- CALENDAR LOCALE SETUP ---
 LocaleConfig.locales['kr'] = {
@@ -58,6 +63,7 @@ export default function PlanScreen() {
     const [repeatOption, setRepeatOption] = useState<'none' | 'daily' | 'weekly' | 'monthly'>('none');
     const [isRepeatEnabled, setIsRepeatEnabled] = useState(false);
     const [repeatEndDate, setRepeatEndDate] = useState<string | null>(null);
+    const [showTutorial, setShowTutorial] = useState(false);
 
     // Handle Deep Linking / Params
     React.useEffect(() => {
@@ -87,11 +93,11 @@ export default function PlanScreen() {
         if (!end) return target === start;
         return target >= start && target <= end;
     };
-    const selectedEvents = events.filter(e => isDateInRange(selectedDate, e.date, e.endDate));
+    const selectedEvents = events.filter((e: any) => isDateInRange(selectedDate, e.date, e.endDate));
 
     const renderDay = ({ date, state }: any) => {
         if (!date) return <View />;
-        const dayEvents = events.filter(e => isDateInRange(date.dateString, e.date, e.endDate));
+        const dayEvents = events.filter((e: any) => isDateInRange(date.dateString, e.date, e.endDate));
         const isSelected = selectedDate === date.dateString;
         const isToday = today === date.dateString;
 
@@ -101,7 +107,7 @@ export default function PlanScreen() {
                     <Text className={cn("font-medium text-xs", isSelected ? "text-white font-bold" : (state === 'disabled' ? "text-gray-300" : "text-gray-800"), !isSelected && isToday ? "text-blue-600 font-bold" : "")}>{date.day}</Text>
                 </View>
                 <View className="w-full px-0.5 gap-0.5">
-                    {dayEvents.slice(0, 2).map((evt, i) => (
+                    {dayEvents.slice(0, 2).map((evt: any, i: number) => (
                         <View key={i} className={cn("rounded px-1 py-0.5 flex-row items-center", isSelected ? "bg-gray-800" : themeBg)}>
                             <Text className="text-[8px] text-white font-bold" numberOfLines={1}>{evt.title}</Text>
                         </View>
@@ -133,8 +139,8 @@ export default function PlanScreen() {
     };
 
     // --- TODO LOGIC ---
-    const dailyMissions = todos.filter(t => t.repeat !== 'weekly');
-    const weeklyMissions = todos.filter(t => t.repeat === 'weekly');
+    const dailyMissions = todos.filter((t: any) => t.repeat !== 'weekly');
+    const weeklyMissions = todos.filter((t: any) => t.repeat === 'weekly');
 
     const getFutureDate = (months: number) => {
         const d = new Date();
@@ -172,7 +178,14 @@ export default function PlanScreen() {
             <View className="items-end justify-center">
                 <View className="flex-row pl-2">
                     {item.assignees?.map((assignee, i) => (
-                        <Image key={assignee.id} source={(AVATARS[assignee.avatarId] || AVATARS[0]).image} className="w-8 h-8 rounded-full border-2 border-white -ml-2" style={{ zIndex: 10 - i }} />
+                        <Avatar
+                            key={assignee.id}
+                            source={(AVATARS[assignee.avatarId] || AVATARS[0]).image}
+                            size="sm"
+                            className="-ml-2"
+                            borderColor="#FFFFFF"
+                            borderWidth={2}
+                        />
                     ))}
                 </View>
             </View>
@@ -186,9 +199,14 @@ export default function PlanScreen() {
         <View className="flex-1 bg-white">
             {/* Header */}
             <View className="pt-16 pb-4 px-6 bg-white flex-row justify-between items-center shadow-sm z-10">
-                <Text className="text-2xl font-bold text-gray-900">
-                    {tCalendar.title}
-                </Text>
+                <View className="flex-row items-center gap-2">
+                    <Text className="text-2xl font-bold text-gray-900">
+                        {tCalendar.title}
+                    </Text>
+                    <TouchableOpacity onPress={() => setShowTutorial(true)}>
+                        <Ionicons name="help-circle-outline" size={20} color="#9CA3AF" />
+                    </TouchableOpacity>
+                </View>
                 {/* Global Add Button */}
                 <TouchableOpacity
                     onPress={handleAddButtonPress}
@@ -245,7 +263,7 @@ export default function PlanScreen() {
                             </Text>
                         </TouchableOpacity>
                     ) : (
-                        selectedEvents.map((evt, idx) => {
+                        selectedEvents.map((evt: any, idx: number) => {
                             const isVote = evt.type === 'vote';
                             const voteCount = evt.votes[selectedDate]?.length || 0;
                             const hasVoted = evt.votes[selectedDate]?.includes(String(avatarId));
@@ -297,12 +315,12 @@ export default function PlanScreen() {
                     ) : (
                         <>
                             <Text className="text-sm font-bold text-gray-500 mb-2 ml-1">{tTodo.today}</Text>
-                            {dailyMissions.length > 0 ? dailyMissions.map((item, index) => <TodoItem key={item.id} item={item} index={index} />) : <Text className="text-gray-400 ml-1 mb-6 text-xs">{tTodo.empty_today}</Text>}
+                            {dailyMissions.length > 0 ? dailyMissions.map((item: any, index: number) => <TodoItem key={item.id} item={item} index={index} />) : <Text className="text-gray-400 ml-1 mb-6 text-xs">{tTodo.empty_today}</Text>}
 
                             <View className="h-4" />
 
                             <Text className="text-sm font-bold text-gray-500 mb-2 ml-1">{tTodo.weekly}</Text>
-                            {weeklyMissions.length > 0 ? weeklyMissions.map((item, index) => <TodoItem key={item.id} item={item} index={index} />) : <Text className="text-gray-400 ml-1 text-xs">{tTodo.empty_weekly}</Text>}
+                            {weeklyMissions.length > 0 ? weeklyMissions.map((item: any, index: number) => <TodoItem key={item.id} item={item} index={index} />) : <Text className="text-gray-400 ml-1 text-xs">{tTodo.empty_weekly}</Text>}
                         </>
                     )}
                 </View>
@@ -478,6 +496,31 @@ export default function PlanScreen() {
                     </View>
                 </View>
             </Modal>
-        </View>
+
+            <TutorialOverlay
+                visible={showTutorial}
+                onComplete={() => setShowTutorial(false)}
+                steps={[
+                    {
+                        target: { x: 20, y: 150, width: width - 40, height: 320, borderRadius: 24 },
+                        title: "우리 집 공유 달력 📅",
+                        description: "룸메이트와 공유해야 할 외박, 친구 방문, 청소일 등을 달력에 기록하세요.",
+                        position: "bottom"
+                    },
+                    {
+                        target: { x: 20, y: 500, width: width - 40, height: 120, borderRadius: 24 },
+                        title: "해야 할 일 (Todo) ✅",
+                        description: "설거지, 쓰레기 분리수거 등 매일 또는 매주 반복되는 할 일을 등록하고 관리하세요.",
+                        position: "top"
+                    },
+                    {
+                        target: { x: width - 60, y: 65, width: 44, height: 44, borderRadius: 22 },
+                        title: "빠른 추가하기",
+                        description: "플러스 버튼을 눌러 일정이나 할 일을 즉시 추가할 수 있습니다.",
+                        position: "bottom"
+                    }
+                ]}
+            />
+        </View >
     );
 }

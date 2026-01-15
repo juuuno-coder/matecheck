@@ -9,6 +9,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { translations } from '../../constants/I18n';
 import TutorialOverlay from '../../components/TutorialOverlay';
 import FloatingActionMenu from '../../components/FloatingActionMenu';
+import Avatar from '../../components/Avatar';
+import ActivityModal from '../../components/ActivityModal';
 
 const { width, height } = Dimensions.get('window');
 
@@ -30,11 +32,13 @@ export default function HomeScreen() {
     const router = useRouter();
     const {
         nickname, avatarId, nestName, nestTheme, nestId,
-        todos, events, goals, members, language, hasSeenTutorial, completeTutorial,
+        todos, events, goals, members, language: langFromStore, hasSeenTutorial, completeTutorial,
         syncMissions, syncEvents, syncGoals, syncTransactions
     } = useUserStore();
-    const t = translations[language].home;
+    const language = langFromStore as 'ko' | 'en';
+    const t = (translations[language] as any).home;
     const [greeting, setGreeting] = useState('');
+    const [activityModalVisible, setActivityModalVisible] = useState(false);
 
     // Theme setup
     const themeBg = THEMES[nestTheme]?.color || 'bg-orange-500';
@@ -42,15 +46,15 @@ export default function HomeScreen() {
     const themeItemBg = THEMES[nestTheme]?.bg || 'bg-orange-50';
 
     // Data Aggregation
-    const incompleteTodos = todos.filter(t => !t.isCompleted).slice(0, 3);
-    const today = new Date().toISOString().split('T')[0];
+    const incompleteTodos = todos.filter((t: any) => !t.isCompleted).slice(0, 3);
+    const todayStr = new Date().toISOString().split('T')[0];
     const upcomingEvents = events
-        .filter(e => e.date >= today)
-        .sort((a, b) => a.date.localeCompare(b.date))
+        .filter((e: any) => e.date >= todayStr)
+        .sort((a: any, b: any) => a.date.localeCompare(b.date))
         .slice(0, 2);
 
     // Top 3 Goals (Vision or Year preferred, else any)
-    const activeGoals = goals.sort((a, b) => {
+    const activeGoals = goals.sort((a: any, b: any) => {
         const order = { vision: 0, year: 1, month: 2, week: 3 };
         return order[a.type as keyof typeof order] - order[b.type as keyof typeof order];
     }).slice(0, 3);
@@ -95,11 +99,14 @@ export default function HomeScreen() {
                     {/* Member Stack (Centered) */}
                     <View className="flex-row items-center bg-white/80 py-2 px-4 rounded-full shadow-sm">
                         <View className="flex-row pl-2 mr-2">
-                            {members.slice(0, 4).map((m, i) => (
-                                <Image
+                            {members.slice(0, 4).map((m: any, i: number) => (
+                                <Avatar
                                     key={m.id}
                                     source={(AVATARS[m.avatarId] || AVATARS[0]).image}
-                                    className="w-8 h-8 rounded-full border-2 border-white -ml-3"
+                                    size="xs"
+                                    className="-ml-3"
+                                    borderColor="#FFFFFF"
+                                    borderWidth={2}
                                 />
                             ))}
                         </View>
@@ -108,7 +115,7 @@ export default function HomeScreen() {
 
                     <TouchableOpacity
                         className="absolute top-16 right-16 p-2 rounded-full bg-white/50"
-                        onPress={() => router.push('/(tabs)/activity')}
+                        onPress={() => setActivityModalVisible(true)}
                     >
                         <Ionicons name="notifications-outline" size={20} color="#4B5563" />
                     </TouchableOpacity>
@@ -193,7 +200,7 @@ export default function HomeScreen() {
                             </View>
                         ) : (
                             <View className="gap-3">
-                                {upcomingEvents.slice(0, 3).map((evt, index) => {
+                                {upcomingEvents.slice(0, 3).map((evt: any, index: number) => {
                                     const dday = getDDay(evt.date);
                                     const isToday = dday === '오늘';
 
@@ -238,7 +245,7 @@ export default function HomeScreen() {
                     </View>
 
                 </View>
-            </ScrollView>
+            </ScrollView >
 
             <TutorialOverlay
                 visible={!hasSeenTutorial}
@@ -246,26 +253,31 @@ export default function HomeScreen() {
                 steps={[
                     {
                         target: { x: 20, y: 170, width: width - 40, height: 260, borderRadius: 24 },
-                        title: "오늘의 체크리스트",
-                        description: "우리 가족이 오늘 해야 할 미션들을 한눈에 확인하고 체크할 수 있어요.",
+                        title: "오늘의 체크리스트 ✅",
+                        description: "룸메이트와 오늘 하기로 한 할 일들을 확인하세요. 완료 버튼을 눌러 서로에게 공유할 수 있어요.",
                         position: "bottom"
                     },
                     {
                         target: { x: 20, y: 450, width: width - 40, height: 180, borderRadius: 24 },
-                        title: "다가오는 일정",
-                        description: "가족 행사나 중요한 일정을 놓치지 않도록 이곳에서 미리 알려드려요.",
+                        title: "우리 집 일정 📅",
+                        description: "집들이, 공과금 납부일 등 메이트들과 공유해야 할 중요한 일정들을 미리 확인하세요.",
                         position: "top"
                     },
                     {
                         target: { x: 0, y: height - (Platform.OS === 'ios' ? 95 : 70), width: width, height: 90, borderRadius: 0 },
-                        title: "편리한 하단 메뉴",
-                        description: "미션, 일정, 목표, 가계부 등 원하는 기능으로 언제든 빠르게 이동할 수 있어요.",
+                        title: "스마트한 메뉴 이동 🚀",
+                        description: "규칙 정하기, 일정 공유, 함께 목표 달성, 공금 정산까지 하단 메뉴에서 빠르게 이동하세요.",
                         position: "top"
                     }
                 ]}
             />
 
             <FloatingActionMenu themeBg={THEMES[nestTheme]?.color || 'bg-orange-500'} />
-        </View>
+
+            <ActivityModal
+                visible={activityModalVisible}
+                onClose={() => setActivityModalVisible(false)}
+            />
+        </View >
     );
 }

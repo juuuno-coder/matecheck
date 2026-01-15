@@ -11,12 +11,12 @@ interface AvatarProps {
 }
 
 const sizeMap = {
-    xs: { width: 32, height: 45 },   // 32 * 1.4 ≈ 45
-    sm: { width: 48, height: 67 },   // 48 * 1.4 ≈ 67
-    md: { width: 64, height: 90 },   // 64 * 1.4 ≈ 90
-    lg: { width: 80, height: 112 },  // 80 * 1.4 = 112
-    xl: { width: 96, height: 134 },  // 96 * 1.4 ≈ 134
-    '2xl': { width: 128, height: 179 } // 128 * 1.4 ≈ 179
+    xs: { width: 32, height: 32 },
+    sm: { width: 48, height: 48 },
+    md: { width: 64, height: 64 },
+    lg: { width: 80, height: 80 },
+    xl: { width: 96, height: 96 },
+    '2xl': { width: 128, height: 128 }
 };
 
 export default function Avatar({
@@ -33,21 +33,21 @@ export default function Avatar({
             style={{
                 width: dimensions.width,
                 height: dimensions.height,
-                borderRadius: dimensions.width * 0.25, // 25% radius for squircle effect
+                borderRadius: dimensions.width * 0.42, // Squircle shape (approx ~42% radius)
                 borderColor,
                 borderWidth,
                 overflow: 'hidden',
-                backgroundColor: '#F9FAFB'
+                backgroundColor: '#F3F4F6' // Slight gray bg for transparent pngs
             }}
-            className={cn("shadow-sm items-center justify-center", className)}
+            className={cn("shadow-sm items-center justify-center bg-gray-100", className)}
         >
             <Image
                 source={source}
                 style={{
-                    width: dimensions.width * 0.85,
-                    height: dimensions.height * 0.85,
+                    width: '100%',
+                    height: '100%',
                 }}
-                resizeMode="contain"
+                resizeMode="cover"
             />
         </View>
     );

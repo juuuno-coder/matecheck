@@ -29,17 +29,18 @@ const REVIEWS = [
 const FloatingReview = ({ text, index, total }: { text: string, index: number, total: number }) => {
     const translateY = useSharedValue(height);
     const opacity = useSharedValue(0);
+    const [randomX] = React.useState(() => (Math.random() * 0.4 + 0.3) * width);
+    const [randomDuration] = React.useState(() => 10000 + Math.random() * 5000);
 
     useEffect(() => {
-        const duration = 12000 + Math.random() * 4000; // 12-16초
-        const delay = index * 2500; // 2.5초 간격으로 시작
+        const delay = index * 2000;
 
         translateY.value = withDelay(
             delay,
             withRepeat(
                 withSequence(
-                    withTiming(-100, { duration, easing: Easing.linear }),
-                    withTiming(height, { duration: 0 }) // 즉시 리셋
+                    withTiming(-150, { duration: randomDuration, easing: Easing.out(Easing.quad) }),
+                    withTiming(height, { duration: 0 })
                 ),
                 -1,
                 false
@@ -50,9 +51,9 @@ const FloatingReview = ({ text, index, total }: { text: string, index: number, t
             delay,
             withRepeat(
                 withSequence(
-                    withTiming(0.7, { duration: 1500 }),
-                    withTiming(0.7, { duration: duration - 3000 }),
-                    withTiming(0, { duration: 1500 })
+                    withTiming(0.6, { duration: 2000 }),
+                    withTiming(0.6, { duration: randomDuration - 4000 }),
+                    withTiming(0, { duration: 2000 })
                 ),
                 -1,
                 false
@@ -60,15 +61,10 @@ const FloatingReview = ({ text, index, total }: { text: string, index: number, t
         );
     }, []);
 
-    const animatedStyle = useAnimatedStyle(() => {
-        return {
-            transform: [{ translateY: translateY.value }],
-            opacity: opacity.value,
-        };
-    });
-
-    // 좌우 번갈아 배치
-    const horizontalPosition = index % 2 === 0 ? width * 0.15 : width * 0.65;
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ translateY: translateY.value }],
+        opacity: opacity.value,
+    }));
 
     return (
         <Animated.View
@@ -76,13 +72,13 @@ const FloatingReview = ({ text, index, total }: { text: string, index: number, t
                 animatedStyle,
                 {
                     position: 'absolute',
-                    left: horizontalPosition - 60,
+                    left: randomX - 60,
                     zIndex: 0
                 }
             ]}
         >
-            <View className="bg-white/70 px-4 py-2 rounded-full shadow-sm">
-                <Text className="text-gray-500 text-sm">
+            <View className="bg-white/60 px-4 py-2 rounded-full border border-white/50 shadow-sm">
+                <Text className="text-gray-500 text-xs font-medium">
                     {text}
                 </Text>
             </View>
@@ -92,7 +88,7 @@ const FloatingReview = ({ text, index, total }: { text: string, index: number, t
 
 export default function Home() {
     const isLoggedIn = useUserStore((state: any) => state.isLoggedIn);
-    const language = useUserStore((state: any) => state.language);
+    const language = useUserStore((state: any) => state.language) as 'ko' | 'en';
     const t = translations[language].intro;
 
     if (isLoggedIn) {

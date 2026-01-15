@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUserStore } from '../store/userStore';
 import { AVATARS } from '../constants/data';
 import { API_URL } from '../constants/Config';
+import Avatar from '../components/Avatar';
 
 export default function MemberManagementScreen() {
     const router = useRouter();
@@ -12,18 +13,15 @@ export default function MemberManagementScreen() {
 
     const handleRemoveMember = (memberId: string, nickname: string) => {
         Alert.alert(
-            "멤버 삭제",
-            `'${nickname}' 님을 내보내시겠습니까?`,
+            language === 'ko' ? "멤버 삭제" : "Remove Member",
+            language === 'ko' ? `'${nickname}' 님을 내보내시겠습니까?` : `Are you sure you want to remove '${nickname}'?`,
             [
-                { text: "취소", style: "cancel" },
+                { text: language === 'ko' ? "취소" : "Cancel", style: "cancel" },
                 {
-                    text: "삭제",
+                    text: language === 'ko' ? "삭제" : "Remove",
                     style: "destructive",
                     onPress: async () => {
-                        // Implement delete API call if needed, or just warn it's not implemented fully yet
-                        // Ideally: DELETE /nests/:nest_id/members/:id 
-                        // But I haven't checked if that API exists. Assume yes or just show alert.
-                        Alert.alert("알림", "멤버 관리는 아직 준비 중인 기능입니다.");
+                        Alert.alert(language === 'ko' ? "알림" : "Notice", language === 'ko' ? "멤버 관리는 아직 준비 중인 기능입니다." : "Member management is coming soon.");
                     }
                 }
             ]
@@ -38,23 +36,23 @@ export default function MemberManagementScreen() {
                     <TouchableOpacity onPress={() => router.back()} className="mr-4">
                         <Ionicons name="arrow-back" size={24} color="#111827" />
                     </TouchableOpacity>
-                    <Text className="text-xl font-bold text-gray-900">멤버 관리</Text>
+                    <Text className="text-xl font-bold text-gray-900">{language === 'ko' ? "멤버 관리" : "Member Management"}</Text>
                 </View>
             </View>
 
             <ScrollView className="flex-1 p-6">
-                <Text className="text-gray-500 font-medium mb-4">함께하는 가족 구성원</Text>
+                <Text className="text-gray-500 font-medium mb-4">{language === 'ko' ? "함께하는 가족 구성원" : "Nest Members"}</Text>
 
-                <View className="bg-white rounded-2xl p-2 shadow-sm border border-gray-100">
+                <View className="bg-white rounded-3xl p-2 shadow-sm border border-gray-100">
                     {members.map((member, index) => (
                         <View
                             key={member.id}
                             className={`flex-row items-center justify-between p-4 ${index !== members.length - 1 ? 'border-b border-gray-50' : ''}`}
                         >
                             <View className="flex-row items-center gap-4">
-                                <Image
+                                <Avatar
                                     source={(AVATARS[member.avatarId] || AVATARS[0]).image}
-                                    className="w-12 h-12 rounded-full bg-gray-100"
+                                    size="md"
                                 />
                                 <View>
                                     <View className="flex-row items-center gap-2">
@@ -79,18 +77,19 @@ export default function MemberManagementScreen() {
                 {/* Add Member Button */}
                 <TouchableOpacity
                     onPress={() => router.push('/add_member')}
-                    className="mt-6 bg-white border border-gray-200 border-dashed rounded-2xl p-4 flex-row items-center justify-center gap-2 active:bg-gray-50"
+                    className="mt-6 bg-white border border-gray-200 border-dashed rounded-3xl p-6 flex-row items-center justify-center gap-2 active:bg-gray-50"
                 >
-                    <View className="w-8 h-8 rounded-full bg-orange-100 items-center justify-center">
-                        <Ionicons name="add" size={20} color="#F97316" />
+                    <View className="w-10 h-10 rounded-2xl bg-orange-100 items-center justify-center">
+                        <Ionicons name="add" size={24} color="#F97316" />
                     </View>
-                    <Text className="text-gray-600 font-bold">새로운 멤버 초대/추가하기</Text>
+                    <Text className="text-gray-600 font-bold text-lg">{language === 'ko' ? "새로운 멤버 초대/추가하기" : "Invite/Add New Member"}</Text>
                 </TouchableOpacity>
 
                 <View className="mt-8">
                     <Text className="text-gray-400 text-xs text-center leading-5">
-                        가족 구성원을 추가하고 함께 보금자리를 꾸며보세요.{'\n'}
-                        초대 코드를 공유하거나, 자녀/반려동물 프로필을 직접 생성할 수 있어요.
+                        {language === 'ko'
+                            ? "가족 구성원을 추가하고 함께 보금자리를 꾸며보세요.\n초대 코드를 공유하거나, 자녀/반려동물 프로필을 직접 생성할 수 있어요."
+                            : "Add members to your nest.\nShare invite codes or create profiles for kids and pets."}
                     </Text>
                 </View>
             </ScrollView>

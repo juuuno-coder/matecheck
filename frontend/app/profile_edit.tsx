@@ -6,6 +6,7 @@ import { useUserStore } from '../store/userStore';
 import { API_URL } from '../constants/Config';
 import { AVATARS } from '../constants/data';
 import { translations } from '../constants/I18n';
+import Avatar from '../components/Avatar';
 
 export default function ProfileEditScreen() {
     const router = useRouter();
@@ -18,7 +19,7 @@ export default function ProfileEditScreen() {
 
     const handleSave = async () => {
         if (!newNickname.trim()) {
-            Alert.alert(t.common.error, "닉네임을 입력해주세요.");
+            Alert.alert(t.common.error, language === 'ko' ? "닉네임을 입력해주세요." : "Please enter nickname.");
             return;
         }
 
@@ -37,11 +38,11 @@ export default function ProfileEditScreen() {
             if (response.ok) {
                 const data = await response.json();
                 setProfile(data.nickname, data.avatar_id);
-                Alert.alert(t.common.success, "프로필이 수정되었습니다.", [
+                Alert.alert(t.common.success, language === 'ko' ? "프로필이 수정되었습니다." : "Profile updated.", [
                     { text: t.common.ok, onPress: () => router.back() }
                 ]);
             } else {
-                Alert.alert(t.common.error, "저장에 실패했습니다.");
+                Alert.alert(t.common.error, language === 'ko' ? "저장에 실패했습니다." : "Failed to save.");
             }
         } catch (error) {
             console.error(error);
@@ -50,6 +51,8 @@ export default function ProfileEditScreen() {
             setIsSaving(false);
         }
     };
+
+    const selectedAvatar = AVATARS.find(a => a.id === selectedAvatarId) || AVATARS[0];
 
     return (
         <View className="flex-1 bg-gray-50">
@@ -60,11 +63,11 @@ export default function ProfileEditScreen() {
                         <TouchableOpacity onPress={() => router.back()} className="mr-4">
                             <Ionicons name="arrow-back" size={24} color="#111827" />
                         </TouchableOpacity>
-                        <Text className="text-xl font-bold text-gray-900">프로필 수정</Text>
+                        <Text className="text-xl font-bold text-gray-900">{language === 'ko' ? "프로필 수정" : "Edit Profile"}</Text>
                     </View>
                     <TouchableOpacity onPress={handleSave} disabled={isSaving}>
                         <Text className={`text-lg font-bold ${isSaving ? 'text-gray-300' : 'text-orange-600'}`}>
-                            {isSaving ? "저장 중" : "완료"}
+                            {isSaving ? (language === 'ko' ? "저장 중" : "Saving") : (language === 'ko' ? "완료" : "Done")}
                         </Text>
                     </TouchableOpacity>
                 </View>
@@ -73,40 +76,55 @@ export default function ProfileEditScreen() {
             <ScrollView className="flex-1 p-6">
                 {/* Avatar Selection */}
                 <View className="items-center mb-8">
-                    <Text className="text-sm font-bold text-gray-900 mb-4">아바타 선택</Text>
-                    <View className="w-32 h-32 bg-white rounded-full items-center justify-center mb-4 shadow-lg border-4 border-orange-100">
-                        <Text className="text-6xl">{AVATARS.find(a => a.id === selectedAvatarId)?.emoji || '🙂'}</Text>
+                    <Text className="text-sm font-bold text-gray-900 mb-4">{language === 'ko' ? "아바타 선택" : "Choose Avatar"}</Text>
+
+                    {/* Main Preview - Now Squircle 1:1 */}
+                    <View className="mb-4">
+                        <Avatar
+                            source={selectedAvatar.image}
+                            size="2xl"
+                            borderColor="#FFEDD5"
+                            borderWidth={4}
+                        />
                     </View>
-                    <Text className="text-xs text-gray-400 mb-4">아이콘을 눌러 캐릭터를 변경하세요</Text>
+
+                    <Text className="text-xs text-gray-400 mb-6">{language === 'ko' ? "아이콘을 눌러 캐릭터를 변경하세요" : "Tap icon to change character"}</Text>
 
                     {/* Avatar Grid */}
-                    <View className="flex-row flex-wrap justify-center gap-3 max-w-sm">
+                    <View className="flex-row flex-wrap justify-center gap-4 max-w-sm">
                         {AVATARS.map((avatar) => (
                             <TouchableOpacity
                                 key={avatar.id}
                                 onPress={() => setSelectedAvatarId(avatar.id)}
-                                className={`w-16 h-16 rounded-2xl items-center justify-center ${selectedAvatarId === avatar.id
-                                        ? 'bg-orange-100 border-2 border-orange-500'
-                                        : 'bg-gray-100 border-2 border-gray-200'
+                                className={`p-1 rounded-[22px] ${selectedAvatarId === avatar.id
+                                    ? 'bg-orange-500 shadow-md'
+                                    : 'bg-transparent'
                                     }`}
                             >
-                                <Text className="text-3xl">{avatar.emoji}</Text>
+                                <Avatar
+                                    source={avatar.image}
+                                    size="md"
+                                    borderColor={selectedAvatarId === avatar.id ? "#F97316" : "#E5E7EB"}
+                                    borderWidth={selectedAvatarId === avatar.id ? 2 : 1}
+                                />
                             </TouchableOpacity>
                         ))}
                     </View>
                 </View>
 
                 {/* Nickname Input */}
-                <View>
-                    <Text className="text-sm font-bold text-gray-900 mb-2">닉네임</Text>
+                <View className="mt-4">
+                    <Text className="text-sm font-bold text-gray-900 mb-2">{language === 'ko' ? "닉네임" : "Nickname"}</Text>
                     <TextInput
                         value={newNickname}
                         onChangeText={setNewNickname}
                         className="bg-white border border-gray-200 rounded-xl p-4 text-lg text-gray-900 shadow-sm"
-                        placeholder="닉네임을 입력하세요"
+                        placeholder={language === 'ko' ? "닉네임을 입력하세요" : "Enter nickname"}
                         maxLength={20}
                     />
-                    <Text className="text-xs text-gray-400 mt-2">{newNickname.length} / 20</Text>
+                    <View className="flex-row justify-end mt-2">
+                        <Text className="text-xs text-gray-400">{newNickname.length} / 20</Text>
+                    </View>
                 </View>
             </ScrollView>
         </View>

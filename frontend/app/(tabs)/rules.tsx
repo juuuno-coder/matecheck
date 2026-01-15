@@ -8,6 +8,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { translations, Language } from '../../constants/I18n';
 import { API_URL } from '../../constants/Config';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import TutorialOverlay from '../../components/TutorialOverlay';
+import { Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
 
 // Types for House Rules
 interface HouseRule {
@@ -55,6 +59,7 @@ export default function RulesScreen() {
     const [ruleTitle, setRuleTitle] = useState('');
     const [ruleDescription, setRuleDescription] = useState('');
     const [ruleType, setRuleType] = useState('other');
+    const [showTutorial, setShowTutorial] = useState(false);
 
     // Fetch Rules & Handle Deep Linking
     useEffect(() => {
@@ -177,7 +182,7 @@ export default function RulesScreen() {
 
     // --- COMPONENTS ---
     const GoalSection = ({ type, label, icon }: { type: Goal['type'], label: string, icon: string }) => {
-        const sectionGoals = goals.filter(g => g.type === type);
+        const sectionGoals = goals.filter((g: any) => g.type === type);
 
         if (sectionGoals.length === 0) return null;
 
@@ -252,9 +257,14 @@ export default function RulesScreen() {
         <View className="flex-1 bg-gray-50">
             {/* Header */}
             <View className="pt-16 pb-4 px-6 bg-white flex-row justify-between items-center shadow-sm z-10">
-                <Text className="text-2xl font-bold text-gray-900">
-                    {language === 'ko' ? "약속" : "Promises"}
-                </Text>
+                <View className="flex-row items-center gap-2">
+                    <Text className="text-2xl font-bold text-gray-900">
+                        {language === 'ko' ? "약속" : "Promises"}
+                    </Text>
+                    <TouchableOpacity onPress={() => setShowTutorial(true)}>
+                        <Ionicons name="help-circle-outline" size={20} color="#9CA3AF" />
+                    </TouchableOpacity>
+                </View>
 
                 <TouchableOpacity
                     onPress={handleAddButtonPress}
@@ -522,6 +532,31 @@ export default function RulesScreen() {
                     </View>
                 </View>
             </Modal>
-        </View>
+
+            <TutorialOverlay
+                visible={showTutorial}
+                onComplete={() => setShowTutorial(false)}
+                steps={[
+                    {
+                        target: { x: 20, y: 270, width: width - 40, height: 180, borderRadius: 24 },
+                        title: "함께하는 목표 🏆",
+                        description: "이번 달 공과금 아끼기, 매주 대청소하기 등 메이트들과 함께 달성할 목표를 세워보세요.",
+                        position: "bottom"
+                    },
+                    {
+                        target: { x: 20, y: 300, width: width - 40, height: 180, borderRadius: 24 },
+                        title: "우리의 규칙 📜",
+                        description: "손님 초대, 소음 시간 등 갈등을 줄이기 위한 우리 집만의 약속을 명문화할 수 있습니다.",
+                        position: "top"
+                    },
+                    {
+                        target: { x: width - 60, y: 65, width: 44, height: 44, borderRadius: 22 },
+                        title: "새로운 약속 추가",
+                        description: "플러스 버튼을 눌러 목표나 규칙을 언제든지 새롭게 추가할 수 있어요.",
+                        position: "bottom"
+                    }
+                ]}
+            />
+        </View >
     );
 }

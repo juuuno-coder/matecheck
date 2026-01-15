@@ -42,6 +42,13 @@ export interface BudgetTransaction {
     date: string;
     payerId: string; // memberId
 }
+
+export interface FixedExpense {
+    id: string;
+    title: string;
+    amount: number;
+    day: number; // Day of month (1-31)
+}
 export interface Goal {
     id: string;
     type: 'vision' | 'year' | 'month' | 'week';
@@ -75,6 +82,7 @@ interface UserState {
     // Features - Budget
     budgetGoal: number;
     transactions: BudgetTransaction[];
+    fixedExpenses: FixedExpense[];
 
     // Features - Goals
     goals: Goal[];
@@ -117,6 +125,9 @@ interface UserState {
 
     // Budget Actions
     addTransaction: (title: string, amount: number, category: BudgetTransaction['category']) => void;
+    setBudgetGoal: (amount: number) => void;
+    addFixedExpense: (title: string, amount: number, day: number) => void;
+    deleteFixedExpense: (id: string) => void;
 
     // Goal Actions
     addGoal: (type: Goal['type'], title: string, target: number, unit: string) => void;
@@ -147,8 +158,11 @@ export const useUserStore = create<UserState>((set) => ({
     members: [],
     todos: [],
     events: [],
-    budgetGoal: 0,
+    budgetGoal: 1000000,
     transactions: [],
+    fixedExpenses: [
+        { id: '1', title: '🏠 관리비', amount: 150000, day: 1 }
+    ],
     goals: [],
 
     pendingRequests: [],
@@ -207,7 +221,7 @@ export const useUserStore = create<UserState>((set) => ({
         todos: [],
         events: [],
         transactions: [],
-        goals: [],
+        fixedExpenses: [],
         goals: [],
         pendingRequests: [],
         language: 'ko',
@@ -217,7 +231,7 @@ export const useUserStore = create<UserState>((set) => ({
         members: [...state.members, { id: Math.random().toString(36).substr(2, 9), nickname, avatarId }]
     })),
 
-    updatePassword: async (currentPassword, newPassword, confirmPassword) => {
+    updatePassword: async (currentPassword, newPassword, confirmPassword): Promise<{ success: boolean; error?: string }> => {
         const { userEmail } = useUserStore.getState();
         try {
             const response = await fetch(`${API_URL}/users/password`, {
@@ -515,6 +529,25 @@ export const useUserStore = create<UserState>((set) => ({
         }
     },
 
+    setBudgetGoal: (amount) => {
+        set({ budgetGoal: amount });
+    },
+
+    addFixedExpense: (title, amount, day) => {
+        set((state: UserState) => ({
+            fixedExpenses: [
+                ...state.fixedExpenses,
+                { id: Math.random().toString(36).substr(2, 9), title, amount, day }
+            ]
+        }));
+    },
+
+    deleteFixedExpense: (id) => {
+        set((state: UserState) => ({
+            fixedExpenses: state.fixedExpenses.filter(f => f.id !== id)
+        }));
+    },
+
     // Goal Actions
     addGoal: async (type, title, target, unit) => {
         const { nestId } = useUserStore.getState();
@@ -573,13 +606,13 @@ export const useUserStore = create<UserState>((set) => ({
                 });
                 if (response.ok) {
                     set((state: UserState) => ({
-                        goals: state.goals.map(g => g.id === id ? { ...g, current: nextVal } : g)
+                        goals: state.goals.map((g: Goal) => g.id === id ? { ...g, current: nextVal } : g)
                     }));
                 }
             } catch (error) { console.error(error); }
         } else {
             set((state: UserState) => ({
-                goals: state.goals.map(g => g.id === id ? { ...g, current: nextVal } : g)
+                goals: state.goals.map((g: Goal) => g.id === id ? { ...g, current: nextVal } : g)
             }));
         }
     },

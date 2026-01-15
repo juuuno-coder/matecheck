@@ -9,14 +9,17 @@ export default function Layout() {
     const [isHydrated, setIsHydrated] = useState(false);
 
     useEffect(() => {
-        const checkHydration = async () => {
-            // Wait for rehydration
-            while (!useUserStore.persist.hasHydrated()) {
-                await new Promise(resolve => setTimeout(resolve, 10));
-            }
+        // Subscribe to hydration changes
+        const unsub = useUserStore.persist.onFinishHydration(() => {
             setIsHydrated(true);
-        };
-        checkHydration();
+        });
+
+        // Check if already hydrated (sometimes happens before listener attaches)
+        if (useUserStore.persist.hasHydrated()) {
+            setIsHydrated(true);
+        }
+
+        return () => unsub();
     }, []);
 
     if (!isHydrated) return null;

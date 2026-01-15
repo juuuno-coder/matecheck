@@ -87,9 +87,9 @@ export default function HomeScreen() {
         <View className="flex-1 bg-white">
             <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
 
-                {/* Nest Header (Centered & Large) */}
-                <View className={cn("pt-20 pb-10 px-6 rounded-b-[50px] mb-6 items-center", themeItemBg)}>
-                    <View className="w-24 h-24 bg-white rounded-full items-center justify-center mb-4 shadow-sm overflow-hidden p-2">
+                {/* Nest Header (Modern & Simple) */}
+                <View className={cn("pt-16 pb-8 px-6 rounded-b-[40px] mb-8 items-center", themeItemBg)}>
+                    <View className="w-20 h-20 bg-white rounded-[32px] items-center justify-center mb-4 shadow-sm overflow-hidden p-3 transform rotate-3">
                         <Image
                             source={(NEST_AVATARS.find((a: any) => a.id === nestAvatarId) || NEST_AVATARS[0]).image}
                             style={{ width: '100%', height: '100%' }}
@@ -97,112 +97,109 @@ export default function HomeScreen() {
                         />
                     </View>
 
-                    <Text className="text-gray-500 font-medium text-sm mb-1 text-center">{greeting}</Text>
-                    <Text className="text-3xl font-extrabold text-gray-900 text-center mb-6">{nestName}</Text>
+                    <Text className="text-gray-500 font-bold text-sm mb-1 text-center tracking-wide uppercase">{greeting}</Text>
+                    <Text className="text-2xl font-black text-gray-900 text-center mb-6">{nestName}</Text>
 
-                    {/* Member Stack (Centered) */}
-                    <View className="flex-row items-center bg-white/80 py-2 px-4 rounded-full shadow-sm">
-                        <View className="flex-row pl-2 mr-2">
+                    {/* Member Stack (Clean Pill) */}
+                    <View className="flex-row items-center bg-white py-2 pl-2 pr-4 rounded-full shadow-sm border border-gray-100">
+                        <View className="flex-row -space-x-2 mr-3">
                             {members.slice(0, 4).map((m: any, i: number) => (
                                 <Avatar
                                     key={m.id}
                                     source={(AVATARS[m.avatarId] || AVATARS[0]).image}
                                     size="xs"
-                                    className="-ml-3"
                                     borderColor="#FFFFFF"
                                     borderWidth={2}
                                 />
                             ))}
                         </View>
-                        <Text className="text-gray-600 font-semibold text-xs">
-                            {members.length === 0 ? t.empty_mate : t.mate_count.replace('{count}', members.length.toString())}
+                        <Text className="text-gray-600 font-bold text-xs">
+                            {members.length === 0 ? t.empty_mate : `${members.length} Mates`}
                         </Text>
                     </View>
 
                     <TouchableOpacity
-                        className="absolute top-16 right-16 p-2 rounded-full bg-white/50"
-                        onPress={() => setActivityModalVisible(true)}
-                    >
-                        <Ionicons name="notifications-outline" size={20} color="#4B5563" />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        className="absolute top-16 right-6 p-2 rounded-full bg-white/50"
+                        className="absolute top-14 right-4 w-10 h-10 items-center justify-center rounded-full bg-white/60"
                         onPress={() => router.push('/(tabs)/settings')}
                     >
-                        <Ionicons name="settings-outline" size={20} color="#4B5563" />
+                        <Ionicons name="settings-outline" size={22} color="#1F2937" />
                     </TouchableOpacity>
                 </View>
 
-                <View className="px-6 gap-8">
+                <View className="px-6 gap-6">
 
-                    {/* 1. AI Agent Briefing Card */}
-                    <Animated.View entering={FadeInUp.delay(200)} className="bg-gray-900 rounded-3xl p-6 shadow-xl shadow-orange-500/20">
-                        <View className="flex-row items-center mb-4 gap-3">
-                            <View className="w-10 h-10 bg-orange-500 rounded-full items-center justify-center">
-                                <Ionicons name="sparkles" size={20} color="white" />
+                    {/* 1. Smart Briefing Card (Modern Dark) */}
+                    <Animated.View entering={FadeInUp.delay(200)} className="bg-gray-900 rounded-[32px] p-6 shadow-xl shadow-gray-200">
+                        <View className="flex-row items-center justify-between mb-6">
+                            <View className="flex-row items-center gap-3">
+                                <View className="w-10 h-10 bg-gray-800 rounded-full items-center justify-center">
+                                    <Text className="text-xl">✨</Text>
+                                </View>
+                                <View>
+                                    <Text className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">Daily Briefing</Text>
+                                    <Text className="text-white text-lg font-bold">오늘의 체크리스트</Text>
+                                </View>
                             </View>
-                            <View>
-                                <Text className="text-orange-400 text-xs font-bold uppercase tracking-wider">Smart Briefing</Text>
-                                <Text className="text-white text-lg font-bold">오늘의 체크리스트</Text>
-                            </View>
+                            <TouchableOpacity onPress={() => setActivityModalVisible(true)} className="w-8 h-8 bg-gray-800 rounded-full items-center justify-center">
+                                <Ionicons name="notifications" size={16} color="white" />
+                                <View className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-gray-900" />
+                            </TouchableOpacity>
                         </View>
 
                         <View className="gap-3">
-                            {/* Priority 1: Event */}
+                            {/* Smart Content Logic */}
                             {upcomingEvents.length > 0 ? (
-                                <View className="flex-row items-start gap-3 bg-white/10 p-3 rounded-xl">
-                                    <Text className="text-xl">📅</Text>
+                                <View className="bg-gray-800 p-4 rounded-2xl flex-row gap-4 items-center">
+                                    <View className="bg-orange-500/20 w-10 h-10 rounded-xl items-center justify-center">
+                                        <Text className="text-lg">📅</Text>
+                                    </View>
                                     <View className="flex-1">
-                                        <Text className="text-gray-300 text-xs">잊지 마세요!</Text>
-                                        <Text className="text-white font-medium">
-                                            <Text className="font-bold text-orange-300">'{upcomingEvents[0].title}'</Text> 일정이 {getDDay(upcomingEvents[0].date)} 있어요.
-                                        </Text>
+                                        <Text className="text-orange-300 font-bold text-xs mb-1">D-{getDDay(upcomingEvents[0].date).replace('D-', '')} Upcoming</Text>
+                                        <Text className="text-white font-bold text-base" numberOfLines={1}>{upcomingEvents[0].title}</Text>
+                                    </View>
+                                </View>
+                            ) : activeGoals.length > 0 ? (
+                                <View className="bg-gray-800 p-4 rounded-2xl flex-row gap-4 items-center">
+                                    <View className="bg-blue-500/20 w-10 h-10 rounded-xl items-center justify-center">
+                                        <Text className="text-lg">🏆</Text>
+                                    </View>
+                                    <View className="flex-1">
+                                        <Text className="text-blue-300 font-bold text-xs mb-1">Focus Goal</Text>
+                                        <Text className="text-white font-bold text-base" numberOfLines={1}>{activeGoals[0].title}</Text>
+                                        <Text className="text-gray-400 text-xs mt-1">{activeGoals[0].current}% 달성 중</Text>
                                     </View>
                                 </View>
                             ) : (
-                                <View className="flex-row items-start gap-3 bg-white/10 p-3 rounded-xl">
-                                    <Text className="text-xl">📅</Text>
-                                    <Text className="text-gray-300 mt-1">예정된 일정이 없어서 여유로워요.</Text>
-                                </View>
-                            )}
-
-                            {/* Priority 2: Goal */}
-                            {activeGoals.length > 0 && (
-                                <View className="flex-row items-start gap-3 bg-white/10 p-3 rounded-xl">
-                                    <Text className="text-xl">🏆</Text>
+                                <View className="bg-gray-800 p-4 rounded-2xl flex-row gap-4 items-center">
+                                    <View className="bg-green-500/20 w-10 h-10 rounded-xl items-center justify-center">
+                                        <Text className="text-lg">🌿</Text>
+                                    </View>
                                     <View className="flex-1">
-                                        <Text className="text-gray-300 text-xs">목표 달성 응원!</Text>
-                                        <Text className="text-white font-medium">
-                                            <Text className="font-bold text-orange-300">{activeGoals[0].title}</Text> {activeGoals[0].current}% 달성 중이에요!
-                                        </Text>
+                                        <Text className="text-green-300 font-bold text-xs mb-1">Peaceful Day</Text>
+                                        <Text className="text-white font-bold text-base">오늘 하루도 행복하게!</Text>
                                     </View>
                                 </View>
                             )}
 
-                            {/* Priority 3: Mission Count */}
-                            <View className="flex-row items-start gap-3 bg-white/10 p-3 rounded-xl">
-                                <Text className="text-xl">✅</Text>
-                                <View className="flex-1">
-                                    <Text className="text-gray-300 text-xs">오늘의 미션</Text>
-                                    {incompleteTodos.length > 0 ? (
-                                        <Text className="text-white font-medium">
-                                            아직 <Text className="font-bold text-orange-300">{incompleteTodos.length}개의 미션</Text>이 남아있어요. 화이팅!
-                                        </Text>
-                                    ) : (
-                                        <Text className="text-white font-medium">모든 미션을 완료했어요! 완벽해요 🎉</Text>
-                                    )}
+                            {incompleteTodos.length > 0 && (
+                                <View className="bg-gray-800/50 p-4 rounded-2xl flex-row justify-between items-center">
+                                    <Text className="text-gray-400 font-medium text-sm">남은 할 일</Text>
+                                    <View className="flex-row items-center gap-2">
+                                        <Text className="text-white font-bold">{incompleteTodos.length}개</Text>
+                                        <Ionicons name="chevron-forward" size={14} color="#9CA3AF" />
+                                    </View>
                                 </View>
-                            </View>
+                            )}
                         </View>
                     </Animated.View>
 
-                    {/* 2. Upcoming Schedule (Pretty UI) */}
+                    {/* 2. Upcoming Schedule (Clean List) */}
                     <View>
                         <SectionHeader title="돌아오는 일정 📅" onPress={() => router.push('/(tabs)/plan')} />
                         {upcomingEvents.length === 0 ? (
-                            <View className="bg-gray-50 p-6 rounded-2xl items-center border border-gray-100 border-dashed">
-                                <Text className="text-gray-400">예정된 일정이 없어요.</Text>
+                            <View className="bg-gray-50 p-8 rounded-[32px] items-center justify-center border border-gray-100/50">
+                                <Text className="text-4xl mb-4 opacity-30">🗓️</Text>
+                                <Text className="text-gray-400 font-medium">등록된 일정이 없어요</Text>
                             </View>
                         ) : (
                             <View className="gap-3">
@@ -211,27 +208,29 @@ export default function HomeScreen() {
                                     const isToday = dday === '오늘';
 
                                     return (
-                                        <Animated.View key={evt.id} entering={FadeInDown.delay(index * 100 + 300)} className="flex-row bg-white p-4 rounded-3xl border border-gray-100 shadow-sm items-center">
-                                            {/* Date Box */}
-                                            <View className={cn("w-16 h-16 rounded-2xl items-center justify-center mr-4 shadow-sm", isToday ? "bg-orange-500" : "bg-gray-50")}>
-                                                <Text className={cn("text-xs font-bold uppercase mb-0.5", isToday ? "text-white" : "text-gray-400")}>
+                                        <Animated.View key={evt.id} entering={FadeInDown.delay(index * 100 + 300)}
+                                            className="flex-row bg-white p-5 rounded-3xl border border-gray-100 items-center shadow-sm"
+                                        >
+                                            {/* Date Box (Modern) */}
+                                            <View className={cn("w-14 h-14 rounded-2xl items-center justify-center mr-5", isToday ? "bg-gray-900" : "bg-gray-50")}>
+                                                <Text className={cn("text-[10px] font-bold uppercase", isToday ? "text-gray-400" : "text-gray-400")}>
                                                     {new Date(evt.date).getMonth() + 1}월
                                                 </Text>
-                                                <Text className={cn("text-2xl font-black", isToday ? "text-white" : "text-gray-900")}>
+                                                <Text className={cn("text-xl font-black", isToday ? "text-white" : "text-gray-900")}>
                                                     {new Date(evt.date).getDate()}
                                                 </Text>
                                             </View>
 
                                             {/* Content */}
-                                            <View className="flex-1">
-                                                <View className="flex-row justify-between items-start mb-1">
-                                                    <Text className="font-bold text-gray-900 text-lg flex-1 mr-2" numberOfLines={1}>{evt.title}</Text>
-                                                    <View className={cn("px-2 py-1 rounded-full", isToday ? "bg-red-100" : "bg-gray-100")}>
-                                                        <Text className={cn("text-[10px] font-bold", isToday ? "text-red-600" : "text-gray-500")}>{dday}</Text>
+                                            <View className="flex-1 gap-1">
+                                                <View className="flex-row justify-between items-center">
+                                                    <View className={cn("px-2 py-0.5 rounded-md self-start mb-1", isToday ? "bg-red-50" : "bg-gray-100")}>
+                                                        <Text className={cn("text-[10px] font-bold", isToday ? "text-red-500" : "text-gray-500")}>{dday}</Text>
                                                     </View>
                                                 </View>
-                                                <Text className="text-gray-400 text-sm">
-                                                    {evt.endDate ? `${evt.date} ~ ${evt.endDate}` : '하루 종일'}
+                                                <Text className="font-bold text-gray-900 text-base" numberOfLines={1}>{evt.title}</Text>
+                                                <Text className="text-gray-400 text-xs font-medium">
+                                                    {evt.endDate ? `${evt.date} ~ ${evt.endDate}` : 'All Day'}
                                                 </Text>
                                             </View>
                                         </Animated.View>
@@ -242,10 +241,10 @@ export default function HomeScreen() {
                         {upcomingEvents.length > 0 && (
                             <TouchableOpacity
                                 onPress={() => router.push('/(tabs)/plan')}
-                                className="mt-4 flex-row justify-center items-center py-3 bg-gray-50 rounded-xl"
+                                className="mt-4 flex-row justify-center items-center py-4 bg-gray-50 rounded-2xl active:bg-gray-100"
                             >
-                                <Text className="text-gray-500 font-medium text-sm">전체 일정 보기</Text>
-                                <Ionicons name="chevron-forward" size={16} color="#6B7280" />
+                                <Text className="text-gray-500 font-bold text-sm">전체 일정 보기</Text>
+                                <Ionicons name="arrow-forward" size={16} color="#6B7280" className="ml-2" />
                             </TouchableOpacity>
                         )}
                     </View>

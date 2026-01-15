@@ -92,155 +92,175 @@ export default function SettingsScreen() {
     };
 
     const SettingItem = ({ icon, label, value, onPress, isDestructive = false }: any) => (
-        <TouchableOpacity onPress={onPress} className="flex-row items-center justify-between py-4 border-b border-gray-100 bg-white px-6 active:bg-gray-50">
-            <View className="flex-row items-center gap-3">
-                <View className={cn("w-8 h-8 rounded-full items-center justify-center", isDestructive ? "bg-red-50" : "bg-gray-50")}>
-                    <Ionicons name={icon} size={18} color={isDestructive ? "#EF4444" : "#4B5563"} />
+        <TouchableOpacity onPress={onPress} className="flex-row items-center justify-between py-5 px-6 active:bg-gray-50">
+            <View className="flex-row items-center gap-4">
+                <View className={cn("w-10 h-10 rounded-2xl items-center justify-center", isDestructive ? "bg-red-50" : "bg-gray-50")}>
+                    <Ionicons name={icon} size={20} color={isDestructive ? "#EF4444" : "#4B5563"} />
                 </View>
-                <Text className={cn("text-base font-medium", isDestructive ? "text-red-500" : "text-gray-700")}>{label}</Text>
+                <Text className={cn("text-base font-bold", isDestructive ? "text-red-500" : "text-gray-900")}>{label}</Text>
             </View>
             <View className="flex-row items-center gap-2">
-                {value && <Text className="text-gray-400 text-sm">{value}</Text>}
-                <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
+                {value && <Text className="text-gray-400 font-medium text-sm">{value}</Text>}
+                {!isDestructive && <Ionicons name="chevron-forward" size={18} color="#E5E7EB" />}
             </View>
         </TouchableOpacity>
     );
 
     return (
         <View className="flex-1 bg-gray-50">
-            <View className="pt-16 pb-6 px-6 bg-white mb-4 shadow-sm flex-row justify-between items-start">
-                <View className="flex-1">
-                    <View className="flex-row items-center gap-2 mb-6">
-                        <Text className="text-2xl font-bold text-gray-800 font-primary">{t.title}</Text>
-                        <TouchableOpacity onPress={() => setShowTutorial(true)}>
-                            <Ionicons name="help-circle-outline" size={20} color="#9CA3AF" />
-                        </TouchableOpacity>
-                    </View>
+            {/* Header / Profile Section */}
+            <View className="pt-16 pb-8 px-6 bg-white shadow-sm rounded-b-[40px] mb-8 z-10">
+                <View className="flex-row justify-between items-start mb-6">
+                    <Text className="text-3xl font-black text-gray-900">{t.title}</Text>
+                    <TouchableOpacity onPress={() => setShowTutorial(true)} className="p-2 bg-gray-50 rounded-full">
+                        <Ionicons name="help" size={20} color="#6B7280" />
+                    </TouchableOpacity>
+                </View>
 
-                    <View className="flex-row items-center gap-4">
-                        <Avatar
-                            source={(AVATARS[avatarId] || AVATARS[0]).image}
-                            size="lg"
-                            borderColor="#E5E7EB"
-                            borderWidth={1}
-                        />
-                        <View className="flex-row items-center justify-between flex-1">
-                            <View>
-                                <Text className="text-xl font-bold text-gray-900">{nickname}</Text>
-                                <Text className="text-gray-500">{nestName}</Text>
-                            </View>
+                <View className="flex-row items-center gap-5">
+                    <Avatar
+                        source={(AVATARS[avatarId] || AVATARS[0]).image}
+                        size="lg"
+                        borderColor="#F3F4F6"
+                        borderWidth={4}
+                    />
+                    <View className="flex-1">
+                        <Text className="text-2xl font-bold text-gray-900 mb-1">{nickname}</Text>
+                        <Text className="text-gray-500 font-medium text-sm mb-3">@{nestName}</Text>
+
+                        <View className="flex-row gap-2">
+                            <TouchableOpacity
+                                onPress={() => router.push('/profile_edit')}
+                                className="bg-gray-900 px-4 py-2 rounded-full"
+                            >
+                                <Text className="text-white font-bold text-xs">{t.profile_edit}</Text>
+                            </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={handleLogout}
-                                className="flex-row items-center gap-1 bg-red-50 px-3 py-1.5 rounded-full border border-red-100"
+                                className="bg-gray-100 px-4 py-2 rounded-full"
                             >
-                                <Ionicons name="log-out-outline" size={14} color="#EF4444" />
-                                <Text className="text-red-500 font-bold text-xs">{t.logout}</Text>
+                                <Text className="text-gray-600 font-bold text-xs">{t.logout}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
                 </View>
             </View>
 
-            <ScrollView contentContainerStyle={{ paddingBottom: 50 }}>
-                {/* Join Requests Section */}
+            <ScrollView contentContainerStyle={{ paddingBottom: 100 }} className="px-6">
+
+                {/* Join Requests (Card Style) */}
                 {pendingRequests.length > 0 && (
-                    <View className="mb-4">
-                        <Text className="px-6 py-2 text-xs font-bold text-orange-500 uppercase">{t.join_requests} ({pendingRequests.length})</Text>
-                        {pendingRequests.map((req: any) => (
-                            <View key={req.id} className="flex-row items-center justify-between py-4 border-b border-gray-100 bg-orange-50/30 px-6">
-                                <View className="flex-row items-center gap-3">
-                                    <Avatar source={(AVATARS[req.avatarId] || AVATARS[0]).image} size="sm" />
-                                    <View>
-                                        <Text className="text-base font-bold text-gray-800">{req.nickname}</Text>
-                                        <Text className="text-gray-400 text-xs">{language === 'ko' ? '보금자리 참여를 요청했습니다.' : 'Requested to join MateHome.'}</Text>
+                    <View className="mb-8">
+                        <Text className="text-sm font-bold text-gray-900 mb-3 px-2">🔔 {t.join_requests}</Text>
+                        <View className="bg-white rounded-3xl p-2 shadow-sm border border-gray-100 gap-2">
+                            {pendingRequests.map((req: any) => (
+                                <View key={req.id} className="flex-row items-center justify-between p-4 bg-orange-50 rounded-2xl">
+                                    <View className="flex-row items-center gap-3">
+                                        <Avatar source={(AVATARS[req.avatarId] || AVATARS[0]).image} size="sm" />
+                                        <View>
+                                            <Text className="text-base font-bold text-gray-900">{req.nickname}</Text>
+                                            <Text className="text-orange-600/60 text-xs font-bold">New Mate Request</Text>
+                                        </View>
                                     </View>
+                                    <TouchableOpacity
+                                        onPress={() => approveJoinRequest(req.id)}
+                                        className="bg-orange-500 w-10 h-10 rounded-full items-center justify-center shadow-sm"
+                                    >
+                                        <Ionicons name="checkmark" size={20} color="white" />
+                                    </TouchableOpacity>
                                 </View>
-                                <TouchableOpacity
-                                    onPress={() => approveJoinRequest(req.id)}
-                                    className="bg-orange-500 px-4 py-2 rounded-lg"
-                                >
-                                    <Text className="text-white font-bold text-sm">{language === 'ko' ? '수락' : 'Approve'}</Text>
-                                </TouchableOpacity>
-                            </View>
-                        ))}
+                            ))}
+                        </View>
                     </View>
                 )}
 
-                <View className="mb-2">
-                    <Text className="px-6 py-2 text-xs font-bold text-gray-400 uppercase">{t.account_section}</Text>
-                    <SettingItem icon="person-outline" label={t.profile_edit} onPress={() => router.push('/profile_edit')} />
-                    <SettingItem icon="notifications-outline" label={t.notifications} value="On" />
-                    <SettingItem
-                        icon="earth-outline"
-                        label={language === 'ko' ? "언어 (Language)" : "Language"}
-                        value={language === 'ko' ? "한국어" : "English"}
-                        onPress={toggleLanguage}
-                    />
-                </View>
+                {/* Settings Groups */}
+                <View className="gap-8">
 
-                <View className="mb-2">
-                    <Text className="px-6 py-2 text-xs font-bold text-gray-400 uppercase">{t.nest_section}</Text>
-                    {/* Nest Management (New) */}
-                    <SettingItem
-                        icon="home-outline"
-                        label={language === 'ko' ? "보금자리 관리" : "Nest Management"}
-                        value={nestName}
-                        onPress={() => router.push('/nest_management')}
-                    />
-
-                    {/* Member Management (Old "Basic Management" / "Member Management") */}
-                    <TouchableOpacity onPress={() => router.push('/member_management')} className="flex-row items-center justify-between py-4 border-b border-gray-100 bg-white px-6 active:bg-gray-50">
-                        <View className="flex-row items-center gap-3">
-                            <View className="w-8 h-8 rounded-full items-center justify-center bg-gray-50">
-                                <Ionicons name="people-outline" size={18} color="#4B5563" />
-                            </View>
-                            <Text className="text-base font-medium text-gray-700">{t.member_mgmt}</Text>
+                    {/* Group 1: Nest & Members */}
+                    <View>
+                        <Text className="text-sm font-bold text-gray-400 mb-3 px-2 uppercase tracking-wider">{t.nest_section}</Text>
+                        <View className="bg-white rounded-[32px] overflow-hidden shadow-sm border border-gray-100">
+                            <SettingItem
+                                icon="home"
+                                label={language === 'ko' ? "보금자리 관리" : "Nest Settings"}
+                                value={nestName}
+                                onPress={() => router.push('/nest_management')}
+                            />
+                            <View className="h-[1px] bg-gray-50 mx-6" />
+                            <TouchableOpacity onPress={() => router.push('/member_management')} className="flex-row items-center justify-between py-5 px-6 active:bg-gray-50">
+                                <View className="flex-row items-center gap-4">
+                                    <View className="w-10 h-10 rounded-2xl items-center justify-center bg-gray-50">
+                                        <Ionicons name="people" size={20} color="#4B5563" />
+                                    </View>
+                                    <Text className="text-base font-bold text-gray-900">{t.member_mgmt}</Text>
+                                </View>
+                                <View className="flex-row items-center">
+                                    <View className="flex-row -space-x-2 mr-2">
+                                        {members.slice(0, 3).map((m: any, i: number) => (
+                                            <Avatar
+                                                key={m.id}
+                                                source={(AVATARS[m.avatarId] || AVATARS[0]).image}
+                                                size="xs"
+                                                borderColor="#FFFFFF"
+                                                borderWidth={2}
+                                            />
+                                        ))}
+                                    </View>
+                                    <Ionicons name="chevron-forward" size={18} color="#E5E7EB" />
+                                </View>
+                            </TouchableOpacity>
+                            <View className="h-[1px] bg-gray-50 mx-6" />
+                            <SettingItem
+                                icon="share-social"
+                                label={language === 'ko' ? "초대하기" : "Invite Mates"}
+                                value={localInviteCode}
+                                onPress={onShareInvite}
+                            />
                         </View>
-                        <View className="flex-row items-center">
-                            <View className="flex-row pl-2">
-                                {members.slice(0, 3).map((m: any, i: number) => (
-                                    <Avatar
-                                        key={m.id}
-                                        source={(AVATARS[m.avatarId] || AVATARS[0]).image}
-                                        size="xs"
-                                        className="-ml-2"
-                                        borderColor="#FFFFFF"
-                                        borderWidth={1}
-                                    />
-                                ))}
-                            </View>
-                            <View className="w-6 h-6 rounded-full bg-gray-100 border border-white -ml-2 items-center justify-center z-20">
-                                <Ionicons name="add" size={14} color="#6B7280" />
-                            </View>
-                            <Ionicons name="chevron-forward" size={16} color="#D1D5DB" className="ml-2" />
-                        </View>
-                    </TouchableOpacity>
-
-                    <SettingItem
-                        icon="copy-outline"
-                        label={language === 'ko' ? "초대 코드 복사" : "Copy Invite Code"}
-                        value={localInviteCode || "Loading..."}
-                        onPress={onCopyCode}
-                    />
-                    <SettingItem
-                        icon="share-social-outline"
-                        label={language === 'ko' ? "초대 링크 공유하기" : "Share Invitation Link"}
-                        onPress={onShareInvite}
-                    />
-                </View>
-
-                <View className="mb-8">
-                    <Text className="px-6 py-2 text-xs font-bold text-gray-400 uppercase">{language === 'ko' ? "기타" : "Etc"}</Text>
-                    <SettingItem
-                        icon="document-text-outline"
-                        label={language === 'ko' ? "공지사항" : "Announcements"}
-                        onPress={() => router.push('/announcements')}
-                    />
-                    <SettingItem icon="help-circle-outline" label={language === 'ko' ? "지원센터" : "Support Center"} onPress={() => router.push('/support')} />
-                    <SettingItem icon="log-out-outline" label={t.logout} isDestructive onPress={handleLogout} />
-                    <View className="items-center py-6">
-                        <Text className="text-gray-300 text-xs">Version 1.0.0 (Alpha)</Text>
                     </View>
+
+                    {/* Group 2: App Preferences */}
+                    <View>
+                        <Text className="text-sm font-bold text-gray-400 mb-3 px-2 uppercase tracking-wider">{t.account_section}</Text>
+                        <View className="bg-white rounded-[32px] overflow-hidden shadow-sm border border-gray-100">
+                            <SettingItem
+                                icon="notifications"
+                                label={t.notifications}
+                                value="On"
+                            />
+                            <View className="h-[1px] bg-gray-50 mx-6" />
+                            <SettingItem
+                                icon="globe"
+                                label={language === 'ko' ? "언어 설정" : "Language"}
+                                value={language === 'ko' ? "한국어" : "English"}
+                                onPress={toggleLanguage}
+                            />
+                        </View>
+                    </View>
+
+                    {/* Group 3: Support */}
+                    <View>
+                        <Text className="text-sm font-bold text-gray-400 mb-3 px-2 uppercase tracking-wider">Help & Support</Text>
+                        <View className="bg-white rounded-[32px] overflow-hidden shadow-sm border border-gray-100">
+                            <SettingItem
+                                icon="megaphone"
+                                label={language === 'ko' ? "공지사항" : "Announcements"}
+                                onPress={() => router.push('/announcements')}
+                            />
+                            <View className="h-[1px] bg-gray-50 mx-6" />
+                            <SettingItem
+                                icon="chatbubble-ellipses"
+                                label={language === 'ko' ? "문의하기" : "Contact Us"}
+                                onPress={() => router.push('/support')}
+                            />
+                        </View>
+                    </View>
+
+                    <View className="items-center py-4">
+                        <Text className="text-gray-300 text-xs font-bold">MateCheck v1.0.0</Text>
+                    </View>
+
                 </View>
             </ScrollView>
 

@@ -230,9 +230,20 @@ export default function PlanScreen() {
                     </View>
 
                     {selectedEvents.length === 0 ? (
-                        <View className="bg-white rounded-2xl p-6 items-center justify-center border border-gray-100 border-dashed mb-2">
-                            <Text className="text-gray-400 font-medium text-sm">{tCalendar.no_events}</Text>
-                        </View>
+                        <TouchableOpacity
+                            onPress={() => setCalModalVisible(true)}
+                            className="bg-gray-50 rounded-2xl p-8 items-center justify-center border-2 border-dashed border-gray-200 active:bg-gray-100"
+                        >
+                            <View className="w-12 h-12 rounded-full bg-white items-center justify-center mb-3 shadow-sm">
+                                <Ionicons name="add" size={24} color="#9CA3AF" />
+                            </View>
+                            <Text className="text-gray-500 font-medium text-sm">
+                                {language === 'ko' ? "예정된 일정이 없어요" : "No events scheduled"}
+                            </Text>
+                            <Text className="text-gray-400 text-xs mt-1">
+                                {language === 'ko' ? "터치해서 일정을 추가해보세요" : "Tap to add a new event"}
+                            </Text>
+                        </TouchableOpacity>
                     ) : (
                         selectedEvents.map((evt, idx) => {
                             const isVote = evt.type === 'vote';
@@ -271,9 +282,18 @@ export default function PlanScreen() {
                     </View>
 
                     {todos.length === 0 ? (
-                        <View className="bg-white rounded-2xl p-8 items-center justify-center border border-gray-100 border-dashed">
-                            <Text className="text-gray-400 text-sm">{tTodo.empty_list_title}</Text>
-                        </View>
+                        <TouchableOpacity
+                            onPress={() => setTodoModalVisible(true)}
+                            className="bg-gray-50 rounded-2xl p-8 items-center justify-center border-2 border-dashed border-gray-200 active:bg-gray-100"
+                        >
+                            <View className="w-12 h-12 rounded-full bg-white items-center justify-center mb-3 shadow-sm">
+                                <Ionicons name="add" size={24} color="#9CA3AF" />
+                            </View>
+                            <Text className="text-gray-500 text-sm font-medium">{tTodo.empty_list_title}</Text>
+                            <Text className="text-gray-400 text-xs mt-1">
+                                {language === 'ko' ? "터치해서 할 일을 추가해보세요" : "Tap to add a new task"}
+                            </Text>
+                        </TouchableOpacity>
                     ) : (
                         <>
                             <Text className="text-sm font-bold text-gray-500 mb-2 ml-1">{tTodo.today}</Text>

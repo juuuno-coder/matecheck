@@ -504,20 +504,20 @@ export default function PlanScreen() {
                 steps={[
                     {
                         target: { x: 20, y: 150, width: width - 40, height: 320, borderRadius: 24 },
-                        title: "우리 집 공유 달력 📅",
-                        description: "룸메이트와 공유해야 할 외박, 친구 방문, 청소일 등을 달력에 기록하세요.",
+                        title: language === 'ko' ? "우리 집 공유 달력 📅" : "Shared Calendar 📅",
+                        description: language === 'ko' ? "룸메이트와 공유해야 할 외박, 친구 방문, 청소일 등을 달력에 기록하세요." : "Record events like sleepover plans, guest visits, and cleaning days.",
                         position: "bottom"
                     },
                     {
                         target: { x: 20, y: 500, width: width - 40, height: 120, borderRadius: 24 },
-                        title: "해야 할 일 (Todo) ✅",
-                        description: "설거지, 쓰레기 분리수거 등 매일 또는 매주 반복되는 할 일을 등록하고 관리하세요.",
+                        title: language === 'ko' ? "해야 할 일 (Todo) ✅" : "Todo List ✅",
+                        description: language === 'ko' ? "설거지, 쓰레기 분리수거 등 매일 또는 매주 반복되는 할 일을 등록하고 관리하세요." : "Register daily or weekly recurring chores like dishes and trash.",
                         position: "top"
                     },
                     {
                         target: { x: width - 60, y: 65, width: 44, height: 44, borderRadius: 22 },
-                        title: "빠른 추가하기",
-                        description: "플러스 버튼을 눌러 일정이나 할 일을 즉시 추가할 수 있습니다.",
+                        title: language === 'ko' ? "빠른 추가하기" : "Quick Add",
+                        description: language === 'ko' ? "플러스 버튼을 눌러 일정이나 할 일을 즉시 추가할 수 있습니다." : "Press the + button to instantly add events or tasks.",
                         position: "bottom"
                     }
                 ]}

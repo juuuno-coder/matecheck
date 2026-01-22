@@ -295,6 +295,36 @@ export const translations = {
             d_day: "D-Day",
             d_minus: "D-{days}",
             d_plus: "D+{days}"
+        },
+        // 방장 관련
+        master: {
+            badge: "방장",
+            only_notice: "목표와 규칙은 방장만 관리할 수 있어요.",
+            tutorial_title: "새로운 소식: 방장 시스템 도입! 👑",
+            tutorial_desc: "우리 집의 질서를 위해 목표와 규칙 설정 권한은 방장에게 주어져요. 현재 방장의 가이드를 따라 즐거운 공동생활을 만들어보세요!",
+            grant_notice: "현재 보금자리를 만든 분이 방장으로 지정되었습니다."
+        },
+        // 튜토리얼 관련
+        tutorial: {
+            step1_title: "함께하는 우리 집 🏠",
+            step1_desc: "여기는 보금자리 정보와 함께하는 메이트들을 한눈에 볼 수 있는 곳이에요.",
+            step2_title: "오늘의 체크리스트 ✅",
+            step2_desc: "오늘 해야 할 중요한 일이나 일정을 스마트하게 브리핑해드려요.",
+            step3_title: "빠른 추가 버튼 ✨",
+            step3_desc: "이 버튼을 눌러 언제든 새로운 일정, 목표, 집안일을 추가할 수 있어요.",
+            step4_title: "스마트한 메뉴 이동 🚀",
+            step4_desc: "하단 탭을 통해 할 일, 일정, 목표, 가계부, 설정을 자유롭게 이동해보세요.",
+            next: "다음",
+            skip: "건너뛰기",
+            finish: "시작하기"
+        },
+        settings_tutorial: {
+            step1_title: "내 프로필 관리 👤",
+            step1_desc: "나만의 닉네임과 아바타를 변경하고 계정 설정을 관리하세요.",
+            step2_title: "보금자리(Nest) 설정 🏠",
+            step2_desc: "우리 집의 이름, 테마를 바꾸고 새로운 메이트를 초대할 수 있는 기능들이 모여있어요.",
+            step3_title: "초대 코드 복사 🔗",
+            step3_desc: "초대 코드를 복사해서 함께 살 룸메이트에게 보내보세요!",
         }
     },
     en: {
@@ -599,6 +629,34 @@ export const translations = {
             d_day: "D-Day",
             d_minus: "D-{days}",
             d_plus: "D+{days}"
+        },
+        master: {
+            badge: "Master",
+            only_notice: "Only the Nest Master can manage goals and rules.",
+            tutorial_title: "New: Nest Master System! 👑",
+            tutorial_desc: "To keep our nest organized, the power to set goals and rules is now granted to the Nest Master. Follow the master's guide for a happy co-living!",
+            grant_notice: "The creator of the nest is assigned as the Master."
+        },
+        tutorial: {
+            step1_title: "Our Sweet Home 🏠",
+            step1_desc: "See your nest info and fellow mates at a glance right here.",
+            step2_title: "Daily Briefing ✅",
+            step2_desc: "Get a smart briefing on important tasks and upcoming events for today.",
+            step3_title: "Quick Action ✨",
+            step3_desc: "Tap this button anytime to add new schedules, goals, or chores.",
+            step4_title: "Smart Navigation 🚀",
+            step4_desc: "Use the bottom tabs to move between Tasks, Calendar, Goals, Budget, and Settings.",
+            next: "Next",
+            skip: "Skip",
+            finish: "Get Started"
+        },
+        settings_tutorial: {
+            step1_title: "Manage Profile 👤",
+            step1_desc: "Change your nickname and avatar, and manage account settings.",
+            step2_title: "Nest Settings 🏠",
+            step2_desc: "Change your house name, theme, and find all tools to invite new mates.",
+            step3_title: "Copy Invite Code 🔗",
+            step3_desc: "Copy the invite code and send it to your future roommates!",
         }
     }
 };

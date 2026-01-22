@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Image, Dimensions, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, Dimensions, Platform, Modal, TouchableWithoutFeedback } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { useUserStore } from '../../store/userStore';
@@ -33,12 +33,24 @@ export default function HomeScreen() {
     const {
         nickname, avatarId, nestName, nestTheme, nestId, nestAvatarId,
         todos, events, goals, members, language: langFromStore, hasSeenTutorial, completeTutorial,
-        syncMissions, syncEvents, syncGoals, syncTransactions
+        syncMissions, syncEvents, syncGoals, syncTransactions, isLoggedIn, hasSeenMasterTutorial, completeMasterTutorial, isMaster
     } = useUserStore();
     const language = langFromStore as 'ko' | 'en';
     const t = (translations[language] as any).home;
     const [greeting, setGreeting] = useState('');
     const [activityModalVisible, setActivityModalVisible] = useState(false);
+    const [showMasterModal, setShowMasterModal] = useState(false);
+    const tm = (translations[language] as any).master;
+
+    useEffect(() => {
+        if (isLoggedIn && hasSeenTutorial && !hasSeenMasterTutorial) {
+            // Delay a bit to not clash with initial animations
+            const timer = setTimeout(() => {
+                setShowMasterModal(true);
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [isLoggedIn, hasSeenTutorial, hasSeenMasterTutorial]);
 
     // Theme setup
     const themeBg = THEMES[nestTheme]?.color || 'bg-orange-500';
@@ -67,10 +79,7 @@ export default function HomeScreen() {
 
         // Sync data if we have nestId
         if (nestId) {
-            syncMissions();
-            syncEvents();
-            syncGoals();
-            syncTransactions();
+            useUserStore.getState().syncAll();
         }
     }, [nestId, language]);
 
@@ -89,7 +98,7 @@ export default function HomeScreen() {
 
                 {/* Nest Header (Modern & Simple) */}
                 <View className={cn("pt-12 pb-8 px-6 rounded-b-[40px] mb-8 items-center", themeItemBg)}>
-                    <View className="w-20 h-20 bg-white rounded-[32px] items-center justify-center mb-4 shadow-sm overflow-hidden p-3 transform rotate-3">
+                    <View className="w-16 h-16 bg-white rounded-[24px] items-center justify-center mb-4 shadow-sm overflow-hidden p-2.5 transform rotate-2">
                         <Image
                             source={(NEST_AVATARS.find((a: any) => a.id === nestAvatarId) || NEST_AVATARS[0]).image}
                             style={{ width: '100%', height: '100%' }}
@@ -114,7 +123,7 @@ export default function HomeScreen() {
                             ))}
                         </View>
                         <Text className="text-gray-600 font-bold text-xs">
-                            {members.length === 0 ? t.empty_mate : `${members.length} Mates`}
+                            {members.length === 0 ? t.empty_mate : language === 'ko' ? `${members.length}명의 메이트` : `${members.length} Mates`}
                         </Text>
                     </View>
 
@@ -136,7 +145,7 @@ export default function HomeScreen() {
                                     <Text className="text-xl">✨</Text>
                                 </View>
                                 <View>
-                                    <Text className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">Daily Briefing</Text>
+                                    <Text className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">{language === 'ko' ? "데일리 브리핑" : "Daily Briefing"}</Text>
                                     <Text className="text-white text-lg font-bold">오늘의 체크리스트</Text>
                                 </View>
                             </View>
@@ -154,7 +163,7 @@ export default function HomeScreen() {
                                         <Text className="text-lg">📅</Text>
                                     </View>
                                     <View className="flex-1">
-                                        <Text className="text-orange-300 font-bold text-xs mb-1">D-{getDDay(upcomingEvents[0].date).replace('D-', '')} Upcoming</Text>
+                                        <Text className="text-orange-300 font-bold text-xs mb-1">D-{getDDay(upcomingEvents[0].date).replace('D-', '')} {language === 'ko' ? "일정 예정" : "Upcoming"}</Text>
                                         <Text className="text-white font-bold text-base" numberOfLines={1}>{upcomingEvents[0].title}</Text>
                                     </View>
                                 </View>
@@ -164,7 +173,7 @@ export default function HomeScreen() {
                                         <Text className="text-lg">🏆</Text>
                                     </View>
                                     <View className="flex-1">
-                                        <Text className="text-blue-300 font-bold text-xs mb-1">Focus Goal</Text>
+                                        <Text className="text-blue-300 font-bold text-xs mb-1">{language === 'ko' ? "집중 목표" : "Focus Goal"}</Text>
                                         <Text className="text-white font-bold text-base" numberOfLines={1}>{activeGoals[0].title}</Text>
                                         <Text className="text-gray-400 text-xs mt-1">{activeGoals[0].current}% 달성 중</Text>
                                     </View>
@@ -175,7 +184,7 @@ export default function HomeScreen() {
                                         <Text className="text-lg">🌿</Text>
                                     </View>
                                     <View className="flex-1">
-                                        <Text className="text-green-300 font-bold text-xs mb-1">Peaceful Day</Text>
+                                        <Text className="text-green-300 font-bold text-xs mb-1">{language === 'ko' ? "평온한 하루" : "Peaceful Day"}</Text>
                                         <Text className="text-white font-bold text-base">오늘 하루도 행복하게!</Text>
                                     </View>
                                 </View>
@@ -257,21 +266,27 @@ export default function HomeScreen() {
                 onComplete={completeTutorial}
                 steps={[
                     {
-                        target: { x: 20, y: 170, width: width - 40, height: 260, borderRadius: 24 },
-                        title: "오늘의 체크리스트 ✅",
-                        description: "룸메이트와 오늘 하기로 한 할 일들을 확인하세요. 완료 버튼을 눌러 서로에게 공유할 수 있어요.",
+                        target: { x: 0, y: 0, width: width, height: 260, borderRadius: 0 },
+                        title: (translations[language] as any).tutorial.step1_title,
+                        description: (translations[language] as any).tutorial.step1_desc,
                         position: "bottom"
                     },
                     {
-                        target: { x: 20, y: 450, width: width - 40, height: 180, borderRadius: 24 },
-                        title: "우리 집 일정 📅",
-                        description: "집들이, 공과금 납부일 등 메이트들과 공유해야 할 중요한 일정들을 미리 확인하세요.",
+                        target: { x: 20, y: 280, width: width - 40, height: 220, borderRadius: 32 },
+                        title: (translations[language] as any).tutorial.step2_title,
+                        description: (translations[language] as any).tutorial.step2_desc,
+                        position: "bottom"
+                    },
+                    {
+                        target: { x: width - 88, y: height - 194, width: 72, height: 72, borderRadius: 36 },
+                        title: (translations[language] as any).tutorial.step3_title,
+                        description: (translations[language] as any).tutorial.step3_desc,
                         position: "top"
                     },
                     {
                         target: { x: 0, y: height - (Platform.OS === 'ios' ? 95 : 70), width: width, height: 90, borderRadius: 0 },
-                        title: "스마트한 메뉴 이동 🚀",
-                        description: "규칙 정하기, 일정 공유, 함께 목표 달성, 공금 정산까지 하단 메뉴에서 빠르게 이동하세요.",
+                        title: (translations[language] as any).tutorial.step4_title,
+                        description: (translations[language] as any).tutorial.step4_desc,
                         position: "top"
                     }
                 ]}
@@ -283,6 +298,55 @@ export default function HomeScreen() {
                 visible={activityModalVisible}
                 onClose={() => setActivityModalVisible(false)}
             />
+
+            {/* Master Tutorial Modal */}
+            <Modal
+                visible={showMasterModal}
+                transparent
+                animationType="fade"
+            >
+                <TouchableWithoutFeedback onPress={() => {
+                    completeMasterTutorial();
+                    setShowMasterModal(false);
+                }}>
+                    <View className="flex-1 bg-black/60 items-center justify-center px-6">
+                        <TouchableWithoutFeedback>
+                            <Animated.View
+                                entering={FadeInDown.springify()}
+                                className="bg-white rounded-[40px] w-full p-8 items-center shadow-2xl"
+                            >
+                                <View className="w-20 h-20 bg-yellow-400 rounded-full items-center justify-center mb-6 shadow-lg shadow-yellow-100">
+                                    <Text className="text-4xl">👑</Text>
+                                </View>
+
+                                <Text className="text-2xl font-black text-gray-900 mb-2 text-center">
+                                    {tm.tutorial_title}
+                                </Text>
+
+                                <Text className="text-gray-500 text-center leading-6 mb-8 font-medium">
+                                    {tm.tutorial_desc}
+                                </Text>
+
+                                <View className="bg-orange-50 p-4 rounded-2xl mb-8 w-full border border-orange-100">
+                                    <Text className="text-orange-600 text-xs font-bold text-center">
+                                        💡 {tm.grant_notice}
+                                    </Text>
+                                </View>
+
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        completeMasterTutorial();
+                                        setShowMasterModal(false);
+                                    }}
+                                    className="bg-gray-900 w-full py-5 rounded-3xl items-center shadow-lg shadow-gray-200"
+                                >
+                                    <Text className="text-white font-black text-base">확인했습니다</Text>
+                                </TouchableOpacity>
+                            </Animated.View>
+                        </TouchableWithoutFeedback>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
         </View >
     );
 }

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_14_234218) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_22_050451) do
   create_table "anniversaries", force: :cascade do |t|
     t.date "anniversary_date"
     t.string "category"
@@ -77,6 +77,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_14_234218) do
     t.string "title"
     t.datetime "updated_at", null: false
     t.index ["nest_id"], name: "index_house_rules_on_nest_id"
+  end
+
+  create_table "life_infos", force: :cascade do |t|
+    t.datetime "application_end"
+    t.datetime "application_start"
+    t.string "category"
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.string "gender"
+    t.string "image_url"
+    t.integer "max_age"
+    t.integer "min_age"
+    t.string "occupation"
+    t.datetime "official_date"
+    t.integer "priority"
+    t.datetime "published_at"
+    t.string "region"
+    t.string "source_url"
+    t.string "target_audience"
+    t.string "title"
+    t.datetime "updated_at", null: false
   end
 
   create_table "mission_assignments", force: :cascade do |t|
@@ -147,13 +168,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_14_234218) do
 
   create_table "users", force: :cascade do |t|
     t.integer "avatar_id"
+    t.date "birth_date"
     t.datetime "created_at", null: false
     t.string "email"
+    t.string "gender"
     t.string "member_type"
     t.integer "nest_id"
     t.string "nest_status", default: "active"
     t.string "nickname"
+    t.string "occupation"
     t.string "password_digest"
+    t.string "region"
     t.datetime "updated_at", null: false
   end
 

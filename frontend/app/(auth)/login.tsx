@@ -44,9 +44,9 @@ export default function LoginScreen() {
                 const nest = data.nest;
 
                 if (user.nickname) {
-                    setProfile(user.nickname, user.avatar_id || 0);
+                    setProfile(user.nickname, user.avatar_id || 0, String(user.id));
                 } else {
-                    setProfile("돌아온 메이트", 0);
+                    setProfile("돌아온 메이트", 0, String(user.id));
                 }
 
                 if (nest) {

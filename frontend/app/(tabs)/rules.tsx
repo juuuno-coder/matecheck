@@ -27,7 +27,7 @@ const RULE_TYPES = [
 export default function RulesScreen() {
     const {
         nestTheme, goals, addGoal, incrementGoalProgress, decrementGoalProgress, deleteGoal,
-        language, nestId, rules, addRule, deleteRule, syncRules
+        language, nestId, rules, addRule, deleteRule, syncRules, isMaster
     } = useUserStore();
     const router = useRouter();
     const params = useLocalSearchParams<{ action?: string }>();
@@ -76,6 +76,13 @@ export default function RulesScreen() {
 
     // --- ACTIONS ---
     const handleAddButtonPress = () => {
+        if (!isMaster) {
+            Alert.alert(
+                (translations[language as Language] as any).master.badge,
+                (translations[language as Language] as any).master.only_notice
+            );
+            return;
+        }
         setSelectionModalVisible(true);
     };
 
@@ -98,6 +105,10 @@ export default function RulesScreen() {
     };
 
     const confirmDeleteGoal = (id: string) => {
+        if (!isMaster) {
+            Alert.alert((translations[language as Language] as any).master.badge, (translations[language as Language] as any).master.only_notice);
+            return;
+        }
         Alert.alert(
             tCommon.delete,
             tGoals.delete_msg || "삭제하시겠습니까?", // Fallback
@@ -120,6 +131,10 @@ export default function RulesScreen() {
     };
 
     const confirmDeleteRule = (id: number) => {
+        if (!isMaster) {
+            Alert.alert((translations[language as Language] as any).master.badge, (translations[language as Language] as any).master.only_notice);
+            return;
+        }
         Alert.alert(
             tCommon.delete,
             language === 'ko' ? '이 규칙을 삭제하시겠습니까?' : 'Delete this rule?',
@@ -497,20 +512,20 @@ export default function RulesScreen() {
                 steps={[
                     {
                         target: { x: 20, y: 270, width: width - 40, height: 180, borderRadius: 24 },
-                        title: "함께하는 목표 🏆",
-                        description: "이번 달 공과금 아끼기, 매주 대청소하기 등 메이트들과 함께 달성할 목표를 세워보세요.",
+                        title: language === 'ko' ? "함께하는 목표 🏆" : "Shared Goals 🏆",
+                        description: language === 'ko' ? "이번 달 공과금 아끼기, 매주 대청소하기 등 메이트들과 함께 달성할 목표를 세워보세요." : "Set goals with your mates like saving on bills or weekly deep cleaning.",
                         position: "bottom"
                     },
                     {
                         target: { x: 20, y: 300, width: width - 40, height: 180, borderRadius: 24 },
-                        title: "우리의 규칙 📜",
-                        description: "손님 초대, 소음 시간 등 갈등을 줄이기 위한 우리 집만의 약속을 명문화할 수 있습니다.",
+                        title: language === 'ko' ? "우리의 규칙 📜" : "House Rules 📜",
+                        description: language === 'ko' ? "손님 초대, 소음 시간 등 갈등을 줄이기 위한 우리 집만의 약속을 명문화할 수 있습니다." : "Document house rules like quiet hours and guest policies to reduce conflict.",
                         position: "top"
                     },
                     {
                         target: { x: width - 60, y: 65, width: 44, height: 44, borderRadius: 22 },
-                        title: "새로운 약속 추가",
-                        description: "플러스 버튼을 눌러 목표나 규칙을 언제든지 새롭게 추가할 수 있어요.",
+                        title: language === 'ko' ? "새로운 약속 추가" : "Add New",
+                        description: language === 'ko' ? "플러스 버튼을 눌러 목표나 규칙을 언제든지 새롭게 추가할 수 있어요." : "Press + to add new goals or rules anytime.",
                         position: "bottom"
                     }
                 ]}

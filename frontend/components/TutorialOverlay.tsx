@@ -2,6 +2,8 @@ import { View, Text, TouchableOpacity, Dimensions, Platform } from 'react-native
 import React, { useState, useEffect } from 'react';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { useUserStore } from '../store/userStore';
+import { translations } from '../constants/I18n';
 
 const { width, height } = Dimensions.get('window');
 
@@ -25,6 +27,8 @@ interface TutorialOverlayProps {
 }
 
 export default function TutorialOverlay({ steps, visible, onComplete }: TutorialOverlayProps) {
+    const { language } = useUserStore();
+    const t = (translations[language as keyof typeof translations] as any).tutorial;
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
     useEffect(() => {
@@ -131,13 +135,13 @@ export default function TutorialOverlay({ steps, visible, onComplete }: Tutorial
 
                 <View className="flex-row justify-end gap-3">
                     <TouchableOpacity onPress={handleSkip} className="px-4 py-2">
-                        <Text className="text-gray-400 font-bold">건너뛰기</Text>
+                        <Text className="text-gray-400 font-bold">{t.skip}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={handleNext}
                         className="bg-orange-500 px-6 py-2 rounded-xl active:bg-orange-600"
                     >
-                        <Text className="text-white font-bold">{currentStepIndex === steps.length - 1 ? "시작하기" : "다음"}</Text>
+                        <Text className="text-white font-bold">{currentStepIndex === steps.length - 1 ? t.finish : t.next}</Text>
                     </TouchableOpacity>
                 </View>
 

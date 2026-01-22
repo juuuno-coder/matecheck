@@ -17,7 +17,7 @@ export default function SettingsScreen() {
     const {
         nickname, avatarId, nestName, logout, members, nestId, inviteCode,
         pendingRequests, fetchJoinRequests, approveJoinRequest,
-        language, setLanguage
+        language, setLanguage, isMaster
     } = useUserStore();
     const router = useRouter();
     const t = (translations[language as keyof typeof translations] as any).settings;
@@ -118,12 +118,19 @@ export default function SettingsScreen() {
                 </View>
 
                 <View className="flex-row items-center gap-5">
-                    <Avatar
-                        source={(AVATARS[avatarId] || AVATARS[0]).image}
-                        size="lg"
-                        borderColor="#F3F4F6"
-                        borderWidth={4}
-                    />
+                    <View>
+                        <Avatar
+                            source={(AVATARS[avatarId] || AVATARS[0]).image}
+                            size="lg"
+                            borderColor="#F3F4F6"
+                            borderWidth={4}
+                        />
+                        {isMaster && (
+                            <View className="absolute -bottom-1 -right-1 bg-yellow-400 px-2 py-0.5 rounded-full border-2 border-white shadow-sm">
+                                <Text className="text-[10px] font-black text-white">👑 {translations[language as keyof typeof translations].master.badge}</Text>
+                            </View>
+                        )}
+                    </View>
                     <View className="flex-1">
                         <Text className="text-2xl font-bold text-gray-900 mb-1">{nickname}</Text>
                         <Text className="text-gray-500 font-medium text-sm mb-3">@{nestName}</Text>
@@ -270,20 +277,20 @@ export default function SettingsScreen() {
                 steps={[
                     {
                         target: { x: 20, y: 100, width: width - 40, height: 100, borderRadius: 24 },
-                        title: "내 프로필 관리 👤",
-                        description: "나만의 닉네임과 아바타를 변경하고 계정 설정을 관리하세요.",
+                        title: (translations[language as keyof typeof translations] as any).settings_tutorial.step1_title,
+                        description: (translations[language as keyof typeof translations] as any).settings_tutorial.step1_desc,
                         position: "bottom"
                     },
                     {
                         target: { x: 20, y: 400, width: width - 40, height: 200, borderRadius: 24 },
-                        title: "보금자리(Nest) 설정 🏠",
-                        description: "우리 집의 이름, 테마를 바꾸고 새로운 메이트를 초대할 수 있는 기능들이 모여있어요.",
+                        title: (translations[language as keyof typeof translations] as any).settings_tutorial.step2_title,
+                        description: (translations[language as keyof typeof translations] as any).settings_tutorial.step2_desc,
                         position: "top"
                     },
                     {
                         target: { x: 20, y: 550, width: width - 40, height: 100, borderRadius: 24 },
-                        title: "초대 코드 복사 🔗",
-                        description: "초대 코드를 복사해서 함께 살 룸메이트에게 보내보세요!",
+                        title: (translations[language as keyof typeof translations] as any).settings_tutorial.step3_title,
+                        description: (translations[language as keyof typeof translations] as any).settings_tutorial.step3_desc,
                         position: "top"
                     }
                 ]}

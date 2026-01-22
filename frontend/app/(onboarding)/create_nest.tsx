@@ -38,7 +38,7 @@ export default function CreateNestScreen() {
             const data = await response.json();
 
             if (response.ok) {
-                setNest(data.name, data.theme_id, data.invite_code, data.id.toString(), '', data.avatar_id);
+                setNest(data.name, data.theme_id, data.invite_code, data.id.toString(), '', data.avatar_id, true);
                 router.replace('/(tabs)/home');
             } else {
                 Alert.alert("Error", data.errors?.join(', ') || "Failed to create.");

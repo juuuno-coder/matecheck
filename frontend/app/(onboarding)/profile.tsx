@@ -40,7 +40,7 @@ export default function ProfileScreen() {
             const data = await response.json();
 
             if (response.ok) {
-                setProfile(nickname, selectedAvatarId);
+                setProfile(nickname, selectedAvatarId, String(data.id));
                 router.push('/(onboarding)/nest_choice');
             } else {
                 Alert.alert("Error", data.error || "Something went wrong.");

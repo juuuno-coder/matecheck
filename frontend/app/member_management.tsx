@@ -6,12 +6,22 @@ import { useUserStore } from '../store/userStore';
 import { AVATARS } from '../constants/data';
 import { API_URL } from '../constants/Config';
 import Avatar from '../components/Avatar';
+import { translations } from '../constants/I18n';
 
 export default function MemberManagementScreen() {
     const router = useRouter();
-    const { members, nestId, language, setMembers } = useUserStore();
+    const { members, nestId, language, setMembers, isMaster } = useUserStore();
+    const tm = (translations[language as keyof typeof translations] as any).master;
 
-    const handleRemoveMember = (memberId: string, nickname: string) => {
+    const handleRemoveMember = (memberId: string, nickname: string, role?: string) => {
+        if (!isMaster) {
+            Alert.alert(tm.badge, tm.only_notice);
+            return;
+        }
+        if (role === 'master') {
+            Alert.alert(tm.badge, language === 'ko' ? "방장은 스스로를 내보낼 수 없습니다." : "The master cannot remove themselves.");
+            return;
+        }
         Alert.alert(
             language === 'ko' ? "멤버 삭제" : "Remove Member",
             language === 'ko' ? `'${nickname}' 님을 내보내시겠습니까?` : `Are you sure you want to remove '${nickname}'?`,
@@ -57,7 +67,13 @@ export default function MemberManagementScreen() {
                                 <View>
                                     <View className="flex-row items-center gap-2">
                                         <Text className="text-lg font-bold text-gray-900">{member.nickname}</Text>
-                                        {member.memberType && (
+                                        {member.role === 'master' && (
+                                            <View className="bg-yellow-400 px-2 py-0.5 rounded-md flex-row items-center gap-1">
+                                                <Ionicons name="star" size={10} color="white" />
+                                                <Text className="text-white text-[10px] font-black uppercase">{tm.badge}</Text>
+                                            </View>
+                                        )}
+                                        {member.memberType && !member.role && (
                                             <View className="bg-orange-100 px-2 py-0.5 rounded-md">
                                                 <Text className="text-orange-600 text-[10px] font-bold uppercase">{member.memberType}</Text>
                                             </View>
@@ -67,7 +83,7 @@ export default function MemberManagementScreen() {
                                 </View>
                             </View>
 
-                            <TouchableOpacity onPress={() => handleRemoveMember(member.id, member.nickname)} className="p-2">
+                            <TouchableOpacity onPress={() => handleRemoveMember(member.id, member.nickname, member.role)} className="p-2">
                                 <Ionicons name="ellipsis-vertical" size={20} color="#9CA3AF" />
                             </TouchableOpacity>
                         </View>
@@ -92,7 +108,7 @@ export default function MemberManagementScreen() {
                             : "Add members to your nest.\nShare invite codes or create profiles for kids and pets."}
                     </Text>
                 </View>
-            </ScrollView>
-        </View>
+            </ScrollView >
+        </View >
     );
 }

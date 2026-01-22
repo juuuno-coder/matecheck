@@ -94,7 +94,7 @@ export default function BudgetScreen() {
                     className={cn("px-5 py-2.5 rounded-full shadow-lg shadow-orange-200 flex-row items-center gap-1", themeBg)}
                 >
                     <Ionicons name="add" size={18} color="white" />
-                    <Text className="text-white font-bold text-sm">기록</Text>
+                    <Text className="text-white font-bold text-sm">{language === 'ko' ? '기록' : 'Add'}</Text>
                 </TouchableOpacity>
             </View>
 
@@ -107,13 +107,13 @@ export default function BudgetScreen() {
                         <View className="flex-row justify-between items-center mb-10">
                             <Text className="text-gray-900 text-lg font-bold opacity-80">{t.goal_title}</Text>
                             <TouchableOpacity onPress={() => setGoalModalVisible(true)} className="bg-white px-4 py-2 rounded-full shadow-sm">
-                                <Text className="text-gray-900 text-xs font-bold">목표 수정</Text>
+                                <Text className="text-gray-900 text-xs font-bold">{language === 'ko' ? '목표 수정' : 'Edit Goal'}</Text>
                             </TouchableOpacity>
                         </View>
 
                         {/* Center Hero Section */}
                         <View className="items-center mb-12">
-                            <Text className="text-gray-900/60 text-sm font-bold mb-2 uppercase tracking-widest">Remaining Layout</Text>
+                            <Text className="text-gray-900/60 text-sm font-bold mb-2 uppercase tracking-widest">{language === 'ko' ? "남은 예산" : "Remaining Budget"}</Text>
                             <Text className="text-gray-900 text-5xl font-black tracking-tighter" style={{ includeFontPadding: false }}>
                                 {remaining.toLocaleString()}
                                 <Text className="text-3xl font-bold">원</Text>
@@ -134,11 +134,11 @@ export default function BudgetScreen() {
                         {/* Stats Row */}
                         <View className="flex-row gap-3">
                             <View className="flex-1 bg-white p-5 rounded-3xl shadow-sm items-center">
-                                <Text className="text-gray-400 text-[10px] uppercase font-bold mb-1">Spent</Text>
+                                <Text className="text-gray-400 text-[10px] uppercase font-bold mb-1">{language === 'ko' ? "현재 지출" : "Spent"}</Text>
                                 <Text className="text-gray-900 font-bold text-lg">{totalSpent.toLocaleString()}</Text>
                             </View>
                             <View className="flex-1 bg-white/50 p-5 rounded-3xl border border-white/50 items-center">
-                                <Text className="text-gray-800/60 text-[10px] uppercase font-bold mb-1">Target</Text>
+                                <Text className="text-gray-800/60 text-[10px] uppercase font-bold mb-1">{language === 'ko' ? "목표 예산" : "Target"}</Text>
                                 <Text className="text-gray-900/80 font-bold text-lg">{budgetGoal.toLocaleString()}</Text>
                             </View>
                         </View>
@@ -261,7 +261,7 @@ export default function BudgetScreen() {
                         <Text className="text-2xl font-black text-gray-900 mb-2">{t.goal_title} 💰</Text>
                         <Text className="text-gray-500 mb-8">{t.goal_desc}</Text>
 
-                        <Text className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-widest">Total Budget Amount</Text>
+                        <Text className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-widest">{language === 'ko' ? "총 예산 금액" : "Total Budget Amount"}</Text>
                         <TextInput
                             value={tempGoal}
                             onChangeText={setTempGoal}
@@ -356,20 +356,20 @@ export default function BudgetScreen() {
                 steps={[
                     {
                         target: { x: 20, y: 150, width: width - 40, height: 200, borderRadius: 40 },
-                        title: "예산 한눈에 보기",
-                        description: "이번 달 총 공금과 남은 금액을 실시간으로 확인할 수 있어요.",
+                        title: language === 'ko' ? "예산 한눈에 보기" : "Budget Overview",
+                        description: language === 'ko' ? "이번 달 총 공금과 남은 금액을 실시간으로 확인할 수 있어요." : "See your total budget and remaining amount in real-time.",
                         position: "bottom"
                     },
                     {
                         target: { x: 20, y: 370, width: width - 40, height: 180, borderRadius: 30 },
-                        title: "고정 지출 관리",
-                        description: "월세, 관리비 같은 정기적인 지출을 등록하고 매달 일정을 챙기세요.",
+                        title: language === 'ko' ? "고정 지출 관리" : "Fixed Expenses",
+                        description: language === 'ko' ? "월세, 관리비 같은 정기적인 지출을 등록하고 매달 일정을 챙기세요." : "Register recurring expenses like rent and utilities.",
                         position: "bottom"
                     },
                     {
                         target: { x: width - 120, y: 60, width: 100, height: 45, borderRadius: 25 },
-                        title: "지출 기록하기",
-                        description: "새로운 지출이 생길 때마다 여기서 바로 기록할 수 있어요.",
+                        title: language === 'ko' ? "지출 기록하기" : "Record Expense",
+                        description: language === 'ko' ? "새로운 지출이 생길 때마다 여기서 바로 기록할 수 있어요." : "Quickly add new expenses here.",
                         position: "bottom"
                     }
                 ]}

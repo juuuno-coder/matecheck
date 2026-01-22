@@ -1,41 +1,18 @@
 import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { useUserStore } from '../../store/userStore';
+import React from 'react';
+import { useUserStore, HouseRule } from '../../store/userStore';
 import { cn } from '../../lib/utils';
 import { THEMES, AVATARS } from '../../constants/data';
 import { Ionicons } from '@expo/vector-icons';
-import { API_URL } from '../../constants/Config';
 import { translations, Language } from '../../constants/I18n';
 import { useRouter } from 'expo-router';
 
-// Define Rule Interface here too (or move to types)
-interface HouseRule {
-    id: number;
-    title: string;
-    description: string;
-    rule_type: string;
-    priority: number;
-    created_at?: string; // Assume API returns this
-}
-
 export default function ActivityScreen() {
-    const { nestTheme, todos, events, goals, members, language, nestName, nestId } = useUserStore();
+    const { nestTheme, todos, events, goals, members, language, nestName, nestId, rules } = useUserStore();
     const router = useRouter();
     const t = translations[language as Language];
 
     const themeText = THEMES[nestTheme]?.color?.replace('bg-', 'text-') || 'text-orange-600';
-
-    const [rules, setRules] = useState<HouseRule[]>([]);
-
-    // Fetch Rules specifically for Activity Log since it's not in global store yet
-    useEffect(() => {
-        if (nestId) {
-            fetch(`${API_URL}/nests/${nestId}/house_rules`)
-                .then(res => res.json())
-                .then(data => setRules(data))
-                .catch(err => console.error("Failed to fetch rules for activity:", err));
-        }
-    }, [nestId]);
 
     // Helper to format date relative time
     const formatRelativeTime = (dateString: string) => {

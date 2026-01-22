@@ -9,6 +9,11 @@ export interface User {
     nickname: string;
     avatarId: number;
     memberType?: 'human' | 'baby' | 'pet' | 'plant' | 'ai';
+    role?: 'master' | 'mate';
+    region?: string;
+    birthDate?: string;
+    gender?: 'male' | 'female';
+    occupation?: string;
 }
 
 export interface Todo {
@@ -64,6 +69,7 @@ export interface HouseRule {
     description: string;
     rule_type: string;
     priority: number;
+    created_at?: string;
 }
 
 export interface Anniversary {
@@ -72,13 +78,20 @@ export interface Anniversary {
     anniversary_date: string;
     is_recurring: boolean;
     category: string;
+    created_at?: string;
 }
 
 interface UserState {
     // Profile
     nickname: string;
     avatarId: number;
+    userId: string;
     userEmail: string;
+    isMaster: boolean;
+    region: string;
+    birthDate: string;
+    gender: 'male' | 'female' | '';
+    occupation: string;
 
     // Nest
     nestName: string;
@@ -89,6 +102,7 @@ interface UserState {
     inviteCode: string;
     isLoggedIn: boolean;
     hasSeenTutorial: boolean;
+    hasSeenMasterTutorial: boolean;
 
     // Features - Todo
     todos: Todo[];
@@ -117,12 +131,14 @@ interface UserState {
     language: 'ko' | 'en';
 
     // Actions
-    setProfile: (nickname: string, avatarId: number) => void;
+    setProfile: (nickname: string, avatarId: number, id?: string) => void;
+    setDetailedProfile: (region: string, birthDate: string, gender: 'male' | 'female' | '', occupation: string) => void;
     setEmail: (email: string) => void;
-    setNest: (nestName: string, nestTheme: number, inviteCode?: string, nestId?: string, nestImage?: string, nestAvatarId?: number) => void;
+    setNest: (nestName: string, nestTheme: number, inviteCode?: string, nestId?: string, nestImage?: string, nestAvatarId?: number, isMaster?: boolean) => void;
     setMembers: (members: User[]) => void;
     logout: () => void;
     completeTutorial: () => void;
+    completeMasterTutorial: () => void;
     addMember: (nickname: string, avatarId: number) => void;
     addManagedMember: (nickname: string, avatarId: number, memberType: string) => Promise<void>;
 
@@ -173,13 +189,21 @@ interface UserState {
     syncTransactions: () => Promise<void>;
     syncRules: () => Promise<void>;
     syncAnniversaries: () => Promise<void>;
+    syncMembers: () => Promise<void>;
+    syncAll: () => Promise<void>;
 }
 
 export const useUserStore = create<UserState>((set) => ({
     // Initial State
     nickname: '',
     avatarId: 0,
+    userId: '',
     userEmail: '',
+    isMaster: false,
+    region: '',
+    birthDate: '',
+    gender: '',
+    occupation: '',
     nestName: '',
     nestTheme: 0,
     nestAvatarId: 100, // Default to House line art
@@ -188,6 +212,7 @@ export const useUserStore = create<UserState>((set) => ({
     inviteCode: '',
     isLoggedIn: false,
     hasSeenTutorial: false,
+    hasSeenMasterTutorial: false,
 
     members: [],
     todos: [],
@@ -205,12 +230,21 @@ export const useUserStore = create<UserState>((set) => ({
     language: 'ko',
 
     // Actions
-    setProfile: (nickname, avatarId) => set({ nickname, avatarId }),
+    setProfile: (nickname, avatarId, id = '') => set({ nickname, avatarId, userId: id || useUserStore.getState().userId }),
+    setDetailedProfile: (region: string, birthDate: string, gender: 'male' | 'female' | '', occupation: string) => set({ region, birthDate, gender, occupation }),
     setEmail: (userEmail) => set({ userEmail }),
-    setNest: (nestName, nestTheme, inviteCode = '', nestId = '', nestImage = '', nestAvatarId = 100) =>
-        set({ nestName, nestTheme, inviteCode, nestId, nestImage, nestAvatarId, isLoggedIn: true }),
-    setMembers: (members) => set({ members }),
+    setNest: (nestName, nestTheme, inviteCode = '', nestId = '', nestImage = '', nestAvatarId = 100, isMaster = false) =>
+        set({ nestName, nestTheme, inviteCode, nestId, nestImage, nestAvatarId, isLoggedIn: true, isMaster }),
+    setMembers: (members) => {
+        const { userId } = useUserStore.getState();
+        const currentMember = members.find(m => m.id === userId);
+        set({
+            members,
+            isMaster: currentMember?.role === 'master'
+        });
+    },
     completeTutorial: () => set({ hasSeenTutorial: true }),
+    completeMasterTutorial: () => set({ hasSeenMasterTutorial: true }),
 
     fetchJoinRequests: async () => {
         const { nestId } = useUserStore.getState();
@@ -849,6 +883,37 @@ export const useUserStore = create<UserState>((set) => ({
                     unit: g.unit
                 }));
                 set({ goals: mapped });
+            }
+        } catch (error) { console.error(error); }
+    },
+
+    syncAll: async () => {
+        const { syncMissions, syncEvents, syncGoals, syncTransactions, syncRules, syncAnniversaries, syncMembers } = useUserStore.getState();
+        await Promise.all([
+            syncMissions(),
+            syncEvents(),
+            syncGoals(),
+            syncTransactions(),
+            syncRules(),
+            syncAnniversaries(),
+            syncMembers()
+        ]);
+    },
+
+    syncMembers: async () => {
+        const { nestId, setMembers } = useUserStore.getState();
+        if (!nestId) return;
+        try {
+            const response = await fetch(`${API_URL}/nests/${nestId}`);
+            const data = await response.json();
+            if (response.ok && data.members) {
+                setMembers(data.members.map((m: any) => ({
+                    id: String(m.id),
+                    nickname: m.nickname,
+                    avatarId: m.avatar_id,
+                    role: m.role || 'mate',
+                    memberType: m.member_type
+                })));
             }
         } catch (error) { console.error(error); }
     },

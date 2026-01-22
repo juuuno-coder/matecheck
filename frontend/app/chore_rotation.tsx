@@ -263,13 +263,13 @@ export default function ChoreRotationScreen() {
                                         {members.slice(0, 5).map((member, idx) => (
                                             <View
                                                 key={member.id}
-                                                className={`-ml-2 ${member.id === rotation.current_assignee_id ? 'z-10' : ''}`}
+                                                className={`-ml-2 ${member.id === String(rotation.current_assignee_id) ? 'z-10' : ''}`}
                                             >
                                                 <Avatar
                                                     source={AVATARS[member.avatarId || 0].image}
                                                     size="xs"
-                                                    borderColor={member.id === rotation.current_assignee_id ? '#10B981' : '#FFFFFF'}
-                                                    borderWidth={member.id === rotation.current_assignee_id ? 2 : 1}
+                                                    borderColor={member.id === String(rotation.current_assignee_id) ? '#10B981' : '#FFFFFF'}
+                                                    borderWidth={member.id === String(rotation.current_assignee_id) ? 2 : 1}
                                                 />
                                             </View>
                                         ))}

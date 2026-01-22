@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, Dimensions, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, Dimensions, Platform, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { cn } from '../lib/utils';
 import Animated, { FadeIn, FadeInDown, FadeOut, SlideInDown, SlideOutDown } from 'react-native-reanimated';
+import { useUserStore } from '../store/userStore';
+import { translations } from '../constants/I18n';
 
 interface FloatingActionMenuProps {
     themeBg?: string;
@@ -12,8 +14,10 @@ interface FloatingActionMenuProps {
 const { width } = Dimensions.get('window');
 
 export default function FloatingActionMenu({ themeBg = 'bg-orange-500' }: FloatingActionMenuProps) {
+    const { language, isMaster } = useUserStore();
     const router = useRouter();
     const [visible, setVisible] = useState(false);
+    const t = (translations[language as keyof typeof translations] as any).master;
 
     const toggleMenu = () => {
         setVisible(!visible);
@@ -34,7 +38,8 @@ export default function FloatingActionMenu({ themeBg = 'bg-orange-500' }: Floati
             color: 'bg-yellow-500',
             textColor: 'text-yellow-600',
             bgColor: 'bg-yellow-50',
-            path: { pathname: '/(tabs)/rules', params: { action: 'add_goal' } }
+            path: { pathname: '/(tabs)/rules', params: { action: 'add_goal' } },
+            isMasterOnly: true
         },
         {
             label: '일정 추가',
@@ -52,7 +57,8 @@ export default function FloatingActionMenu({ themeBg = 'bg-orange-500' }: Floati
             color: 'bg-indigo-500',
             textColor: 'text-indigo-600',
             bgColor: 'bg-indigo-50',
-            path: { pathname: '/(tabs)/rules', params: { action: 'add_rule' } }
+            path: { pathname: '/(tabs)/rules', params: { action: 'add_rule' } },
+            isMasterOnly: true
         },
         {
             label: '공금 내역',
@@ -71,6 +77,15 @@ export default function FloatingActionMenu({ themeBg = 'bg-orange-500' }: Floati
             textColor: 'text-green-600',
             bgColor: 'bg-green-50',
             path: '/chore_rotation'
+        },
+        {
+            label: '생활 정보',
+            subLabel: '지원사업 & 꿀팁',
+            icon: 'sparkles',
+            color: 'bg-indigo-500',
+            textColor: 'text-indigo-600',
+            bgColor: 'bg-indigo-50',
+            path: '/life_info'
         },
         // Placeholder for Grid balance if needed
     ];
@@ -114,12 +129,12 @@ export default function FloatingActionMenu({ themeBg = 'bg-orange-500' }: Floati
                                     className="w-1/2 p-2"
                                 >
                                     <TouchableOpacity
-                                        onPress={() => handleAction(item.path)}
+                                        onPress={() => item.isMasterOnly && !isMaster ? Alert.alert(t.badge, t.only_notice) : handleAction(item.path)}
                                         activeOpacity={0.7}
                                         className={cn(
                                             "p-5 rounded-3xl border flex-row items-center gap-4 shadow-sm",
                                             item.bgColor,
-                                            "border-white" // Using border-white to blend or border-transparent
+                                            item.isMasterOnly && !isMaster ? "opacity-60 grayscale" : "border-white"
                                         )}
                                         style={{
                                             // Optional: Add subtle border matching color with low opacity 
@@ -127,10 +142,13 @@ export default function FloatingActionMenu({ themeBg = 'bg-orange-500' }: Floati
                                         }}
                                     >
                                         <View className={cn("w-12 h-12 rounded-2xl items-center justify-center shadow-sm", item.color)}>
-                                            <Ionicons name={item.icon as any} size={24} color="white" />
+                                            <Ionicons name={(item.isMasterOnly && !isMaster ? "lock-closed" : item.icon) as any} size={24} color="white" />
                                         </View>
                                         <View className="flex-1">
-                                            <Text className={cn("font-bold text-base mb-0.5", item.textColor)}>{item.label}</Text>
+                                            <View className="flex-row items-center gap-1">
+                                                <Text className={cn("font-bold text-base mb-0.5", item.textColor)}>{item.label}</Text>
+                                                {item.isMasterOnly && !isMaster && <Ionicons name="lock-closed" size={12} color="#9CA3AF" />}
+                                            </View>
                                             <Text className="text-xs text-gray-500 font-medium" numberOfLines={1}>{item.subLabel}</Text>
                                         </View>
                                     </TouchableOpacity>

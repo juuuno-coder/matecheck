@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { API_URL } from '../constants/Config';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useUserStore } from '../store/userStore';
 
 interface Announcement {
     id: number;
@@ -14,6 +15,7 @@ interface Announcement {
 
 export default function AnnouncementsScreen() {
     const router = useRouter();
+    const { language } = useUserStore();
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -53,7 +55,7 @@ export default function AnnouncementsScreen() {
                     <TouchableOpacity onPress={() => router.back()} className="mr-4">
                         <Ionicons name="arrow-back" size={24} color="#111827" />
                     </TouchableOpacity>
-                    <Text className="text-xl font-bold text-gray-900">공지사항</Text>
+                    <Text className="text-xl font-bold text-gray-900">{language === 'ko' ? '공지사항' : 'Announcements'}</Text>
                 </View>
             </View>
 
@@ -66,7 +68,7 @@ export default function AnnouncementsScreen() {
                     {announcements.length === 0 ? (
                         <View className="items-center justify-center py-20">
                             <Text className="text-5xl mb-4">📢</Text>
-                            <Text className="text-gray-400 text-lg">등록된 공지사항이 없습니다.</Text>
+                            <Text className="text-gray-400 text-lg">{language === 'ko' ? '등록된 공지사항이 없습니다.' : 'No announcements yet.'}</Text>
                         </View>
                     ) : (
                         announcements.map((announcement, index) => (

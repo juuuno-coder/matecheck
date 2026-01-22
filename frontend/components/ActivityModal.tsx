@@ -8,7 +8,7 @@ import { API_URL } from '../constants/Config';
 import { translations, Language } from '../constants/I18n';
 import Avatar from './Avatar';
 import Animated, { FadeInUp, FadeOutDown } from 'react-native-reanimated';
-import { User, Todo, CalendarEvent, Goal } from '../store/userStore';
+import { User, Todo, CalendarEvent, Goal, HouseRule } from '../store/userStore';
 
 const { width, height } = Dimensions.get('window');
 
@@ -17,28 +17,9 @@ interface ActivityModalProps {
     onClose: () => void;
 }
 
-interface HouseRule {
-    id: number;
-    title: string;
-    description: string;
-    rule_type: string;
-    priority: number;
-    created_at?: string;
-}
-
 export default function ActivityModal({ visible, onClose }: ActivityModalProps) {
-    const { nestTheme, todos, events, goals, members, language, nestName, nestId } = useUserStore();
+    const { nestTheme, todos, events, goals, members, language, nestName, nestId, rules } = useUserStore();
     const t = translations[language as Language];
-    const [rules, setRules] = useState<HouseRule[]>([]);
-
-    useEffect(() => {
-        if (visible && nestId) {
-            fetch(`${API_URL}/nests/${nestId}/house_rules`)
-                .then(res => res.json())
-                .then(data => setRules(data))
-                .catch(err => console.error("Failed to fetch rules for activity:", err));
-        }
-    }, [nestId, visible]);
 
     const formatRelativeTime = (dateString: string) => {
         if (!dateString) return '';

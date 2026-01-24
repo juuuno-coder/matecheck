@@ -258,6 +258,39 @@ export default function HomeScreen() {
                         )}
                     </View>
 
+                    {/* 3. Life Info Banner (New) */}
+                    <TouchableOpacity
+                        onPress={() => router.push('/life_info')}
+                        activeOpacity={0.9}
+                        className="bg-indigo-600 rounded-[32px] p-6 shadow-xl shadow-indigo-200 overflow-hidden relative"
+                    >
+                        {/* Background Deco */}
+                        <View className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10" />
+                        <View className="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full -ml-8 -mb-8" />
+
+                        <View className="flex-row items-center justify-between">
+                            <View className="flex-1 mr-4">
+                                <View className="bg-white/20 px-3 py-1 rounded-full self-start mb-3">
+                                    <Text className="text-white text-[10px] font-bold">✨ AI 맞춤 추천</Text>
+                                </View>
+                                <Text className="text-white text-xl font-black mb-1 leading-tight">
+                                    놓치고 있는 혜택,{'\n'}지금 바로 확인하세요!
+                                </Text>
+                                <Text className="text-indigo-200 text-xs font-medium">
+                                    내 조건에 딱 맞는 지원금을 찾아드려요
+                                </Text>
+                            </View>
+                            <View className="w-16 h-16 bg-white rounded-2xl items-center justify-center shadow-lg transform rotate-6">
+                                <Ionicons name="sparkles" size={32} color="#4F46E5" />
+                            </View>
+                        </View>
+
+                        <View className="mt-6 flex-row items-center">
+                            <Text className="text-white font-bold text-sm mr-2">생활 정보 보러가기</Text>
+                            <Ionicons name="arrow-forward" size={16} color="white" />
+                        </View>
+                    </TouchableOpacity>
+
                 </View>
             </ScrollView >
 

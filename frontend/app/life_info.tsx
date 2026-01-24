@@ -361,7 +361,7 @@ export default function LifeInfoScreen() {
 
             {/* Smart Save Modal */}
             <Modal transparent visible={smartSaveVisible} animationType="fade" onRequestClose={() => setSmartSaveVisible(false)}>
-                <View className="flex-1 justify-center items-center bg-black/60 px-4">
+                <View className="flex-1 justify-center items-center bg-white/90 px-4">
                     <TouchableWithoutFeedback onPress={() => setSmartSaveVisible(false)}>
                         <View className="absolute inset-0" />
                     </TouchableWithoutFeedback>
@@ -428,8 +428,8 @@ export default function LifeInfoScreen() {
                                         key={val}
                                         onPress={() => setLeadTime(val)}
                                         className={`flex-1 h-10 rounded-xl border items-center justify-center ${leadTime === val
-                                                ? 'bg-indigo-600 border-indigo-600'
-                                                : 'bg-white border-gray-200'
+                                            ? 'bg-indigo-600 border-indigo-600'
+                                            : 'bg-white border-gray-200'
                                             }`}
                                     >
                                         <Text className={`font-bold text-xs ${leadTime === val ? 'text-white' : 'text-gray-600'}`}>

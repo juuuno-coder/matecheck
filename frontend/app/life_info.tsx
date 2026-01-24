@@ -361,85 +361,99 @@ export default function LifeInfoScreen() {
 
             {/* Smart Save Modal */}
             <Modal transparent visible={smartSaveVisible} animationType="fade" onRequestClose={() => setSmartSaveVisible(false)}>
-                <View className="flex-1 justify-end bg-black/70">
+                <View className="flex-1 justify-center items-center bg-black/60 px-4">
                     <TouchableWithoutFeedback onPress={() => setSmartSaveVisible(false)}>
                         <View className="absolute inset-0" />
                     </TouchableWithoutFeedback>
 
                     <Animated.View
-                        entering={SlideInDown.springify().damping(20)}
-                        exiting={SlideOutDown}
-                        className="bg-white rounded-t-[32px] p-6 pb-12 shadow-2xl w-full max-w-md mx-auto"
-                        style={{ maxHeight: '90%' }}
+                        entering={FadeIn.duration(200)}
+                        exiting={FadeOut.duration(200)}
+                        className="bg-white rounded-[32px] p-6 shadow-2xl w-full max-w-[360px]"
                     >
                         <View className="items-center mb-6">
-                            <View className="w-12 h-1.5 bg-gray-200 rounded-full mb-4" />
-                            <Text className="text-xl font-bold text-gray-900">📅 스마트 일정 등록</Text>
+                            <View className="w-14 h-14 bg-indigo-50 rounded-full items-center justify-center mb-3">
+                                <Ionicons name="calendar" size={28} color="#4F46E5" />
+                            </View>
+                            <Text className="text-xl font-black text-gray-900">스마트 일정 등록</Text>
+                            <Text className="text-gray-500 text-xs mt-1">정책 알림을 언제 받으시겠어요?</Text>
                         </View>
 
-                        <ScrollView showsVerticalScrollIndicator={false} className="mb-4">
-                            {activeInfo && (
-                                <View className="bg-gray-50 p-4 rounded-2xl mb-6 border border-gray-100 flex-row items-center gap-3">
+                        {activeInfo && (
+                            <View className="bg-gray-50 p-4 rounded-2xl mb-6 border border-gray-100 flex-row gap-3">
+                                <View className="mt-1">
                                     {activeInfo.image_url ? (
-                                        <Image source={{ uri: activeInfo.image_url }} className="w-12 h-12 rounded-lg bg-gray-200" />
+                                        <Image source={{ uri: activeInfo.image_url }} className="w-10 h-10 rounded-lg bg-gray-200" />
                                     ) : (
-                                        <View className="w-12 h-12 rounded-lg bg-indigo-100 items-center justify-center">
-                                            <Ionicons name="document-text" size={20} color="#6366F1" />
+                                        <View className="w-10 h-10 rounded-lg bg-white border border-gray-100 items-center justify-center">
+                                            <Ionicons name="document-text" size={18} color="#6366F1" />
                                         </View>
                                     )}
-                                    <View className="flex-1">
-                                        <Text className="text-gray-900 font-bold text-base mb-1" numberOfLines={1}>{activeInfo.title}</Text>
-                                        <Text className="text-gray-500 text-xs">
-                                            {activeInfo.category === 'youth' && '청년'}
-                                            {activeInfo.category === 'farming' && '귀농'}
-                                            {activeInfo.category === 'family' && '가족'}
-                                            {activeInfo.category === 'living' && '생활'}
-                                            정책 • {activeInfo.region || '전국'}
+                                </View>
+                                <View className="flex-1">
+                                    <Text className="text-gray-900 font-bold text-sm leading-5 mb-1" numberOfLines={2}>{activeInfo.title}</Text>
+                                    <View className="flex-row items-center">
+                                        <View className="bg-white border border-gray-200 px-1.5 py-0.5 rounded text-[10px]">
+                                            <Text className="text-gray-500 text-[10px]">
+                                                {activeInfo.category === 'youth' && '청년'}
+                                                {activeInfo.category === 'farming' && '귀농'}
+                                                {activeInfo.category === 'family' && '가족'}
+                                                {activeInfo.category === 'living' && '생활'}
+                                            </Text>
+                                        </View>
+                                        <Text className="text-gray-400 text-[10px] ml-1.5 overflow-hidden w-24" numberOfLines={1}>
+                                            {activeInfo.region || '전국'}
                                         </Text>
                                     </View>
                                 </View>
-                            )}
-
-                            <View className="mb-6">
-                                <Text className="text-gray-900 font-bold text-base mb-3">언제 알림을 받을까요?</Text>
-                                <View className="flex-row gap-2 mb-4">
-                                    <TextInput
-                                        className="flex-1 bg-gray-100 rounded-xl px-4 py-3.5 font-bold text-gray-900 text-center"
-                                        value={targetDate}
-                                        onChangeText={setTargetDate}
-                                        placeholder="YYYY-MM-DD"
-                                    />
-                                    <View className="bg-indigo-600 rounded-xl w-12 items-center justify-center">
-                                        <Ionicons name="calendar" size={20} color="white" />
-                                    </View>
-                                </View>
-
-                                <Text className="text-gray-600 text-xs font-medium mb-3">미리 준비하기 (D-Day 전 알림)</Text>
-                                <View className="flex-row gap-2">
-                                    {[0, 1, 3, 7].map((val) => (
-                                        <TouchableOpacity
-                                            key={val}
-                                            onPress={() => setLeadTime(val)}
-                                            className={`flex-1 py-3 rounded-xl border items-center justify-center ${leadTime === val
-                                                    ? 'bg-indigo-600 border-indigo-600'
-                                                    : 'bg-white border-gray-200'
-                                                }`}
-                                        >
-                                            <Text className={`font-bold text-sm ${leadTime === val ? 'text-white' : 'text-gray-500'}`}>
-                                                {val === 0 ? '당일' : `${val}일 전`}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
                             </View>
-                        </ScrollView>
+                        )}
 
-                        <TouchableOpacity
-                            onPress={executeSmartSave}
-                            className="bg-[#0F172A] py-4 rounded-xl items-center justify-center shadow-lg shadow-indigo-100"
-                        >
-                            <Text className="text-white font-bold text-lg">일정 등록하기</Text>
-                        </TouchableOpacity>
+                        <View className="mb-2">
+                            <Text className="text-gray-900 font-bold text-sm mb-2 ml-1">기준 날짜</Text>
+                            <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-xl px-3 h-12 mb-5">
+                                <TextInput
+                                    className="flex-1 font-bold text-gray-900 text-sm"
+                                    value={targetDate}
+                                    onChangeText={setTargetDate}
+                                    placeholder="YYYY-MM-DD"
+                                />
+                                <Ionicons name="calendar-outline" size={20} color="#94A3B8" />
+                            </View>
+
+                            <Text className="text-gray-900 font-bold text-sm mb-2 ml-1">미리 알림 (D-Day)</Text>
+                            <View className="flex-row gap-2 mb-6">
+                                {[0, 1, 3, 7].map((val) => (
+                                    <TouchableOpacity
+                                        key={val}
+                                        onPress={() => setLeadTime(val)}
+                                        className={`flex-1 h-10 rounded-xl border items-center justify-center ${leadTime === val
+                                                ? 'bg-indigo-600 border-indigo-600'
+                                                : 'bg-white border-gray-200'
+                                            }`}
+                                    >
+                                        <Text className={`font-bold text-xs ${leadTime === val ? 'text-white' : 'text-gray-600'}`}>
+                                            {val === 0 ? '당일' : `${val}일`}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        </View>
+
+                        <View className="flex-row gap-3">
+                            <TouchableOpacity
+                                onPress={() => setSmartSaveVisible(false)}
+                                className="flex-1 py-3.5 rounded-xl bg-gray-100 items-center justify-center"
+                            >
+                                <Text className="text-gray-600 font-bold text-sm">취소</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={executeSmartSave}
+                                className="flex-[2] py-3.5 rounded-xl bg-[#0F172A] items-center justify-center shadow-md shadow-indigo-100"
+                            >
+                                <Text className="text-white font-bold text-sm">등록하기</Text>
+                            </TouchableOpacity>
+                        </View>
                     </Animated.View>
                 </View>
             </Modal>

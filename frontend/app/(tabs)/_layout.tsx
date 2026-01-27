@@ -5,8 +5,10 @@ import { useUserStore } from '../../store/userStore';
 import React, { useEffect } from 'react';
 
 export default function TabLayout() {
-    const { isLoggedIn, language } = useUserStore();
+    const { isLoggedIn, language, appMode } = useUserStore();
     const router = useRouter();
+
+    const isTossMode = appMode === 'roommatecheck';
 
     useEffect(() => {
         if (!isLoggedIn) {
@@ -19,7 +21,9 @@ export default function TabLayout() {
     }, [isLoggedIn]);
 
     const titles = {
-        ko: { home: "우리 집", plan: "일정", rules: "약속", activity: "활동", settings: "설정", budget: "정산", anniversary: "기념일" },
+        ko: isTossMode
+            ? { home: "홈", plan: "가계부", rules: "규칙", activity: "알림", settings: "더보기", budget: "정산/송금", anniversary: "디데이" }
+            : { home: "우리 집", plan: "일정", rules: "약속", activity: "활동", settings: "설정", budget: "정산", anniversary: "기념일" },
         en: { home: "Home", plan: "Plan", rules: "Rules", activity: "Activity", settings: "Settings", budget: "Budget", anniversary: "Anniversary" }
     }[language] || { home: "Home", plan: "Plan", rules: "Rules", activity: "Activity", settings: "Settings", budget: "Budget", anniversary: "Anniversary" };
 
@@ -37,8 +41,8 @@ export default function TabLayout() {
                     paddingBottom: 20,
                     paddingTop: 10,
                 },
-                tabBarActiveTintColor: '#FF7F50',
-                tabBarInactiveTintColor: '#9CA3AF',
+                tabBarActiveTintColor: isTossMode ? '#3182F6' : '#FF7F50',
+                tabBarInactiveTintColor: isTossMode ? '#ADB5BD' : '#9CA3AF',
                 tabBarLabelStyle: {
                     fontSize: 10,
                     fontWeight: '600',

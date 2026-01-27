@@ -158,7 +158,29 @@ export const translations = {
             no_transactions: "아직 기록된 내역이 없어요 💸",
             total_income: "총 수입",
             total_expense: "총 지출",
-            balance: "남은 돈"
+            balance: "남은 돈",
+        },
+        // 위시리스트
+        wishlist: {
+            title: "공용물품 위시리스트 🛒",
+            subtitle: "함께 사는 데 필요한 물품들",
+            add_item: "물품 추가",
+            item_name_label: "무엇이 필요한가요?",
+            item_name_placeholder: "예: 두루마리 휴지, 세탁세제",
+            quantity_label: "얼마나 필요한가요?",
+            quantity_placeholder: "예: 1팩, 2개",
+            price_label: "예상 가격 (선택)",
+            price_placeholder: "숫자만 입력",
+            add_btn: "위시리스트에 담기",
+            empty_desc: "아직 등록된 물품이 없네요.",
+            empty_hint: "부족한 생필품을 적어보세요!",
+            buy_confirm_title: "구매 완료!",
+            buy_confirm_msg: "이 물품을 정산 리스트에 올릴까요?",
+            to_split_bill: "정산하기",
+            just_bought: "그냥 구매만",
+            status_pending: "필요해요",
+            status_bought: "구매완료",
+            requester: "{name}님이 요청함"
         },
         // 설정
         settings: {

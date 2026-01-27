@@ -33,7 +33,8 @@ export default function HomeScreen() {
     const {
         nickname, avatarId, nestName, nestTheme, nestId, nestAvatarId,
         todos, events, goals, members, language: langFromStore, hasSeenTutorial, completeTutorial,
-        syncMissions, syncEvents, syncGoals, syncTransactions, isLoggedIn, hasSeenMasterTutorial, completeMasterTutorial, isMaster
+        syncMissions, syncEvents, syncGoals, syncTransactions, isLoggedIn, hasSeenMasterTutorial, completeMasterTutorial, isMaster,
+        appMode, setAppMode
     } = useUserStore();
     const language = langFromStore as 'ko' | 'en';
     const t = (translations[language] as any).home;
@@ -41,6 +42,8 @@ export default function HomeScreen() {
     const [activityModalVisible, setActivityModalVisible] = useState(false);
     const [showMasterModal, setShowMasterModal] = useState(false);
     const tm = (translations[language] as any).master;
+
+    const isTossMode = appMode === 'roommatecheck';
 
     useEffect(() => {
         if (isLoggedIn && hasSeenTutorial && !hasSeenMasterTutorial) {
@@ -97,20 +100,37 @@ export default function HomeScreen() {
             <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
 
                 {/* Nest Header (Modern & Simple) */}
-                <View className={cn("pt-12 pb-8 px-6 rounded-b-[40px] mb-8 items-center", themeItemBg)}>
-                    <View className="w-16 h-16 bg-white rounded-[24px] items-center justify-center mb-4 shadow-sm overflow-hidden p-2.5 transform rotate-2">
-                        <Image
-                            source={(NEST_AVATARS.find((a: any) => a.id === nestAvatarId) || NEST_AVATARS[0]).image}
-                            style={{ width: '100%', height: '100%' }}
-                            resizeMode="contain"
-                        />
+                <View className={cn("pt-16 pb-10 px-8 rounded-b-[48px] mb-8 items-start", isTossMode ? "bg-white" : themeItemBg)}>
+                    <View className="flex-row justify-between items-center w-full mb-6">
+                        <View className="w-14 h-14 bg-white rounded-[20px] items-center justify-center shadow-sm overflow-hidden p-2 transform -rotate-3 border border-gray-50">
+                            <Image
+                                source={(NEST_AVATARS.find((a: any) => a.id === nestAvatarId) || NEST_AVATARS[0]).image}
+                                style={{ width: '100%', height: '100%' }}
+                                resizeMode="contain"
+                            />
+                        </View>
+                        <TouchableOpacity
+                            onLongPress={() => {
+                                const next = isTossMode ? 'matecheck' : 'roommatecheck';
+                                setAppMode(next);
+                                Alert.alert(next === 'roommatecheck' ? '🏦 Toss Mode (RoommateCheck)' : '🏠 MateCheck Mode', '디자인 테마가 변경되었습니다.');
+                            }}
+                            onPress={() => router.push('/(tabs)/settings')}
+                            className="w-12 h-12 items-center justify-center rounded-2xl bg-gray-50/80"
+                        >
+                            <Ionicons name="settings-outline" size={24} color={isTossMode ? "#4E5968" : "#1F2937"} />
+                        </TouchableOpacity>
                     </View>
 
-                    <Text className="text-gray-500 font-bold text-sm mb-1 text-center tracking-wide uppercase">{greeting}</Text>
-                    <Text className="text-2xl font-black text-gray-900 text-center mb-6">{nestName}</Text>
+                    <View>
+                        <Text className={cn("font-bold text-sm mb-1 tracking-wide uppercase", isTossMode ? "text-toss-blue" : themeText)}>
+                            {isTossMode ? "룸메체크" : greeting}
+                        </Text>
+                        <Text className={cn("font-black text-gray-900", isTossMode ? "text-4xl" : "text-3xl")}>{isTossMode ? nestName : nestName}</Text>
+                    </View>
 
                     {/* Member Stack (Clean Pill) */}
-                    <View className="flex-row items-center bg-white py-2 pl-2 pr-4 rounded-full shadow-sm border border-gray-100">
+                    <View className={cn("flex-row items-center py-2.5 pl-2.5 pr-5 rounded-full mt-6 shadow-sm border", isTossMode ? "bg-toss-gray-input border-transparent" : "bg-white border-gray-100")}>
                         <View className="flex-row -space-x-2 mr-3">
                             {members.slice(0, 4).map((m: any, i: number) => (
                                 <Avatar
@@ -338,47 +358,53 @@ export default function HomeScreen() {
                 transparent
                 animationType="fade"
             >
-                <TouchableWithoutFeedback onPress={() => {
-                    completeMasterTutorial();
-                    setShowMasterModal(false);
-                }}>
-                    <View className="flex-1 bg-black/60 items-center justify-center px-6">
-                        <TouchableWithoutFeedback>
-                            <Animated.View
-                                entering={FadeInDown.springify()}
-                                className="bg-white rounded-[40px] w-full p-8 items-center shadow-2xl"
-                            >
-                                <View className="w-20 h-20 bg-yellow-400 rounded-full items-center justify-center mb-6 shadow-lg shadow-yellow-100">
-                                    <Text className="text-4xl">👑</Text>
-                                </View>
+                <View className="flex-1 bg-black/60 items-center justify-center px-6">
+                    <TouchableWithoutFeedback onPress={() => {
+                        completeMasterTutorial();
+                        setShowMasterModal(false);
+                    }}>
+                        <View className="absolute inset-0" />
+                    </TouchableWithoutFeedback>
 
-                                <Text className="text-2xl font-black text-gray-900 mb-2 text-center">
-                                    {tm.tutorial_title}
-                                </Text>
+                    <Animated.View
+                        entering={FadeInUp.springify().damping(12)}
+                        className="bg-white rounded-[40px] w-full p-8 items-center shadow-2xl relative"
+                    >
+                        {/* Decorative background circle */}
+                        <View className="absolute -top-10 -right-10 w-40 h-40 bg-yellow-400/10 rounded-full" />
 
-                                <Text className="text-gray-500 text-center leading-6 mb-8 font-medium">
-                                    {tm.tutorial_desc}
-                                </Text>
+                        <View className="w-24 h-24 bg-yellow-400 rounded-[32px] items-center justify-center mb-8 shadow-xl shadow-yellow-100 transform -rotate-6">
+                            <Text className="text-5xl">👑</Text>
+                        </View>
 
-                                <View className="bg-orange-50 p-4 rounded-2xl mb-8 w-full border border-orange-100">
-                                    <Text className="text-orange-600 text-xs font-bold text-center">
-                                        💡 {tm.grant_notice}
-                                    </Text>
-                                </View>
+                        <Text className="text-3xl font-black text-gray-900 mb-3 text-center leading-tight">
+                            {tm.tutorial_title}
+                        </Text>
 
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        completeMasterTutorial();
-                                        setShowMasterModal(false);
-                                    }}
-                                    className="bg-gray-900 w-full py-5 rounded-3xl items-center shadow-lg shadow-gray-200"
-                                >
-                                    <Text className="text-white font-black text-base">확인했습니다</Text>
-                                </TouchableOpacity>
-                            </Animated.View>
-                        </TouchableWithoutFeedback>
-                    </View>
-                </TouchableWithoutFeedback>
+                        <Text className="text-gray-500 text-center leading-7 mb-8 font-medium px-2">
+                            {tm.tutorial_desc}
+                        </Text>
+
+                        <View className="bg-orange-50 p-5 rounded-3xl mb-10 w-full border border-orange-100 flex-row items-center gap-4">
+                            <View className="w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm">
+                                <Text className="text-lg">💡</Text>
+                            </View>
+                            <Text className="flex-1 text-orange-700 text-xs font-bold leading-5">
+                                {tm.grant_notice}
+                            </Text>
+                        </View>
+
+                        <TouchableOpacity
+                            onPress={() => {
+                                completeMasterTutorial();
+                                setShowMasterModal(false);
+                            }}
+                            className="bg-gray-900 w-full py-6 rounded-[30px] items-center shadow-xl shadow-gray-200"
+                        >
+                            <Text className="text-white font-black text-lg">확인했습니다</Text>
+                        </TouchableOpacity>
+                    </Animated.View>
+                </View>
             </Modal>
         </View >
     );

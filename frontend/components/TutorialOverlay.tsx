@@ -100,7 +100,7 @@ export default function TutorialOverlay({ steps, visible, onComplete }: Tutorial
         : target.y - 150; // Approximated for simple text height
 
     return (
-        <Animated.View entering={FadeIn} exiting={FadeOut} className="absolute inset-0 z-50 w-full h-full">
+        <Animated.View entering={FadeIn} exiting={FadeOut} className="absolute inset-0 z-[9999] w-full h-full">
             {/* Mask Parts */}
             <View style={topStyle} />
             <View style={bottomStyle} />

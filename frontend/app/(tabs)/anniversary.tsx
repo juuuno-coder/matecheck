@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Modal, TextInput, Alert, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Modal, TextInput, Alert, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 // import { useUserStore } from '../../store/userStore'; // Removed duplicate
@@ -19,6 +19,9 @@ export default function AnniversaryScreen() {
     const [dateString, setDateString] = useState('');
     const [isRecurring, setIsRecurring] = useState(false);
     const [category, setCategory] = useState('etc');
+
+    // --- STEP-BY-STEP UI STATE ---
+    const [step, setStep] = useState(1);
 
     // Category Keys for internal logic
     const categoryKeys = ['birthday', 'wedding', 'love', 'work', 'etc'];
@@ -168,73 +171,97 @@ export default function AnniversaryScreen() {
             </ScrollView>
 
             {/* Add Anniversary Modal */}
-            <Modal visible={modalVisible} animationType="slide" transparent>
-                <View className="flex-1 justify-end bg-black/50">
-                    <View className="bg-white rounded-t-3xl p-6 pb-10">
-                        <View className="flex-row items-center justify-between mb-6">
-                            <Text className="text-xl font-bold text-gray-900">{t.add_modal_title}</Text>
-                            <TouchableOpacity onPress={() => { setModalVisible(false); resetForm(); }}>
-                                <Ionicons name="close" size={28} color="#9CA3AF" />
+            <Modal visible={modalVisible} animationType="fade" transparent>
+                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-black/60 justify-center px-6">
+                    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                        <View className="bg-white rounded-[40px] p-8 shadow-2xl relative">
+                            <TouchableOpacity onPress={() => { setModalVisible(false); resetForm(); setStep(1); }} className="absolute top-6 right-6 w-10 h-10 items-center justify-center bg-gray-100 rounded-full">
+                                <Ionicons name="close" size={24} color="#94A3B8" />
                             </TouchableOpacity>
-                        </View>
 
-                        <ScrollView className="max-h-96">
-                            {/* Title */}
-                            <Text className="text-sm font-bold text-gray-700 mb-2">{t.form_title}</Text>
-                            <TextInput
-                                value={title}
-                                onChangeText={setTitle}
-                                className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4 text-gray-900"
-                                placeholder={t.form_title_placeholder}
-                            />
-
-                            {/* Category */}
-                            <Text className="text-sm font-bold text-gray-700 mb-2">{t.form_category}</Text>
-                            <View className="flex-row flex-wrap gap-2 mb-4">
-                                {categoryKeys.map((catKey) => (
-                                    <TouchableOpacity
-                                        key={catKey}
-                                        onPress={() => setCategory(catKey)}
-                                        className={`px-4 py-2 rounded-xl ${category === catKey ? getCategoryColor(catKey) : 'bg-gray-100'
-                                            }`}
-                                    >
-                                        <Text className={`font-bold ${category === catKey ? 'text-white' : 'text-gray-600'}`}>
-                                            {getCategoryEmoji(catKey)} {(t.categories as any)[catKey]}
-                                        </Text>
-                                    </TouchableOpacity>
-                                ))}
+                            <View className="mb-8 items-center">
+                                <View className="w-16 h-16 rounded-3xl bg-pink-500 items-center justify-center mb-4 shadow-lg shadow-pink-100">
+                                    <Ionicons name="gift" size={32} color="white" />
+                                </View>
+                                <Text className="text-2xl font-black text-gray-900">{t.add_modal_title}</Text>
+                                <Text className="text-gray-400 font-bold mt-1">Step {step} of 2</Text>
                             </View>
 
-                            {/* Date */}
-                            <Text className="text-sm font-bold text-gray-700 mb-2">{t.form_date}</Text>
-                            <TextInput
-                                value={dateString}
-                                onChangeText={setDateString}
-                                className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4 text-gray-900"
-                                placeholder={t.form_date_placeholder}
-                            />
+                            <ScrollView showsVerticalScrollIndicator={false} className="max-h-[300px] mb-8">
+                                {step === 1 ? (
+                                    <View>
+                                        <Text className="text-sm font-black text-gray-900 mb-3 ml-1">{t.form_title}</Text>
+                                        <TextInput
+                                            value={title}
+                                            onChangeText={setTitle}
+                                            autoFocus
+                                            className="bg-gray-50 border-2 border-gray-100 rounded-2xl p-5 text-gray-900 text-lg font-bold mb-6"
+                                            placeholder={t.form_title_placeholder}
+                                        />
 
-                            {/* Recurring */}
-                            <TouchableOpacity
-                                onPress={() => setIsRecurring(!isRecurring)}
-                                className="flex-row items-center justify-between bg-gray-50 border border-gray-200 rounded-xl p-4 mb-6"
-                            >
-                                <Text className="text-gray-900 font-medium">{t.form_recurring}</Text>
-                                <View className={`w-12 h-6 rounded-full ${isRecurring ? 'bg-orange-500' : 'bg-gray-300'} justify-center`}>
-                                    <View className={`w-5 h-5 rounded-full bg-white ${isRecurring ? 'self-end mr-0.5' : 'self-start ml-0.5'}`} />
-                                </View>
-                            </TouchableOpacity>
-                        </ScrollView>
+                                        <Text className="text-sm font-black text-gray-900 mb-3 ml-1">{t.form_category}</Text>
+                                        <View className="flex-row flex-wrap gap-2 mb-4">
+                                            {categoryKeys.map((catKey) => (
+                                                <TouchableOpacity
+                                                    key={catKey}
+                                                    onPress={() => setCategory(catKey)}
+                                                    className={`px-4 py-3 rounded-xl border-2 ${category === catKey ? getCategoryColor(catKey) + " border-transparent shadow-sm" : 'bg-gray-50 border-gray-100'
+                                                        }`}
+                                                >
+                                                    <Text className={`font-black ${category === catKey ? 'text-white' : 'text-gray-400'}`}>
+                                                        {getCategoryEmoji(catKey)} {(t.categories as any)[catKey]}
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            ))}
+                                        </View>
+                                    </View>
+                                ) : (
+                                    <View>
+                                        <Text className="text-sm font-black text-gray-900 mb-3 ml-1">{t.form_date}</Text>
+                                        <TextInput
+                                            value={dateString}
+                                            onChangeText={setDateString}
+                                            autoFocus
+                                            className="bg-gray-100 border-2 border-orange-200 rounded-2xl p-6 text-orange-600 text-3xl font-black text-center mb-6"
+                                            placeholder={t.form_date_placeholder}
+                                        />
 
-                        {/* Add Button */}
-                        <TouchableOpacity
-                            onPress={handleAddAnniversary}
-                            className="bg-orange-500 py-4 rounded-xl items-center"
-                        >
-                            <Text className="text-white font-bold text-lg">{t.add_confirm}</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                                        <TouchableOpacity
+                                            onPress={() => setIsRecurring(!isRecurring)}
+                                            className="flex-row items-center justify-between bg-gray-50 border-2 border-gray-100 rounded-2xl p-5"
+                                        >
+                                            <View>
+                                                <Text className="text-gray-900 font-black mb-0.5">{t.form_recurring}</Text>
+                                                <Text className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">Repeat Every Year</Text>
+                                            </View>
+                                            <View className={`w-12 h-7 rounded-full ${isRecurring ? 'bg-green-500' : 'bg-gray-200'} justify-center px-1`}>
+                                                <View className={`w-5 h-5 rounded-full bg-white shadow-sm ${isRecurring ? 'self-end' : 'self-start'}`} />
+                                            </View>
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
+                            </ScrollView>
+
+                            <View className="flex-row gap-3">
+                                {step > 1 && (
+                                    <TouchableOpacity onPress={() => setStep(1)} className="flex-1 py-5 rounded-3xl bg-gray-100 items-center justify-center border-2 border-gray-200">
+                                        <Text className="text-gray-600 font-black">이전</Text>
+                                    </TouchableOpacity>
+                                )}
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        if (step === 1) setStep(2);
+                                        else handleAddAnniversary();
+                                    }}
+                                    disabled={step === 1 && !title.trim()}
+                                    className={`flex-[2] py-5 rounded-3xl items-center justify-center shadow-lg ${step === 1 && !title.trim() ? "bg-gray-100 shadow-none" : "bg-orange-500"}`}
+                                >
+                                    <Text className="text-white font-black">{step === 2 ? t.add_confirm : "다음 단계"}</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </KeyboardAvoidingView>
             </Modal>
         </View>
     );

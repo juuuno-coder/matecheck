@@ -1,5 +1,5 @@
-import { View, Text, TouchableOpacity, ScrollView, Modal, TextInput, Alert } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Modal, TextInput, Alert, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Linking, AppState } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useUserStore } from '../store/userStore';
 import { API_URL } from '../constants/Config';
@@ -35,6 +35,27 @@ export default function SplitBillsScreen() {
     const [amount, setAmount] = useState('');
     const [billType, setBillType] = useState('utilities');
     const [dueDate, setDueDate] = useState('');
+
+    // --- STEP-BY-STEP UI STATE ---
+    const [step, setStep] = useState(1);
+    const [pendingBill, setPendingBill] = useState<SplitBill | null>(null);
+    const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+    const appState = useRef(AppState.currentState);
+
+    useEffect(() => {
+        const subscription = AppState.addEventListener('change', nextAppState => {
+            if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+                if (pendingBill) {
+                    setConfirmModalVisible(true);
+                }
+            }
+            appState.current = nextAppState;
+        });
+
+        return () => {
+            subscription.remove();
+        };
+    }, [pendingBill]);
 
     useEffect(() => {
         fetchBills();
@@ -117,6 +138,23 @@ export default function SplitBillsScreen() {
         } catch (error) {
             console.error(error);
         }
+    };
+
+    const handleTransfer = (bill: SplitBill, app: 'toss' | 'kakao') => {
+        setPendingBill(bill);
+        if (app === 'toss') {
+            Linking.openURL(`supertoss://send?amount=${bill.per_person}&memo=${bill.title}`);
+        } else {
+            Linking.openURL('kakaotalk://kakaopay/money/transfer');
+        }
+    };
+
+    const handleConfirmPayment = async (success: boolean) => {
+        if (success && pendingBill) {
+            await togglePaid(pendingBill);
+        }
+        setPendingBill(null);
+        setConfirmModalVisible(false);
     };
 
     const resetForm = () => {
@@ -248,9 +286,31 @@ export default function SplitBillsScreen() {
                                         </View>
                                         <TouchableOpacity
                                             onPress={() => togglePaid(bill)}
-                                            className="bg-orange-500 px-6 py-2 rounded-xl"
+                                            className="bg-orange-500 px-6 py-3 rounded-xl flex-1"
                                         >
-                                            <Text className="text-white font-bold">정산 완료</Text>
+                                            <Text className="text-white text-center font-black">정산 완료</Text>
+                                        </TouchableOpacity>
+                                    </View>
+
+                                    <View className="flex-row items-center gap-2 mt-3 border-t border-gray-50 pt-3">
+                                        <Text className="text-[10px] font-black text-gray-400 mr-1">직접 송금하기</Text>
+                                        <TouchableOpacity
+                                            onPress={() => handleTransfer(bill, 'toss')}
+                                            className="flex-1 bg-[#f1f4ff] py-2 rounded-lg flex-row items-center justify-center gap-2"
+                                        >
+                                            <View className="w-5 h-5 bg-[#0064FF] rounded flex-row items-center justify-center">
+                                                <Text className="text-white font-black text-[8px]">T</Text>
+                                            </View>
+                                            <Text className="text-[#0064FF] font-bold text-xs">Toss</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            onPress={() => handleTransfer(bill, 'kakao')}
+                                            className="flex-1 bg-[#fffbe0] py-2 rounded-lg flex-row items-center justify-center gap-2"
+                                        >
+                                            <View className="w-5 h-5 bg-[#FFEB00] rounded items-center justify-center border border-yellow-100">
+                                                <Ionicons name="chatbubble" size={10} color="#3C1E1E" />
+                                            </View>
+                                            <Text className="text-[#3C1E1E] font-bold text-xs">Kakao</Text>
                                         </TouchableOpacity>
                                     </View>
                                 </Animated.View>
@@ -305,75 +365,128 @@ export default function SplitBillsScreen() {
             </ScrollView>
 
             {/* Add Bill Modal */}
-            <Modal visible={modalVisible} animationType="slide" transparent>
-                <View className="flex-1 justify-end bg-black/50">
-                    <View className="bg-white rounded-t-3xl p-6 pb-10">
-                        <View className="flex-row items-center justify-between mb-6">
-                            <Text className="text-xl font-bold text-gray-900">새 청구서 추가</Text>
-                            <TouchableOpacity onPress={() => { setModalVisible(false); resetForm(); }}>
-                                <Ionicons name="close" size={28} color="#9CA3AF" />
+            <Modal visible={modalVisible} animationType="fade" transparent>
+                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-black/60 justify-center px-6">
+                    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                        <View className="bg-white rounded-[40px] p-8 shadow-2xl relative">
+                            <TouchableOpacity onPress={() => { setModalVisible(false); resetForm(); setStep(1); }} className="absolute top-6 right-6 w-10 h-10 items-center justify-center bg-gray-100 rounded-full">
+                                <Ionicons name="close" size={24} color="#94A3B8" />
                             </TouchableOpacity>
-                        </View>
 
-                        <ScrollView className="max-h-96">
-                            {/* Bill Type */}
-                            <Text className="text-sm font-bold text-gray-700 mb-2">청구서 유형</Text>
-                            <View className="flex-row flex-wrap gap-2 mb-4">
-                                {BILL_TYPES.map((type) => (
-                                    <TouchableOpacity
-                                        key={type.id}
-                                        onPress={() => setBillType(type.id)}
-                                        className={`flex-row items-center px-4 py-2 rounded-xl ${billType === type.id ? type.color : 'bg-gray-100'
-                                            }`}
-                                    >
-                                        <Ionicons
-                                            name={type.icon as any}
-                                            size={16}
-                                            color={billType === type.id ? 'white' : '#6B7280'}
-                                        />
-                                        <Text className={`ml-2 font-bold ${billType === type.id ? 'text-white' : 'text-gray-600'}`}>
-                                            {type.label}
-                                        </Text>
-                                    </TouchableOpacity>
-                                ))}
+                            <View className="mb-8 items-center">
+                                <View className="w-16 h-16 rounded-3xl bg-orange-500 items-center justify-center mb-4 shadow-lg shadow-orange-100">
+                                    <Ionicons name="receipt" size={32} color="white" />
+                                </View>
+                                <Text className="text-2xl font-black text-gray-900">새 청구서 추가</Text>
+                                <Text className="text-gray-400 font-bold mt-1">Step {step} of 3</Text>
                             </View>
 
-                            {/* Title */}
-                            <Text className="text-sm font-bold text-gray-700 mb-2">제목</Text>
-                            <TextInput
-                                value={title}
-                                onChangeText={setTitle}
-                                className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4 text-gray-900"
-                                placeholder="예: 1월 전기세"
-                            />
+                            <ScrollView showsVerticalScrollIndicator={false} className="max-h-[300px] mb-8">
+                                {step === 1 ? (
+                                    <View>
+                                        <Text className="text-sm font-black text-gray-900 mb-3 ml-1">청구 유형을 선택하세요</Text>
+                                        <View className="flex-row flex-wrap gap-2 mb-6">
+                                            {BILL_TYPES.map((type) => (
+                                                <TouchableOpacity
+                                                    key={type.id}
+                                                    onPress={() => setBillType(type.id)}
+                                                    className={`flex-row items-center px-4 py-3 rounded-xl border-2 ${billType === type.id ? type.color + " border-transparent shadow-sm" : "bg-gray-50 border-gray-100"
+                                                        }`}
+                                                >
+                                                    <Ionicons
+                                                        name={type.icon as any}
+                                                        size={18}
+                                                        color={billType === type.id ? 'white' : '#6B7280'}
+                                                    />
+                                                    <Text className={`ml-2 font-black ${billType === type.id ? 'text-white' : 'text-gray-400'}`}>
+                                                        {type.label}
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            ))}
+                                        </View>
+                                    </View>
+                                ) : step === 2 ? (
+                                    <View>
+                                        <Text className="text-sm font-black text-gray-900 mb-3 ml-1">제목과 금액을 입력해주세요</Text>
+                                        <TextInput
+                                            value={title}
+                                            onChangeText={setTitle}
+                                            autoFocus
+                                            className="bg-gray-50 border-2 border-gray-100 rounded-2xl p-5 text-gray-900 text-lg font-bold mb-4"
+                                            placeholder="예: 1월 전기세"
+                                        />
+                                        <TextInput
+                                            value={amount}
+                                            onChangeText={setAmount}
+                                            className="bg-gray-50 border-2 border-orange-100 rounded-2xl p-5 text-gray-900 text-3xl font-black"
+                                            placeholder="0"
+                                            keyboardType="numeric"
+                                        />
+                                        <Text className="text-[10px] text-gray-400 text-right mt-2 font-bold uppercase tracking-widest">Total Amount (KRW)</Text>
+                                    </View>
+                                ) : (
+                                    <View>
+                                        <Text className="text-sm font-black text-gray-900 mb-3 ml-1">언제까지 내야 하나요?</Text>
+                                        <TextInput
+                                            value={dueDate}
+                                            onChangeText={setDueDate}
+                                            autoFocus
+                                            className="bg-gray-50 border-2 border-gray-100 rounded-2xl p-5 text-gray-900 text-lg font-bold"
+                                            placeholder="YYYY-MM-DD (선택사항)"
+                                        />
+                                        <Text className="text-gray-400 text-xs mt-3 ml-1 font-medium">입력하지 않으면 이번 달 말일로 자동 설정됩니다.</Text>
+                                    </View>
+                                )}
+                            </ScrollView>
 
-                            {/* Amount */}
-                            <Text className="text-sm font-bold text-gray-700 mb-2">총 금액</Text>
-                            <TextInput
-                                value={amount}
-                                onChangeText={setAmount}
-                                className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4 text-gray-900"
-                                placeholder="예: 150000"
-                                keyboardType="numeric"
-                            />
+                            <View className="flex-row gap-3">
+                                {step > 1 && (
+                                    <TouchableOpacity onPress={() => setStep(step - 1)} className="flex-1 py-5 rounded-3xl bg-gray-100 items-center justify-center border-2 border-gray-200">
+                                        <Text className="text-gray-600 font-black">이전</Text>
+                                    </TouchableOpacity>
+                                )}
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        if (step < 3) setStep(step + 1);
+                                        else addBill();
+                                    }}
+                                    disabled={step === 2 && (!title.trim() || !amount.trim())}
+                                    className={`flex-[2] py-5 rounded-3xl items-center justify-center shadow-lg ${step === 2 && (!title.trim() || !amount.trim()) ? "bg-gray-200" : "bg-orange-500"}`}
+                                >
+                                    <Text className="text-white font-black">{step === 3 ? "청구서 생성!" : "다음 단계"}</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </KeyboardAvoidingView>
+            </Modal>
+            {/* Payment Confirm Modal */}
+            <Modal animationType="fade" transparent visible={confirmModalVisible}>
+                <View className="flex-1 bg-black/60 justify-center px-6">
+                    <View className="bg-white rounded-[40px] p-8 shadow-2xl items-center">
+                        <View className="w-20 h-20 bg-green-100 rounded-full items-center justify-center mb-6">
+                            <Ionicons name="checkmark-circle" size={48} color="#10B981" />
+                        </View>
+                        <Text className="text-2xl font-black text-gray-900 mb-2">송금을 완료하셨나요?</Text>
+                        <Text className="text-gray-400 text-center font-bold mb-8">
+                            {pendingBill?.title}에 대한 정산 금액{"\n"}
+                            <Text className="text-orange-500">{pendingBill?.per_person.toLocaleString()}원</Text>을 보냈다면 완료 버튼을 눌러주세요.
+                        </Text>
 
-                            {/* Due Date */}
-                            <Text className="text-sm font-bold text-gray-700 mb-2">마감일 (선택)</Text>
-                            <TextInput
-                                value={dueDate}
-                                onChangeText={setDueDate}
-                                className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-6 text-gray-900"
-                                placeholder="YYYY-MM-DD (예: 2026-01-31)"
-                            />
-                        </ScrollView>
-
-                        {/* Add Button */}
-                        <TouchableOpacity
-                            onPress={addBill}
-                            className="bg-orange-500 py-4 rounded-xl items-center"
-                        >
-                            <Text className="text-white font-bold text-lg">청구서 추가</Text>
-                        </TouchableOpacity>
+                        <View className="flex-row gap-3 w-full">
+                            <TouchableOpacity
+                                onPress={() => handleConfirmPayment(false)}
+                                className="flex-1 py-5 rounded-3xl bg-gray-50 items-center justify-center border-2 border-gray-100"
+                            >
+                                <Text className="text-gray-400 font-black">아니오</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => handleConfirmPayment(true)}
+                                className="flex-[2] py-5 rounded-3xl bg-orange-500 items-center justify-center shadow-lg shadow-orange-100"
+                            >
+                                <Text className="text-white font-black text-lg">완료했습니다 ✨</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             </Modal>

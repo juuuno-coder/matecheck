@@ -17,6 +17,7 @@ Rails.application.routes.draw do
     resources :anniversaries
     resources :house_rules
     resources :split_bills
+    resources :wishlist_items
     resources :chore_rotations do
       member do
         post 'rotate'

@@ -14,7 +14,8 @@ interface FloatingActionMenuProps {
 const { width } = Dimensions.get('window');
 
 export default function FloatingActionMenu({ themeBg = 'bg-orange-500' }: FloatingActionMenuProps) {
-    const { language, isMaster } = useUserStore();
+    const { language, isMaster, appMode } = useUserStore();
+    const isTossMode = appMode === 'roommatecheck';
     const router = useRouter();
     const [visible, setVisible] = useState(false);
     const t = (translations[language as keyof typeof translations] as any).master;
@@ -87,7 +88,15 @@ export default function FloatingActionMenu({ themeBg = 'bg-orange-500' }: Floati
             bgColor: 'bg-indigo-50',
             path: '/life_info'
         },
-        // Placeholder for Grid balance if needed
+        {
+            label: '공용물품',
+            subLabel: '쇼핑 위시리스트',
+            icon: 'cart',
+            color: 'bg-teal-500',
+            textColor: 'text-teal-600',
+            bgColor: 'bg-teal-50',
+            path: '/wishlist'
+        },
     ];
 
     return (
@@ -169,8 +178,8 @@ export default function FloatingActionMenu({ themeBg = 'bg-orange-500' }: Floati
                         onPress={toggleMenu}
                         activeOpacity={0.8}
                         className={cn(
-                            "w-16 h-16 rounded-full items-center justify-center shadow-xl shadow-orange-200 border-4 border-white",
-                            themeBg
+                            "w-16 h-16 rounded-full items-center justify-center shadow-xl border-4 border-white",
+                            isTossMode ? "bg-toss-blue shadow-blue-200" : (themeBg + " shadow-orange-200")
                         )}
                     >
                         <Ionicons name="add" size={36} color="white" />

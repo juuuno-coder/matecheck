@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_22_050451) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_26_093649) do
   create_table "anniversaries", force: :cascade do |t|
     t.date "anniversary_date"
     t.string "category"
@@ -182,6 +182,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_22_050451) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "wishlist_items", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "nest_id", null: false
+    t.integer "price"
+    t.string "quantity"
+    t.integer "requester_id"
+    t.string "status"
+    t.string "title"
+    t.datetime "updated_at", null: false
+    t.index ["nest_id"], name: "index_wishlist_items_on_nest_id"
+  end
+
   add_foreign_key "anniversaries", "nests"
   add_foreign_key "calendar_events", "nests"
   add_foreign_key "chore_rotations", "nests"
@@ -192,4 +204,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_22_050451) do
   add_foreign_key "missions", "nests"
   add_foreign_key "split_bills", "nests"
   add_foreign_key "transactions", "nests"
+  add_foreign_key "wishlist_items", "nests"
 end

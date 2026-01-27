@@ -161,6 +161,25 @@ export default function LifeInfoScreen() {
         }
     };
 
+    const openLink = async (url: string) => {
+        if (!url) return;
+        try {
+            const supported = await Linking.canOpenURL(url);
+            if (supported || url.startsWith('http')) {
+                await Linking.openURL(url);
+            } else {
+                Alert.alert('정보', '관리자에 의해 링크가 차단되었거나 유효하지 않은 주소입니다.');
+            }
+        } catch (error) {
+            console.error(error);
+            try {
+                await Linking.openURL(url);
+            } catch (innerError) {
+                Alert.alert('알림', '브라우저를 여는 중 문제가 발생했습니다.');
+            }
+        }
+    };
+
     return (
         <View className="flex-1 bg-[#F8FAFC]">
             {/* Header */}
@@ -308,7 +327,7 @@ export default function LifeInfoScreen() {
                                                 <Ionicons name="calendar-sharp" size={18} color="#10B981" /><Text className="ml-2 font-bold text-[#10B981]">일정 등록</Text>
                                             </TouchableOpacity>
                                             {info.source_url && (
-                                                <TouchableOpacity onPress={() => Linking.openURL(info.source_url)} className="w-12 h-12 items-center justify-center bg-gray-50 rounded-2xl">
+                                                <TouchableOpacity onPress={() => openLink(info.source_url)} className="w-12 h-12 items-center justify-center bg-gray-50 rounded-2xl">
                                                     <Ionicons name="link" size={18} color="#475569" />
                                                 </TouchableOpacity>
                                             )}

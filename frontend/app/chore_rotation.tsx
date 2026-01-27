@@ -1,9 +1,10 @@
-import { View, Text, TouchableOpacity, ScrollView, Modal, TextInput, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Modal, TextInput, Alert, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useUserStore } from '../store/userStore';
 import { API_URL } from '../constants/Config';
 import { AVATARS } from '../constants/data';
+import { cn } from '../lib/utils';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import Avatar from '../components/Avatar';
@@ -41,6 +42,9 @@ export default function ChoreRotationScreen() {
     const [modalVisible, setModalVisible] = useState(false);
     const [choreName, setChoreName] = useState('');
     const [rotationType, setRotationType] = useState('weekly');
+
+    // --- STEP-BY-STEP UI STATE ---
+    const [step, setStep] = useState(1);
 
     useEffect(() => {
         fetchRotations();
@@ -102,6 +106,10 @@ export default function ChoreRotationScreen() {
         }
     };
 
+    const handlePoke = (name: string) => {
+        Alert.alert('콕 찌르기 👉', `${name}님에게 알림을 보냈습니다! 조금만 더 힘내달라고 전했어요.`);
+    };
+
     const deleteRotation = async (id: number) => {
         try {
             const response = await fetch(`${API_URL}/nests/${nestId}/chore_rotations/${id}`, {
@@ -119,6 +127,7 @@ export default function ChoreRotationScreen() {
     const resetForm = () => {
         setChoreName('');
         setRotationType('weekly');
+        setStep(1);
     };
 
     const getRotationTypeInfo = (type: string) => {
@@ -218,7 +227,15 @@ export default function ChoreRotationScreen() {
 
                                 {/* Current Assignee */}
                                 <View className="bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-4 mb-4">
-                                    <Text className="text-gray-500 text-xs font-bold mb-3">현재 담당자</Text>
+                                    <View className="flex-row justify-between items-center mb-3">
+                                        <Text className="text-gray-500 text-xs font-bold uppercase tracking-widest">현재 담당자</Text>
+                                        <TouchableOpacity
+                                            onPress={() => handlePoke(rotation.current_assignee_name)}
+                                            className="bg-white/60 px-2 py-1 rounded-lg border border-green-100"
+                                        >
+                                            <Text className="text-green-600 text-[10px] font-black">콕 찌르기 👉</Text>
+                                        </TouchableOpacity>
+                                    </View>
                                     <View className="flex-row items-center justify-between">
                                         <View className="flex-row items-center">
                                             <Avatar
@@ -242,16 +259,17 @@ export default function ChoreRotationScreen() {
                                             onPress={() => {
                                                 Alert.alert(
                                                     '순번 교체',
-                                                    '다음 담당자로 변경하시겠습니까?',
+                                                    '집안일을 완료했거나 다음 담당자로 변경하시겠습니까?',
                                                     [
                                                         { text: '취소', style: 'cancel' },
-                                                        { text: '교체', onPress: () => rotateChore(rotation.id) }
+                                                        { text: '교체하기 ✨', onPress: () => rotateChore(rotation.id) }
                                                     ]
                                                 );
                                             }}
-                                            className="bg-green-500 w-12 h-12 rounded-full items-center justify-center"
+                                            className="bg-green-500 px-4 py-3 rounded-2xl flex-row items-center gap-2"
                                         >
-                                            <Ionicons name="refresh" size={24} color="white" />
+                                            <Ionicons name="checkmark-circle" size={18} color="white" />
+                                            <Text className="text-white font-black">완료</Text>
                                         </TouchableOpacity>
                                     </View>
                                 </View>
@@ -284,79 +302,112 @@ export default function ChoreRotationScreen() {
                         );
                     })
                 )}
+                <View className="mt-4 mb-4 py-10 items-center justify-center bg-gray-100/50 rounded-3xl border border-dashed border-gray-200">
+                    <Ionicons name="time-outline" size={32} color="#CBD5E1" />
+                    <Text className="text-gray-400 font-bold mt-2 text-xs">최근 활동 내역이 없습니다</Text>
+                </View>
             </ScrollView>
 
             {/* Add Rotation Modal */}
-            <Modal visible={modalVisible} animationType="slide" transparent>
-                <View className="flex-1 justify-end bg-black/50">
-                    <View className="bg-white rounded-t-3xl p-6 pb-10">
-                        <View className="flex-row items-center justify-between mb-6">
-                            <Text className="text-xl font-bold text-gray-900">새 로테이션 추가</Text>
-                            <TouchableOpacity onPress={() => { setModalVisible(false); resetForm(); }}>
-                                <Ionicons name="close" size={28} color="#9CA3AF" />
+            <Modal visible={modalVisible} animationType="fade" transparent>
+                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-black/60 justify-center px-6">
+                    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                        <View className="bg-white rounded-[40px] p-8 shadow-2xl relative">
+                            <TouchableOpacity onPress={() => { setModalVisible(false); resetForm(); }} className="absolute top-6 right-6 w-10 h-10 items-center justify-center bg-gray-100 rounded-full">
+                                <Ionicons name="close" size={24} color="#94A3B8" />
                             </TouchableOpacity>
-                        </View>
 
-                        <ScrollView className="max-h-96">
-                            {/* Chore Presets */}
-                            <Text className="text-sm font-bold text-gray-700 mb-2">빠른 선택</Text>
-                            <View className="flex-row flex-wrap gap-2 mb-4">
-                                {CHORE_PRESETS.map((preset) => (
-                                    <TouchableOpacity
-                                        key={preset.name}
-                                        onPress={() => setChoreName(preset.name)}
-                                        className={`flex-row items-center px-4 py-2 rounded-xl ${choreName === preset.name ? 'bg-green-500' : 'bg-gray-100'
-                                            }`}
-                                    >
-                                        <Text className="mr-2">{preset.icon}</Text>
-                                        <Text className={`font-bold ${choreName === preset.name ? 'text-white' : 'text-gray-600'}`}>
-                                            {preset.name}
-                                        </Text>
-                                    </TouchableOpacity>
-                                ))}
+                            <View className="mb-8 items-center">
+                                <View className="w-16 h-16 rounded-3xl bg-green-500 items-center justify-center mb-4 shadow-lg shadow-green-100">
+                                    <Ionicons name="refresh" size={32} color="white" />
+                                </View>
+                                <Text className="text-2xl font-black text-gray-900">새 로테이션 추가</Text>
+                                <Text className="text-gray-400 font-bold mt-1">Step {step} of 2</Text>
                             </View>
 
-                            {/* Custom Chore Name */}
-                            <Text className="text-sm font-bold text-gray-700 mb-2">집안일 이름</Text>
-                            <TextInput
-                                value={choreName}
-                                onChangeText={setChoreName}
-                                className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4 text-gray-900"
-                                placeholder="예: 설거지, 청소"
-                            />
+                            <ScrollView showsVerticalScrollIndicator={false} className="max-h-[300px] mb-8">
+                                {step === 1 ? (
+                                    <View>
+                                        <Text className="text-sm font-black text-gray-900 mb-3 ml-1">집안일을 선택하거나 입력하세요</Text>
+                                        <View className="flex-row flex-wrap gap-2 mb-6">
+                                            {CHORE_PRESETS.map((preset) => (
+                                                <TouchableOpacity
+                                                    key={preset.name}
+                                                    onPress={() => setChoreName(preset.name)}
+                                                    className={cn(
+                                                        "flex-row items-center px-4 py-3 rounded-xl border-2",
+                                                        choreName === preset.name ? "bg-green-500 border-transparent shadow-sm" : "bg-gray-50 border-gray-100"
+                                                    )}
+                                                >
+                                                    <Text className="mr-2">{preset.icon}</Text>
+                                                    <Text className={cn("font-black", choreName === preset.name ? "text-white" : "text-gray-500")}>
+                                                        {preset.name}
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            ))}
+                                        </View>
 
-                            {/* Rotation Type */}
-                            <Text className="text-sm font-bold text-gray-700 mb-2">교체 주기</Text>
-                            <View className="flex-row flex-wrap gap-2 mb-6">
-                                {ROTATION_TYPES.map((type) => (
-                                    <TouchableOpacity
-                                        key={type.id}
-                                        onPress={() => setRotationType(type.id)}
-                                        className={`flex-row items-center px-4 py-3 rounded-xl flex-1 ${rotationType === type.id ? type.color : 'bg-gray-100'
-                                            }`}
-                                    >
-                                        <Ionicons
-                                            name={type.icon as any}
-                                            size={18}
-                                            color={rotationType === type.id ? 'white' : '#6B7280'}
+                                        <TextInput
+                                            value={choreName}
+                                            onChangeText={setChoreName}
+                                            autoFocus
+                                            className="bg-gray-50 border-2 border-gray-100 rounded-2xl p-5 text-gray-900 text-lg font-bold"
+                                            placeholder="직접 입력 (예: 화분 물주기)"
                                         />
-                                        <Text className={`ml-2 font-bold ${rotationType === type.id ? 'text-white' : 'text-gray-600'}`}>
-                                            {type.label}
-                                        </Text>
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
-                        </ScrollView>
+                                    </View>
+                                ) : (
+                                    <View>
+                                        <Text className="text-sm font-black text-gray-900 mb-4 ml-1">교체 주기 선택</Text>
+                                        <View className="flex-row flex-wrap gap-3">
+                                            {ROTATION_TYPES.map((type) => (
+                                                <TouchableOpacity
+                                                    key={type.id}
+                                                    onPress={() => setRotationType(type.id)}
+                                                    className={cn(
+                                                        "flex-row items-center p-5 rounded-3xl border-2 flex-1 min-w-[120px]",
+                                                        rotationType === type.id ? type.color + " border-transparent shadow-lg" : "bg-gray-50 border-gray-100"
+                                                    )}
+                                                >
+                                                    <Ionicons
+                                                        name={type.icon as any}
+                                                        size={22}
+                                                        color={rotationType === type.id ? 'white' : '#94A3B8'}
+                                                    />
+                                                    <View className="ml-3">
+                                                        <Text className={cn("font-black text-base", rotationType === type.id ? "text-white" : "text-gray-900")}>
+                                                            {type.label}
+                                                        </Text>
+                                                        <Text className={cn("text-[10px] font-bold", rotationType === type.id ? "text-white/60" : "text-gray-400")}>
+                                                            {type.id.toUpperCase()}
+                                                        </Text>
+                                                    </View>
+                                                </TouchableOpacity>
+                                            ))}
+                                        </View>
+                                    </View>
+                                )}
+                            </ScrollView>
 
-                        {/* Add Button */}
-                        <TouchableOpacity
-                            onPress={addRotation}
-                            className="bg-green-500 py-4 rounded-xl items-center"
-                        >
-                            <Text className="text-white font-bold text-lg">로테이션 추가</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                            <View className="flex-row gap-3">
+                                {step > 1 && (
+                                    <TouchableOpacity onPress={() => setStep(1)} className="flex-1 py-5 rounded-3xl bg-gray-100 items-center justify-center border-2 border-gray-200">
+                                        <Text className="text-gray-600 font-black">이전</Text>
+                                    </TouchableOpacity>
+                                )}
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        if (step === 1) setStep(2);
+                                        else addRotation();
+                                    }}
+                                    disabled={step === 1 && !choreName.trim()}
+                                    className={cn("flex-[2] py-5 rounded-3xl items-center justify-center shadow-lg", (step === 1 && !choreName.trim()) ? "bg-gray-200 shadow-none" : "bg-green-600")}
+                                >
+                                    <Text className="text-white font-black">{step === 2 ? "로테이션 시작!" : "다음 단계"}</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </KeyboardAvoidingView>
             </Modal>
         </View>
     );

@@ -17,7 +17,7 @@ export default function SettingsScreen() {
     const {
         nickname, avatarId, nestName, logout, members, nestId, inviteCode,
         pendingRequests, fetchJoinRequests, approveJoinRequest,
-        language, setLanguage, isMaster
+        language, setLanguage, isMaster, appMode, setAppMode
     } = useUserStore();
     const router = useRouter();
     const t = (translations[language as keyof typeof translations] as any).settings;
@@ -242,6 +242,17 @@ export default function SettingsScreen() {
                                 label={language === 'ko' ? "언어 설정" : "Language"}
                                 value={language === 'ko' ? "한국어" : "English"}
                                 onPress={toggleLanguage}
+                            />
+                            <View className="h-[1px] bg-gray-50 mx-6" />
+                            <SettingItem
+                                icon="color-palette"
+                                label={language === 'ko' ? "앱 테마" : "App Theme"}
+                                value={appMode === 'roommatecheck' ? "Toss Style" : "MateCheck"}
+                                onPress={() => {
+                                    const next = appMode === 'roommatecheck' ? 'matecheck' : 'roommatecheck';
+                                    setAppMode(next);
+                                    Alert.alert(next === 'roommatecheck' ? '🏦 Toss Mode' : '🏠 MateCheck Mode', language === 'ko' ? '디자인 테마가 변경되었습니다.' : 'Theme changed successfully.');
+                                }}
                             />
                         </View>
                     </View>

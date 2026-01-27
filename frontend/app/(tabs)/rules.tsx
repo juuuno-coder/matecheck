@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Modal, TextInput, Alert, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Modal, TextInput, Alert, Image, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import React, { useState, useEffect } from 'react';
 // import { useUserStore, Goal } from '../../store/userStore'; // Removed duplicate
 import { cn } from '../../lib/utils';
@@ -56,6 +56,10 @@ export default function RulesScreen() {
     const [ruleDescription, setRuleDescription] = useState('');
     const [ruleType, setRuleType] = useState('other');
     const [showTutorial, setShowTutorial] = useState(false);
+
+    // --- STEP-BY-STEP UI STATE ---
+    const [ruleStep, setRuleStep] = useState(1);
+    const [goalStep, setGoalStep] = useState(1);
 
     // Fetch Rules & Handle Deep Linking
     useEffect(() => {
@@ -389,121 +393,188 @@ export default function RulesScreen() {
             </Modal>
 
             {/* --- ADD RULE MODAL --- */}
-            <Modal visible={ruleModalVisible} animationType="slide" transparent>
-                <View className="flex-1 justify-end bg-black/50">
-                    <View className="bg-white rounded-t-3xl p-6 pb-10">
-                        <View className="flex-row items-center justify-between mb-6">
-                            <Text className="text-xl font-bold text-gray-900">
-                                {language === 'ko' ? "새 규칙 추가" : "Add New Rule"}
-                            </Text>
-                            <TouchableOpacity onPress={() => { setRuleModalVisible(false); resetRuleForm(); }}>
-                                <Ionicons name="close" size={28} color="#9CA3AF" />
+            <Modal visible={ruleModalVisible} animationType="fade" transparent>
+                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-black/60 justify-center px-6">
+                    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                        <View className="bg-white rounded-[40px] p-8 shadow-2xl relative">
+                            <TouchableOpacity onPress={() => { setRuleModalVisible(false); resetRuleForm(); setRuleStep(1); }} className="absolute top-6 right-6 w-10 h-10 items-center justify-center bg-gray-100 rounded-full">
+                                <Ionicons name="close" size={24} color="#94A3B8" />
                             </TouchableOpacity>
-                        </View>
 
-                        <ScrollView className="max-h-96">
-                            <Text className="text-sm font-bold text-gray-700 mb-2">{language === 'ko' ? "유형" : "Type"}</Text>
-                            <View className="flex-row flex-wrap gap-2 mb-4">
-                                {RULE_TYPES.map((type) => (
-                                    <TouchableOpacity
-                                        key={type.id}
-                                        onPress={() => setRuleType(type.id)}
-                                        className={`flex-row items-center px-4 py-2 rounded-xl ${ruleType === type.id ? type.color : 'bg-gray-100'}`}
-                                    >
-                                        <Ionicons name={type.icon as any} size={16} color={ruleType === type.id ? 'white' : '#6B7280'} />
-                                        <Text className={`ml-2 font-bold ${ruleType === type.id ? 'text-white' : 'text-gray-600'}`}>{type.label}</Text>
-                                    </TouchableOpacity>
-                                ))}
+                            <View className="mb-8 items-center">
+                                <View className={cn("w-16 h-16 rounded-3xl items-center justify-center mb-4 shadow-lg", themeBg)}>
+                                    <Ionicons name="document-text-sharp" size={32} color="white" />
+                                </View>
+                                <Text className="text-2xl font-black text-gray-900">새 규칙 추가</Text>
+                                <Text className="text-gray-400 font-bold mt-1">Step {ruleStep} of 2</Text>
                             </View>
 
-                            <Text className="text-sm font-bold text-gray-700 mb-2">{language === 'ko' ? "제목" : "Title"}</Text>
-                            <TextInput
-                                value={ruleTitle}
-                                onChangeText={setRuleTitle}
-                                className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4 text-gray-900"
-                                placeholder={language === 'ko' ? "예: 밤 10시 이후 조용히" : "e.g. Quiet hours after 10PM"}
-                            />
+                            <ScrollView showsVerticalScrollIndicator={false} className="max-h-[300px] mb-8">
+                                {ruleStep === 1 ? (
+                                    <View>
+                                        <Text className="text-sm font-black text-gray-900 mb-3 ml-1">규칙 유형 선택</Text>
+                                        <View className="flex-row flex-wrap gap-2 mb-6">
+                                            {RULE_TYPES.map((type) => (
+                                                <TouchableOpacity
+                                                    key={type.id}
+                                                    onPress={() => setRuleType(type.id)}
+                                                    className={cn(
+                                                        "flex-row items-center px-4 py-3 rounded-xl border-2",
+                                                        ruleType === type.id ? type.color.replace('bg-', 'bg-') + " border-transparent" : "bg-gray-50 border-gray-100"
+                                                    )}
+                                                >
+                                                    <Ionicons name={type.icon as any} size={16} color={ruleType === type.id ? 'white' : '#6B7280'} />
+                                                    <Text className={cn("ml-2 font-black", ruleType === type.id ? "text-white" : "text-gray-400")}>{type.label}</Text>
+                                                </TouchableOpacity>
+                                            ))}
+                                        </View>
+                                    </View>
+                                ) : (
+                                    <View>
+                                        <Text className="text-sm font-black text-gray-900 mb-3 ml-1">내용을 입력해주세요</Text>
+                                        <TextInput
+                                            value={ruleTitle}
+                                            onChangeText={setRuleTitle}
+                                            autoFocus
+                                            className="bg-gray-50 border-2 border-gray-100 rounded-2xl p-5 text-gray-900 text-lg font-bold mb-4"
+                                            placeholder="예: 밤 10시 이후 조용히"
+                                        />
+                                        <TextInput
+                                            value={ruleDescription}
+                                            onChangeText={setRuleDescription}
+                                            className="bg-gray-50 border-2 border-gray-100 rounded-2xl p-5 text-gray-900 font-medium h-24"
+                                            placeholder="상세 규칙 설명 (선택)"
+                                            multiline
+                                            textAlignVertical="top"
+                                        />
+                                    </View>
+                                )}
+                            </ScrollView>
 
-                            <Text className="text-sm font-bold text-gray-700 mb-2">{language === 'ko' ? "설명 (선택)" : "Description (Optional)"}</Text>
-                            <TextInput
-                                value={ruleDescription}
-                                onChangeText={setRuleDescription}
-                                className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-6 text-gray-900"
-                                placeholder={language === 'ko' ? "자세한 설명을 적어주세요" : "Enter details"}
-                                multiline
-                                numberOfLines={3}
-                                textAlignVertical="top"
-                            />
-                        </ScrollView>
-
-                        <TouchableOpacity onPress={handleAddRule} className={cn("py-4 rounded-xl items-center", themeBg)}>
-                            <Text className="text-white font-bold text-lg">{tCommon.add}</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                            <View className="flex-row gap-3">
+                                {ruleStep > 1 && (
+                                    <TouchableOpacity onPress={() => setRuleStep(1)} className="flex-1 py-5 rounded-3xl bg-gray-100 items-center justify-center border-2 border-gray-200">
+                                        <Text className="text-gray-600 font-black">이전</Text>
+                                    </TouchableOpacity>
+                                )}
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        if (ruleStep === 1) setRuleStep(2);
+                                        else handleAddRule();
+                                    }}
+                                    disabled={ruleStep === 2 && !ruleTitle.trim()}
+                                    className={cn("flex-[2] py-5 rounded-3xl items-center justify-center shadow-lg", (ruleStep === 2 && !ruleTitle.trim()) ? "bg-gray-200" : themeBg)}
+                                >
+                                    <Text className="text-white font-black">{ruleStep === 2 ? "규칙 추가! 📜" : "다음 단계"}</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </KeyboardAvoidingView>
             </Modal>
 
             {/* --- ADD GOAL MODAL --- */}
-            <Modal visible={goalModalVisible} animationType="slide" transparent>
-                <View className="flex-1 justify-end bg-black/50">
-                    <View className="bg-white rounded-t-3xl p-6 pb-10">
-                        <View className="flex-row items-center justify-between mb-6">
-                            <Text className="text-xl font-bold text-gray-900">{tGoals.add_goal}</Text>
-                            <TouchableOpacity onPress={() => setGoalModalVisible(false)}>
-                                <Ionicons name="close" size={28} color="#9CA3AF" />
+            <Modal visible={goalModalVisible} animationType="fade" transparent>
+                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-black/60 justify-center px-6">
+                    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                        <View className="bg-white rounded-[40px] p-8 shadow-2xl relative">
+                            <TouchableOpacity onPress={() => { setGoalModalVisible(false); setGoalStep(1); }} className="absolute top-6 right-6 w-10 h-10 items-center justify-center bg-gray-100 rounded-full">
+                                <Ionicons name="close" size={24} color="#94A3B8" />
                             </TouchableOpacity>
-                        </View>
 
-                        <ScrollView className="max-h-96">
-                            <Text className="text-sm font-bold text-gray-500 mb-3">{tGoals.goal_title_label}</Text>
-                            <View className="flex-row gap-2 mb-4">
-                                {['vision', 'year', 'month', 'week'].map((t) => (
-                                    <TouchableOpacity
-                                        key={t}
-                                        onPress={() => setSelectedGoalType(t as any)}
-                                        className={cn("px-4 py-2 rounded-full border", selectedGoalType === t ? `${themeBg} border-transparent` : "bg-white border-gray-200")}
-                                    >
-                                        <Text className={cn("font-bold capitalize", selectedGoalType === t ? "text-white" : "text-gray-500")}>{t}</Text>
-                                    </TouchableOpacity>
-                                ))}
+                            <View className="mb-8 items-center">
+                                <View className={cn("w-16 h-16 rounded-3xl items-center justify-center mb-4 shadow-lg", themeBg)}>
+                                    <Ionicons name="trophy-sharp" size={32} color="white" />
+                                </View>
+                                <Text className="text-2xl font-black text-gray-900">새 목표 추가</Text>
+                                <Text className="text-gray-400 font-bold mt-1">Step {goalStep} of 2</Text>
                             </View>
 
-                            <TextInput
-                                value={goalTitle}
-                                onChangeText={setGoalTitle}
-                                placeholder={tGoals.goal_title_placeholder}
-                                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-gray-800 text-lg mb-4"
-                            />
+                            <ScrollView showsVerticalScrollIndicator={false} className="max-h-[300px] mb-8">
+                                {goalStep === 1 ? (
+                                    <View>
+                                        <Text className="text-sm font-black text-gray-900 mb-3 ml-1">목표 유형</Text>
+                                        <View className="flex-row flex-wrap gap-2 mb-6">
+                                            {['vision', 'year', 'month', 'week'].map((t) => (
+                                                <TouchableOpacity
+                                                    key={t}
+                                                    onPress={() => setSelectedGoalType(t as any)}
+                                                    className={cn(
+                                                        "px-5 py-3 rounded-2xl border-2",
+                                                        selectedGoalType === t ? themeBg + " border-transparent" : "bg-gray-50 border-gray-100"
+                                                    )}
+                                                >
+                                                    <Text className={cn("font-black uppercase text-xs", selectedGoalType === t ? "text-white" : "text-gray-400")}>{t}</Text>
+                                                </TouchableOpacity>
+                                            ))}
+                                        </View>
 
-                            {selectedGoalType !== 'vision' && (
-                                <View className="flex-row gap-4 mb-6">
-                                    <View className="flex-1">
-                                        <Text className="text-sm font-bold text-gray-500 mb-2">{tGoals.target_amount_label}</Text>
+                                        <Text className="text-sm font-black text-gray-900 mb-3 ml-1">무엇을 이루고 싶나요?</Text>
                                         <TextInput
-                                            value={goalTarget}
-                                            onChangeText={setGoalTarget}
-                                            keyboardType="numeric"
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-gray-800 text-lg text-center"
+                                            value={goalTitle}
+                                            onChangeText={setGoalTitle}
+                                            autoFocus
+                                            placeholder={tGoals.goal_title_placeholder}
+                                            className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-5 text-gray-800 text-lg font-bold"
                                         />
                                     </View>
-                                    <View className="flex-1">
-                                        <Text className="text-sm font-bold text-gray-500 mb-2">단위 (Unit)</Text>
-                                        <TextInput
-                                            value={goalUnit}
-                                            onChangeText={setGoalUnit}
-                                            placeholder="회, 원..."
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-gray-800 text-lg text-center"
-                                        />
+                                ) : (
+                                    <View>
+                                        {selectedGoalType !== 'vision' ? (
+                                            <View>
+                                                <Text className="text-sm font-black text-gray-900 mb-4 ml-1">목표치를 설정하세요</Text>
+                                                <View className="flex-row gap-4">
+                                                    <View className="flex-1">
+                                                        <TextInput
+                                                            value={goalTarget}
+                                                            onChangeText={setGoalTarget}
+                                                            keyboardType="numeric"
+                                                            autoFocus
+                                                            className="w-full bg-gray-100 border-2 border-indigo-200 rounded-3xl p-6 text-gray-900 font-black text-3xl text-center"
+                                                        />
+                                                        <Text className="text-[10px] text-gray-400 text-center mt-2 font-bold uppercase tracking-widest">Target Amount</Text>
+                                                    </View>
+                                                    <View className="flex-1">
+                                                        <TextInput
+                                                            value={goalUnit}
+                                                            onChangeText={setGoalUnit}
+                                                            placeholder="단위 (회/원)"
+                                                            className="w-full bg-gray-50 border-2 border-gray-200 rounded-3xl p-6 text-gray-800 font-black text-2xl text-center"
+                                                        />
+                                                        <Text className="text-[10px] text-gray-400 text-center mt-2 font-bold uppercase tracking-widest">Unit</Text>
+                                                    </View>
+                                                </View>
+                                            </View>
+                                        ) : (
+                                            <View className="items-center py-10 bg-indigo-50 rounded-[40px] border-2 border-dashed border-indigo-200">
+                                                <Text className="text-2xl mb-4">✨</Text>
+                                                <Text className="text-indigo-600 font-black text-center px-6">비전(Vision)은 수치가 없는{"\n"}추상적인 목표로 등록됩니다.</Text>
+                                            </View>
+                                        )}
                                     </View>
-                                </View>
-                            )}
-                        </ScrollView>
+                                )}
+                            </ScrollView>
 
-                        <TouchableOpacity onPress={handleAddGoal} disabled={!goalTitle.trim()} className={cn("w-full py-4 rounded-xl items-center shadow-lg", goalTitle.trim() ? themeBg : "bg-gray-200 shadow-none")}>
-                            <Text className="text-white font-bold text-lg">{tGoals.add_button}</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                            <View className="flex-row gap-3">
+                                {goalStep > 1 && (
+                                    <TouchableOpacity onPress={() => setGoalStep(1)} className="flex-1 py-5 rounded-3xl bg-gray-100 items-center justify-center border-2 border-gray-200">
+                                        <Text className="text-gray-600 font-black">이전</Text>
+                                    </TouchableOpacity>
+                                )}
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        if (goalStep === 1) setGoalStep(2);
+                                        else handleAddGoal();
+                                    }}
+                                    disabled={goalStep === 1 && !goalTitle.trim()}
+                                    className={cn("flex-[2] py-5 rounded-3xl items-center justify-center shadow-lg", (goalStep === 1 && !goalTitle.trim()) ? "bg-gray-200 shadow-none" : themeBg)}
+                                >
+                                    <Text className="text-white font-black">{goalStep === 2 ? "목표 추가! 🎯" : "다음 단계"}</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </KeyboardAvoidingView>
             </Modal>
 
             <TutorialOverlay

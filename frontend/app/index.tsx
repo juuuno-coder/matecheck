@@ -1,141 +1,37 @@
-import { View, Text, TouchableOpacity, Dimensions } from 'react-native';
-import React, { useEffect } from 'react';
-import { Link, Redirect } from 'expo-router';
-import { useUserStore } from '../store/userStore';
-import Animated, {
-    FadeInDown,
-    FadeInUp,
-    useSharedValue,
-    useAnimatedStyle,
-    withRepeat,
-    withTiming,
-    withDelay,
-    Easing,
-    withSequence
-} from 'react-native-reanimated';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
+import React from 'react';
+import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { translations } from '../constants/I18n';
 
-const { width, height } = Dimensions.get('window');
-
-const REVIEWS = [
-    "룸메이트랑 안 싸우게 됐어요 ✌️",
-    "정산이 너무 편해졌어요 💸",
-    "집안일 분담이 확실해요 ✨",
-    "초대 코드로 친구 부르기 🏠",
-    "공유 달력 진짜 꿀팁! 📅",
-];
-
-const FloatingReview = ({ text, index, total }: { text: string, index: number, total: number }) => {
-    const translateY = useSharedValue(height);
-    const opacity = useSharedValue(0);
-    const [randomX] = React.useState(() => (Math.random() * 0.6 + 0.2) * width);
-    // 50% slower duration (increased from 10k-15k to 20k-30k)
-    const [randomDuration] = React.useState(() => 20000 + Math.random() * 10000);
-
-    useEffect(() => {
-        const delay = index * 3000;
-
-        translateY.value = withDelay(
-            delay,
-            withRepeat(
-                withSequence(
-                    // Stop at height * 0.5 (middle of the screen, before logo)
-                    withTiming(height * 0.5, { duration: randomDuration, easing: Easing.linear }),
-                    withTiming(height, { duration: 0 })
-                ),
-                -1,
-                false
-            )
-        );
-
-        opacity.value = withDelay(
-            delay,
-            withRepeat(
-                withSequence(
-                    withTiming(0.7, { duration: 3000 }),
-                    withTiming(0.7, { duration: randomDuration - 6000 }),
-                    withTiming(0, { duration: 3000 })
-                ),
-                -1,
-                false
-            )
-        );
-    }, []);
-
-    const animatedStyle = useAnimatedStyle(() => ({
-        transform: [{ translateY: translateY.value }],
-        opacity: opacity.value,
-    }));
+export default function DevGateway() {
+    const router = useRouter();
 
     return (
-        <Animated.View
-            style={[
-                animatedStyle,
-                {
-                    position: 'absolute',
-                    left: randomX - 60,
-                    zIndex: 0
-                }
-            ]}
-        >
-            <View className="bg-white/60 px-4 py-2 rounded-full border border-white/50 shadow-sm">
-                <Text className="text-gray-500 text-xs font-medium">
-                    {text}
-                </Text>
-            </View>
-        </Animated.View>
-    );
-};
-
-export default function Home() {
-    const isLoggedIn = useUserStore((state: any) => state.isLoggedIn);
-    const language = useUserStore((state: any) => state.language) as 'ko' | 'en';
-    const t = translations[language].intro;
-
-    if (isLoggedIn) {
-        return <Redirect href="/(tabs)/home" />;
-    }
-
-    return (
-        <View className="flex-1 bg-orange-50/30 items-center justify-between py-20 px-6 relative overflow-hidden">
+        <View className="flex-1 bg-gray-100 items-center justify-center p-6 bg-white">
             <StatusBar style="dark" />
+            <Text className="text-2xl font-bold mb-8 text-gray-800">개발자 모드: 앱 선택</Text>
 
-            {/* Background Floating Reviews - 채팅 흐르는 효과 */}
-            <View className="absolute inset-0 pointer-events-none w-full h-full">
-                {REVIEWS.map((review, i) => (
-                    <FloatingReview key={i} text={review} index={i} total={REVIEWS.length} />
-                ))}
+            <View className="w-full gap-4 max-w-sm">
+                <TouchableOpacity
+                    onPress={() => router.push('/mate')}
+                    className="w-full bg-orange-500 p-6 rounded-2xl shadow-md border-b-4 border-orange-700 active:border-b-0 active:mt-1"
+                >
+                    <Text className="text-white text-xl font-bold text-center">🏡 MateCheck</Text>
+                    <Text className="text-orange-100 text-center mt-2">오리지널 버전</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    onPress={() => router.push('/toss')}
+                    className="w-full bg-[#0064FF] p-6 rounded-2xl shadow-md border-b-4 border-blue-700 active:border-b-0 active:mt-1"
+                >
+                    <Text className="text-white text-xl font-bold text-center">App In Toss</Text>
+                    <Text className="text-blue-100 text-center mt-2">룸메이트체크 (토스 미니앱)</Text>
+                </TouchableOpacity>
             </View>
 
-            {/* Header / Hero */}
-            <Animated.View entering={FadeInDown.duration(1000).springify()} className="items-center mt-32 z-10">
-                <View className="w-40 h-40 bg-white rounded-full items-center justify-center mb-8 shadow-lg shadow-orange-100 border-4 border-white">
-                    <Text className="text-7xl">🏡</Text>
-                </View>
-                <Text className="text-orange-600 text-4xl font-extrabold tracking-tight mb-3">MateCheck</Text>
-                <Text className="text-gray-500 text-lg font-medium text-center leading-8 bg-white/50 px-4 py-2 rounded-xl">
-                    {t.tagline}
-                </Text>
-            </Animated.View>
-
-            {/* Buttons */}
-            <Animated.View entering={FadeInUp.delay(300).duration(1000).springify()} className="w-full gap-4 mb-10 z-10">
-                <Link href="/(auth)/login" asChild>
-                    <TouchableOpacity className="w-full bg-orange-500 py-4 rounded-2xl items-center shadow-lg shadow-orange-200 active:bg-orange-600">
-                        <Text className="text-white font-bold text-lg">{t.login_btn}</Text>
-                    </TouchableOpacity>
-                </Link>
-
-                <View className="flex-row items-center justify-center mt-2">
-                    <Text className="text-gray-400 mr-2">{t.signup_prompt}</Text>
-                    <Link href="/(auth)/signup" asChild>
-                        <TouchableOpacity>
-                            <Text className="text-orange-600 font-bold text-base underline">{t.signup_btn}</Text>
-                        </TouchableOpacity>
-                    </Link>
-                </View>
-            </Animated.View>
+            <Text className="absolute bottom-10 text-gray-400 text-sm">
+                Local Development Gateway
+            </Text>
         </View>
     );
 }

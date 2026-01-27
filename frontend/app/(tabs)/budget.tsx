@@ -1,5 +1,6 @@
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Dimensions, Modal, KeyboardAvoidingView, Platform } from 'react-native';
-import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Dimensions, Modal, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Linking, Image } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { AppState } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
 import { cn } from '../../lib/utils';
 import Animated, { FadeIn, FadeInDown, SlideInUp, Layout } from 'react-native-reanimated';
@@ -16,14 +17,18 @@ export default function BudgetScreen() {
     const {
         nestTheme, budgetGoal, transactions, addTransaction,
         fixedExpenses, setBudgetGoal, addFixedExpense, deleteFixedExpense,
-        avatarId, language: langFromStore
+        avatarId, language: langFromStore, appMode
     } = useUserStore();
     const language = langFromStore as 'ko' | 'en';
     const t = (translations[language] as any).budget;
 
-    const themeBg = THEMES[nestTheme]?.color || 'bg-orange-500';
-    const themeText = THEMES[nestTheme]?.color?.replace('bg-', 'text-') || 'text-orange-600';
-    const themeBgSoft = THEMES[nestTheme]?.bg || 'bg-orange-50';
+    const isTossMode = appMode === 'roommatecheck';
+
+    // Theme logic: if Toss Mode, force Blue theme or specific Toss Colors
+    // If MateCheck, use nestTheme
+    const themeBg = isTossMode ? 'bg-toss-blue' : (THEMES[nestTheme]?.color || 'bg-orange-500');
+    const themeText = isTossMode ? 'text-toss-blue' : (THEMES[nestTheme]?.color?.replace('bg-', 'text-') || 'text-orange-600');
+    const themeBgSoft = isTossMode ? 'bg-blue-50' : (THEMES[nestTheme]?.bg || 'bg-orange-50');
 
     // State for Modals
     const [transModalVisible, setTransModalVisible] = useState(false);
@@ -36,6 +41,32 @@ export default function BudgetScreen() {
     const [tempAmount, setTempAmount] = useState('');
     const [tempGoal, setTempGoal] = useState(budgetGoal.toString());
     const [tempDay, setTempDay] = useState('1');
+
+    // --- STEP-BY-STEP UI STATE ---
+    const [transStep, setTransStep] = useState(1);
+    const [fixedStep, setFixedStep] = useState(1);
+    const [smartModalVisible, setSmartModalVisible] = useState(false);
+    const [smartStep, setSmartStep] = useState(1);
+    const [smartTargetApp, setSmartTargetApp] = useState<'toss' | 'kakao'>('toss');
+    const [tempDate, setTempDate] = useState(new Date().toISOString().split('T')[0]);
+
+    const appState = useRef(AppState.currentState);
+    const [transferPending, setTransferPending] = useState(false);
+
+    useEffect(() => {
+        const subscription = AppState.addEventListener('change', nextAppState => {
+            if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+                if (transferPending) {
+                    // When returning from transfer app, the modal should already be there or show focus
+                }
+            }
+            appState.current = nextAppState;
+        });
+
+        return () => {
+            subscription.remove();
+        };
+    }, [transferPending]);
 
     // Calculations
     const totalSpent = transactions.reduce((acc: number, curr: BudgetTransaction) => acc + curr.amount, 0);
@@ -79,15 +110,45 @@ export default function BudgetScreen() {
         setTempTitle(''); setTempAmount(''); setTempDay('1'); setFixedModalVisible(false);
     };
 
+    const handleStartSmartTransfer = (app: 'toss' | 'kakao') => {
+        setSmartTargetApp(app);
+        setSmartStep(1);
+        setSmartModalVisible(true);
+        setTempTitle('');
+        setTempAmount('');
+        setTempDate(new Date().toISOString().split('T')[0]);
+    };
+
+    const handleConfirmSmartTransfer = () => {
+        setTransferPending(true);
+        if (smartTargetApp === 'toss') {
+            Linking.openURL(`supertoss://send?amount=${tempAmount || 0}&memo=${tempTitle}`);
+        } else {
+            Linking.openURL('kakaotalk://kakaopay/money/transfer');
+        }
+        setSmartStep(4); // Move to confirm step
+    };
+
+    const handleFinalizeSmartTransfer = (save: boolean) => {
+        if (save) {
+            addTransaction(tempTitle, parseInt(tempAmount), 'etc', tempDate);
+        }
+        setSmartModalVisible(false);
+        setTransferPending(false);
+        setSmartStep(1);
+    };
+
     return (
         <View className="flex-1 bg-gray-50">
             {/* Header (Modern Simple Style) */}
-            <View className="pt-12 pb-6 px-6 bg-white shadow-sm rounded-b-[40px] z-20 mb-2 flex-row justify-between items-center">
+            <View className={cn("pt-16 pb-6 px-6 z-20 mb-2 flex-row justify-between items-center", isTossMode ? "bg-white" : "bg-white shadow-sm rounded-b-[40px]")}>
                 <View className="flex-row items-center gap-2">
-                    <Text className="text-2xl font-black text-gray-900">{t.title}</Text>
-                    <TouchableOpacity onPress={() => setShowTutorial(true)} className="mt-1">
-                        <Ionicons name="help-circle-outline" size={24} color="#9CA3AF" />
-                    </TouchableOpacity>
+                    <Text className={cn("text-2xl font-black", isTossMode ? "text-gray-900 text-3xl" : "text-gray-900")}>{isTossMode ? "송금/정산" : t.title}</Text>
+                    {!isTossMode && (
+                        <TouchableOpacity onPress={() => setShowTutorial(true)} className="mt-1">
+                            <Ionicons name="help-circle-outline" size={24} color="#9CA3AF" />
+                        </TouchableOpacity>
+                    )}
                 </View>
                 <TouchableOpacity
                     onPress={() => setTransModalVisible(true)}
@@ -102,19 +163,22 @@ export default function BudgetScreen() {
                 <View className="gap-8">
 
                     {/* 1. Summary Card (Highlighted) */}
-                    <Animated.View entering={SlideInUp.delay(100)} className={cn("p-8 rounded-[40px] shadow-xl border border-white/20", themeBg)}>
+                    <Animated.View
+                        entering={SlideInUp.delay(100)}
+                        className={cn("p-8 rounded-[40px] shadow-xl", isTossMode ? "bg-white border border-gray-200 shadow-gray-100" : (themeBg + " border border-white/20"))}
+                    >
                         {/* Header Row */}
                         <View className="flex-row justify-between items-center mb-10">
-                            <Text className="text-gray-900 text-lg font-bold opacity-80">{t.goal_title}</Text>
-                            <TouchableOpacity onPress={() => setGoalModalVisible(true)} className="bg-white px-4 py-2 rounded-full shadow-sm">
-                                <Text className="text-gray-900 text-xs font-bold">{language === 'ko' ? '목표 수정' : 'Edit Goal'}</Text>
+                            <Text className={cn("text-lg font-bold", isTossMode ? "text-gray-600" : "text-gray-900 opacity-80")}>{t.goal_title}</Text>
+                            <TouchableOpacity onPress={() => setGoalModalVisible(true)} className={cn("px-4 py-2 rounded-full", isTossMode ? "bg-gray-100" : "bg-white shadow-sm")}>
+                                <Text className={cn("text-xs font-bold", isTossMode ? "text-gray-600" : "text-gray-900")}>{language === 'ko' ? '목표 수정' : 'Edit Goal'}</Text>
                             </TouchableOpacity>
                         </View>
 
                         {/* Center Hero Section */}
                         <View className="items-center mb-12">
-                            <Text className="text-gray-900/60 text-sm font-bold mb-2 uppercase tracking-widest">{language === 'ko' ? "남은 예산" : "Remaining Budget"}</Text>
-                            <Text className="text-gray-900 text-5xl font-black tracking-tighter" style={{ includeFontPadding: false }}>
+                            <Text className={cn("text-sm font-bold mb-2 uppercase tracking-widest", isTossMode ? "text-gray-400" : "text-gray-900/60")}>{language === 'ko' ? "남은 예산" : "Remaining Budget"}</Text>
+                            <Text className={cn("text-5xl font-black tracking-tighter", isTossMode ? "text-gray-900" : "text-gray-900")} style={{ includeFontPadding: false }}>
                                 {remaining.toLocaleString()}
                                 <Text className="text-3xl font-bold">원</Text>
                             </Text>
@@ -123,26 +187,53 @@ export default function BudgetScreen() {
                         {/* Progress Bar */}
                         <View className="mb-6">
                             <View className="flex-row justify-between mb-2 px-1">
-                                <Text className="text-gray-900/60 text-xs font-bold">0%</Text>
-                                <Text className="text-gray-900/60 text-xs font-bold">100%</Text>
+                                <Text className={cn("text-xs font-bold", isTossMode ? "text-gray-400" : "text-gray-900/60")}>0%</Text>
+                                <Text className={cn("text-xs font-bold", isTossMode ? "text-gray-400" : "text-gray-900/60")}>100%</Text>
                             </View>
-                            <View className="w-full h-5 bg-white/40 rounded-full overflow-hidden backdrop-blur-sm border border-white/30">
-                                <Animated.View style={{ width: `${progress}%` }} className="h-full bg-gray-900 rounded-full shadow-sm" />
+                            <View className={cn("w-full h-5 rounded-full overflow-hidden", isTossMode ? "bg-gray-100" : "bg-white/40 backdrop-blur-sm border border-white/30")}>
+                                <Animated.View style={{ width: `${progress}%` }} className={cn("h-full rounded-full shadow-sm", isTossMode ? "bg-toss-blue" : "bg-gray-900")} />
                             </View>
                         </View>
 
                         {/* Stats Row */}
                         <View className="flex-row gap-3">
-                            <View className="flex-1 bg-white p-5 rounded-3xl shadow-sm items-center">
-                                <Text className="text-gray-400 text-[10px] uppercase font-bold mb-1">{language === 'ko' ? "현재 지출" : "Spent"}</Text>
-                                <Text className="text-gray-900 font-bold text-lg">{totalSpent.toLocaleString()}</Text>
+                            <View className={cn("flex-1 p-5 rounded-3xl items-center", isTossMode ? "bg-gray-50" : "bg-white shadow-sm")}>
+                                <Text className={cn("text-[10px] uppercase font-bold mb-1", isTossMode ? "text-gray-400" : "text-gray-400")}>{language === 'ko' ? "현재 지출" : "Spent"}</Text>
+                                <Text className={cn("font-bold text-lg", isTossMode ? "text-gray-900" : "text-gray-900")}>{totalSpent.toLocaleString()}</Text>
                             </View>
-                            <View className="flex-1 bg-white/50 p-5 rounded-3xl border border-white/50 items-center">
-                                <Text className="text-gray-800/60 text-[10px] uppercase font-bold mb-1">{language === 'ko' ? "목표 예산" : "Target"}</Text>
-                                <Text className="text-gray-900/80 font-bold text-lg">{budgetGoal.toLocaleString()}</Text>
+                            <View className={cn("flex-1 p-5 rounded-3xl items-center", isTossMode ? "bg-gray-50" : "bg-white/50 border border-white/50")}>
+                                <Text className={cn("text-[10px] uppercase font-bold mb-1", isTossMode ? "text-gray-400" : "text-gray-800/60")}>{language === 'ko' ? "목표 예산" : "Target"}</Text>
+                                <Text className={cn("font-bold text-lg", isTossMode ? "text-gray-900" : "text-gray-900/80")}>{budgetGoal.toLocaleString()}</Text>
                             </View>
                         </View>
                     </Animated.View>
+
+                    {/* Quick Transfer Links */}
+                    <View>
+                        <Text className="text-xl font-black text-gray-900 mb-4 px-2">간편 송금 & 기록 🔗</Text>
+                        <View className="flex-row gap-3">
+                            <TouchableOpacity
+                                onPress={() => handleStartSmartTransfer('toss')}
+                                className="flex-1 bg-white p-5 rounded-[32px] border border-gray-100 shadow-sm flex-row items-center justify-center gap-3 active:scale-95 transition-all"
+                            >
+                                <View className="w-10 h-10 bg-[#0064FF] rounded-2xl items-center justify-center shadow-lg shadow-blue-100">
+                                    <Text className="text-white font-black text-xs">TOSS</Text>
+                                </View>
+                                <Text className="font-black text-gray-800">토스 기록</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => handleStartSmartTransfer('kakao')}
+                                className="flex-1 bg-white p-5 rounded-[32px] border border-gray-100 shadow-sm flex-row items-center justify-center gap-3 active:scale-95 transition-all"
+                            >
+                                <View className="w-10 h-10 bg-[#FFEB00] rounded-2xl items-center justify-center shadow-lg shadow-yellow-100">
+                                    <View className="bg-[#3C1E1E] w-5 h-4 rounded-sm items-center justify-center">
+                                        <View className="bg-[#FFEB00] w-2 h-2 rounded-full" />
+                                    </View>
+                                </View>
+                                <Text className="font-black text-gray-800">카카오 기록</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
 
                     {/* 2. Fixed Expenses Section */}
                     <View>
@@ -253,101 +344,311 @@ export default function BudgetScreen() {
 
             {/* --- MODALS --- */}
 
+            {/* Smart Transfer & Log Modal */}
+            <Modal animationType="fade" transparent visible={smartModalVisible} onRequestClose={() => setSmartModalVisible(false)}>
+                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-black/60 justify-center px-6">
+                    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                        <View className="bg-white rounded-[40px] p-8 shadow-2xl relative">
+                            {smartStep < 4 && (
+                                <TouchableOpacity onPress={() => setSmartModalVisible(false)} className="absolute top-6 right-6 w-10 h-10 items-center justify-center bg-gray-100 rounded-full">
+                                    <Ionicons name="close" size={24} color="#94A3B8" />
+                                </TouchableOpacity>
+                            )}
+
+                            <View className="mb-8 items-center">
+                                <View className={cn("w-16 h-16 rounded-3xl items-center justify-center mb-4 shadow-xl", smartTargetApp === 'toss' ? "bg-[#0064FF] shadow-blue-100" : "bg-[#FFEB00] shadow-yellow-100")}>
+                                    <Text className="text-2xl">{smartTargetApp === 'toss' ? "🏦" : "💛"}</Text>
+                                </View>
+                                <Text className="text-2xl font-black text-gray-900">
+                                    {smartStep === 4 ? "송금을 완료하셨나요?" : `${smartTargetApp === 'toss' ? '토스' : '카카오'} 기록`}
+                                </Text>
+                                <Text className="text-gray-400 font-bold mt-1">
+                                    {smartStep === 4 ? "앱에 지출 내용을 자동으로 남겨드릴까요?" : `Step ${smartStep} of 3`}
+                                </Text>
+                            </View>
+
+                            <View className="mb-8 px-2">
+                                {smartStep === 1 ? (
+                                    <Animated.View entering={FadeInDown}>
+                                        <Text className="text-sm font-black text-gray-900 mb-3 ml-1">오늘 무엇을 위해 송금하시나요?</Text>
+                                        <TextInput
+                                            value={tempTitle}
+                                            onChangeText={setTempTitle}
+                                            placeholder="예: 월세, 마트, 용돈"
+                                            className="bg-gray-50 border-2 border-gray-100 rounded-2xl p-5 text-gray-900 text-lg font-bold mb-4"
+                                            autoFocus
+                                        />
+                                    </Animated.View>
+                                ) : smartStep === 2 ? (
+                                    <Animated.View entering={FadeInDown}>
+                                        <Text className="text-sm font-black text-gray-900 mb-3 ml-1">송금할 금액을 입력해주세요</Text>
+                                        <TextInput
+                                            value={tempAmount}
+                                            onChangeText={setTempAmount}
+                                            placeholder="0"
+                                            keyboardType="numeric"
+                                            className="bg-gray-50 border-2 border-gray-100 rounded-2xl p-6 text-gray-900 font-black text-3xl mb-4"
+                                            autoFocus
+                                        />
+                                    </Animated.View>
+                                ) : smartStep === 3 ? (
+                                    <Animated.View entering={FadeInDown}>
+                                        <Text className="text-sm font-black text-gray-900 mb-3 ml-1">언제 지출한 내용인가요?</Text>
+                                        <TextInput
+                                            value={tempDate}
+                                            onChangeText={setTempDate}
+                                            placeholder="YYYY-MM-DD"
+                                            className="bg-gray-50 border-2 border-gray-100 rounded-2xl p-5 text-gray-900 text-lg font-bold mb-4"
+                                            autoFocus
+                                        />
+                                        <View className="flex-row gap-2">
+                                            <TouchableOpacity onPress={() => setTempDate(new Date().toISOString().split('T')[0])} className="bg-gray-100 px-4 py-2 rounded-full">
+                                                <Text className="text-gray-600 font-bold text-xs">오늘</Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity onPress={() => {
+                                                const yesterday = new Date();
+                                                yesterday.setDate(yesterday.getDate() - 1);
+                                                setTempDate(yesterday.toISOString().split('T')[0]);
+                                            }} className="bg-gray-100 px-4 py-2 rounded-full">
+                                                <Text className="text-gray-600 font-bold text-xs">어제</Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </Animated.View>
+                                ) : (
+                                    <Animated.View entering={FadeInDown} className="bg-blue-50/50 p-6 rounded-[32px] border border-blue-100 items-center">
+                                        <Text className="text-blue-600 font-black text-2xl mb-2">{parseInt(tempAmount || '0').toLocaleString()}원</Text>
+                                        <Text className="text-blue-400 font-bold text-center">"{tempTitle}" 항목으로{"\n"}기록을 남길 준비가 되었습니다.</Text>
+                                    </Animated.View>
+                                )}
+                            </View>
+
+                            <View className="flex-row gap-3">
+                                {smartStep > 1 && smartStep < 4 && (
+                                    <TouchableOpacity onPress={() => setSmartStep(smartStep - 1)} className="flex-1 py-5 rounded-3xl bg-gray-50 items-center justify-center border-2 border-gray-100">
+                                        <Text className="text-gray-400 font-black">이전</Text>
+                                    </TouchableOpacity>
+                                )}
+
+                                {smartStep === 4 ? (
+                                    <>
+                                        <TouchableOpacity onPress={() => handleFinalizeSmartTransfer(false)} className="flex-1 py-5 rounded-3xl bg-gray-100 items-center justify-center">
+                                            <Text className="text-gray-400 font-black">기록 안 함</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={() => handleFinalizeSmartTransfer(true)} className={cn("flex-[2] py-5 rounded-3xl items-center justify-center shadow-lg", themeBg)}>
+                                            <Text className="text-white font-black">기록 완료 ✨</Text>
+                                        </TouchableOpacity>
+                                    </>
+                                ) : (
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            if (smartStep === 1 && tempTitle) setSmartStep(2);
+                                            else if (smartStep === 2 && tempAmount) setSmartStep(3);
+                                            else if (smartStep === 3) handleConfirmSmartTransfer();
+                                        }}
+                                        disabled={(smartStep === 1 && !tempTitle) || (smartStep === 2 && !tempAmount)}
+                                        className={cn("flex-[2] py-5 rounded-3xl items-center justify-center shadow-lg", ((smartStep === 1 && !tempTitle) || (smartStep === 2 && !tempAmount)) ? "bg-gray-200" : themeBg)}
+                                    >
+                                        <Text className="text-white font-black">
+                                            {smartStep === 3 ? "정보 입력 완료" : "다음 단계"}
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+
+                            {smartStep === 3 && (
+                                <View className="mt-4 bg-orange-50 p-4 rounded-2xl border border-orange-100">
+                                    <Text className="text-orange-600 text-[10px] font-bold text-center leading-4">
+                                        ⓘ 다음 단계에서 {smartTargetApp === 'toss' ? '토스' : '카카오'} 앱으로 연결됩니다.
+                                    </Text>
+                                </View>
+                            )}
+                        </View>
+                    </TouchableWithoutFeedback>
+                </KeyboardAvoidingView>
+            </Modal>
+
             {/* Set Budget Goal Modal */}
-            <Modal animationType="slide" transparent visible={goalModalVisible} onRequestClose={() => setGoalModalVisible(false)}>
-                <View className="flex-1 justify-end bg-black/40">
-                    <TouchableOpacity activeOpacity={1} style={{ flex: 1 }} onPress={() => setGoalModalVisible(false)} />
-                    <Animated.View entering={SlideInUp} className="bg-white rounded-t-[40px] p-8 pb-12">
-                        <Text className="text-2xl font-black text-gray-900 mb-2">{t.goal_title} 💰</Text>
-                        <Text className="text-gray-500 mb-8">{t.goal_desc}</Text>
+            <Modal animationType="fade" transparent visible={goalModalVisible} onRequestClose={() => setGoalModalVisible(false)}>
+                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-black/60 justify-center px-6">
+                    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                        <View className="bg-white rounded-[40px] p-8 shadow-2xl relative">
+                            <TouchableOpacity onPress={() => setGoalModalVisible(false)} className="absolute top-6 right-6 w-10 h-10 items-center justify-center bg-gray-100 rounded-full">
+                                <Ionicons name="close" size={24} color="#94A3B8" />
+                            </TouchableOpacity>
 
-                        <Text className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-widest">{language === 'ko' ? "총 예산 금액" : "Total Budget Amount"}</Text>
-                        <TextInput
-                            value={tempGoal}
-                            onChangeText={setTempGoal}
-                            placeholder="0"
-                            keyboardType="numeric"
-                            className="bg-white border border-gray-200 rounded-2xl p-6 text-gray-900 font-black text-3xl mb-10 shadow-sm"
-                        />
+                            <View className="mb-8 items-center">
+                                <View className={cn("w-16 h-16 rounded-3xl items-center justify-center mb-4", themeBg)}>
+                                    <Ionicons name="wallet-sharp" size={32} color="white" />
+                                </View>
+                                <Text className="text-2xl font-black text-gray-900">{t.goal_title}</Text>
+                            </View>
 
-                        <TouchableOpacity onPress={handleSetGoal} className={cn("w-full py-5 rounded-2xl items-center shadow-lg shadow-orange-200", themeBg)}>
-                            <Text className="text-white font-bold text-lg">설정 완료</Text>
-                        </TouchableOpacity>
-                    </Animated.View>
-                </View>
+                            <View className="mb-8">
+                                <Text className="text-sm font-black text-gray-900 mb-3 ml-1">총 예산 금액을 설정해주세요</Text>
+                                <TextInput
+                                    value={tempGoal}
+                                    onChangeText={setTempGoal}
+                                    placeholder="0"
+                                    keyboardType="numeric"
+                                    className="bg-gray-50 border-2 border-gray-100 rounded-2xl p-6 text-gray-900 font-black text-3xl mb-4"
+                                    autoFocus
+                                />
+                                <Text className="text-gray-400 text-xs text-center font-bold">{t.goal_desc}</Text>
+                            </View>
+
+                            <TouchableOpacity onPress={handleSetGoal} className={cn("w-full py-5 rounded-3xl items-center shadow-lg", themeBg)}>
+                                <Text className="text-white font-black text-lg">설정 완료 ✨</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </KeyboardAvoidingView>
             </Modal>
 
             {/* Add Transaction Modal */}
-            <Modal animationType="slide" transparent visible={transModalVisible} onRequestClose={() => setTransModalVisible(false)}>
-                <View className="flex-1 justify-end bg-black/40">
-                    <TouchableOpacity activeOpacity={1} style={{ flex: 1 }} onPress={() => setTransModalVisible(false)} />
-                    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-                        <View className="bg-white rounded-t-[40px] p-8 pb-12">
-                            <Text className="text-2xl font-black text-gray-900 mb-6">지출 기록하기 💸</Text>
-
-                            <TextInput
-                                value={tempTitle}
-                                onChangeText={setTempTitle}
-                                placeholder="어디에 썼나요? (예: 마트 장보기)"
-                                className="bg-white border border-gray-200 rounded-2xl p-4 text-gray-900 font-bold text-lg mb-4 shadow-sm"
-                            />
-
-                            <TextInput
-                                value={tempAmount}
-                                onChangeText={setTempAmount}
-                                placeholder="얼마를 썼나요? (원)"
-                                keyboardType="numeric"
-                                className="bg-white border border-gray-200 rounded-2xl p-4 text-gray-900 font-black text-2xl mb-8 shadow-sm"
-                            />
-
-                            <TouchableOpacity onPress={handleAddTransaction} className={cn("w-full py-5 rounded-2xl items-center", themeBg)}>
-                                <Text className="text-white font-bold text-lg">기록 완료</Text>
+            <Modal animationType="fade" transparent visible={transModalVisible} onRequestClose={() => setTransModalVisible(false)}>
+                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-black/60 justify-center px-6">
+                    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                        <View className="bg-white rounded-[40px] p-8 shadow-2xl relative">
+                            <TouchableOpacity onPress={() => { setTransModalVisible(false); setTransStep(1); }} className="absolute top-6 right-6 w-10 h-10 items-center justify-center bg-gray-100 rounded-full">
+                                <Ionicons name="close" size={24} color="#94A3B8" />
                             </TouchableOpacity>
+
+                            <View className="mb-8 items-center">
+                                <View className={cn("w-16 h-16 rounded-3xl items-center justify-center mb-4 shadow-lg", themeBg)}>
+                                    <Ionicons name="receipt-sharp" size={32} color="white" />
+                                </View>
+                                <Text className="text-2xl font-black text-gray-900">지출 기록</Text>
+                                <Text className="text-gray-400 font-bold mt-1">Step {transStep} of 2</Text>
+                            </View>
+
+                            <View className="mb-8">
+                                {transStep === 1 ? (
+                                    <View>
+                                        <Text className="text-sm font-black text-gray-900 mb-3 ml-1">어디에 썼나요?</Text>
+                                        <TextInput
+                                            value={tempTitle}
+                                            onChangeText={setTempTitle}
+                                            placeholder="예: 마트 장보기"
+                                            className="bg-gray-50 border-2 border-gray-100 rounded-2xl p-5 text-gray-900 text-lg font-bold mb-4"
+                                            autoFocus
+                                        />
+                                    </View>
+                                ) : (
+                                    <View>
+                                        <Text className="text-sm font-black text-gray-900 mb-3 ml-1">금액을 입력해주세요</Text>
+                                        <TextInput
+                                            value={tempAmount}
+                                            onChangeText={setTempAmount}
+                                            placeholder="0"
+                                            keyboardType="numeric"
+                                            className="bg-gray-50 border-2 border-indigo-100 rounded-2xl p-6 text-gray-900 font-black text-3xl mb-4"
+                                            autoFocus
+                                        />
+                                        <Text className="text-gray-400 font-bold text-center">정확한 금액을 입력하면 투명하게 공유됩니다 ✨</Text>
+                                    </View>
+                                )}
+                            </View>
+
+                            <View className="flex-row gap-3">
+                                {transStep > 1 && (
+                                    <TouchableOpacity onPress={() => setTransStep(1)} className="flex-1 py-5 rounded-3xl bg-gray-100 items-center justify-center border-2 border-gray-200"
+                                    >
+                                        <Text className="text-gray-600 font-black">이전</Text>
+                                    </TouchableOpacity>
+                                )}
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        if (transStep === 1) setTransStep(2);
+                                        else handleAddTransaction();
+                                    }}
+                                    disabled={transStep === 1 && !tempTitle}
+                                    className={cn("flex-[2] py-5 rounded-3xl items-center justify-center shadow-lg", (transStep === 1 && !tempTitle) ? "bg-gray-200" : themeBg)}
+                                >
+                                    <Text className="text-white font-black">{transStep === 2 ? "기록 완료!" : "다음 단계"}</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
-                    </KeyboardAvoidingView>
-                </View>
+                    </TouchableWithoutFeedback>
+                </KeyboardAvoidingView>
             </Modal>
 
             {/* Add Fixed Expense Modal */}
-            <Modal animationType="slide" transparent visible={fixedModalVisible} onRequestClose={() => setFixedModalVisible(false)}>
-                <View className="flex-1 justify-end bg-black/40">
-                    <TouchableOpacity activeOpacity={1} style={{ flex: 1 }} onPress={() => setFixedModalVisible(false)} />
-                    <View className="bg-white rounded-t-[40px] p-8 pb-12">
-                        <Text className="text-2xl font-black text-gray-900 mb-6">예상 고정 지출 추가 🏡</Text>
+            <Modal animationType="fade" transparent visible={fixedModalVisible} onRequestClose={() => setFixedModalVisible(false)}>
+                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-black/60 justify-center px-6">
+                    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                        <View className="bg-white rounded-[40px] p-8 shadow-2xl relative">
+                            <TouchableOpacity onPress={() => { setFixedModalVisible(false); setFixedStep(1); }} className="absolute top-6 right-6 w-10 h-10 items-center justify-center bg-gray-100 rounded-full">
+                                <Ionicons name="close" size={24} color="#94A3B8" />
+                            </TouchableOpacity>
 
-                        <TextInput
-                            value={tempTitle}
-                            onChangeText={setTempTitle}
-                            placeholder="지출 항목 (예: 관리비, 월세)"
-                            className="bg-white border border-gray-200 rounded-2xl p-4 text-gray-900 font-bold text-lg mb-4 shadow-sm"
-                        />
+                            <View className="mb-8 items-center">
+                                <View className={cn("w-16 h-16 rounded-3xl items-center justify-center mb-4", themeBg)}>
+                                    <Ionicons name="home-sharp" size={32} color="white" />
+                                </View>
+                                <Text className="text-2xl font-black text-gray-900">고정 지출 추가</Text>
+                                <Text className="text-gray-400 font-bold mt-1">Step {fixedStep} of 2</Text>
+                            </View>
 
-                        <TextInput
-                            value={tempAmount}
-                            onChangeText={setTempAmount}
-                            placeholder="금액 (원)"
-                            keyboardType="numeric"
-                            className="bg-white border border-gray-200 rounded-2xl p-4 text-gray-900 font-bold text-lg mb-4 shadow-sm"
-                        />
+                            <View className="mb-8">
+                                {fixedStep === 1 ? (
+                                    <View>
+                                        <Text className="text-sm font-black text-gray-900 mb-3 ml-1">지출 항목을 입력해주세요</Text>
+                                        <TextInput
+                                            value={tempTitle}
+                                            onChangeText={setTempTitle}
+                                            placeholder="예: 월세, 관리비"
+                                            className="bg-gray-50 border-2 border-gray-100 rounded-2xl p-5 text-gray-900 text-lg font-bold mb-4"
+                                            autoFocus
+                                        />
+                                    </View>
+                                ) : (
+                                    <View>
+                                        <Text className="text-sm font-black text-gray-900 mb-3 ml-1">금액과 결제일</Text>
+                                        <TextInput
+                                            value={tempAmount}
+                                            onChangeText={setTempAmount}
+                                            placeholder="금액 (원)"
+                                            keyboardType="numeric"
+                                            className="bg-gray-50 border-2 border-indigo-100 rounded-2xl p-4 text-gray-900 font-bold mb-4"
+                                            autoFocus
+                                        />
+                                        <View className="flex-row items-center justify-between bg-gray-50 p-4 rounded-2xl border-2 border-gray-100">
+                                            <Text className="text-gray-500 font-bold">결제 희망일</Text>
+                                            <View className="flex-row items-center gap-2">
+                                                <TextInput
+                                                    value={tempDay}
+                                                    onChangeText={setTempDay}
+                                                    keyboardType="numeric"
+                                                    maxLength={2}
+                                                    className="bg-white border-2 border-indigo-200 rounded-xl p-2 w-12 text-center font-black text-indigo-600"
+                                                />
+                                                <Text className="text-gray-900 font-bold">일</Text>
+                                            </View>
+                                        </View>
+                                    </View>
+                                )}
+                            </View>
 
-                        <View className="flex-row items-center gap-4 mb-8">
-                            <Text className="text-gray-500 font-bold">결제일:</Text>
-                            <TextInput
-                                value={tempDay}
-                                onChangeText={setTempDay}
-                                placeholder="1"
-                                keyboardType="numeric"
-                                maxLength={2}
-                                className="bg-white border border-gray-200 rounded-xl p-3 text-gray-900 font-bold w-16 text-center shadow-sm"
-                            />
-                            <Text className="text-gray-500 font-bold">일</Text>
+                            <View className="flex-row gap-3">
+                                {fixedStep > 1 && (
+                                    <TouchableOpacity onPress={() => setFixedStep(1)} className="flex-1 py-5 rounded-3xl bg-gray-100 items-center justify-center border-2 border-gray-200">
+                                        <Text className="text-gray-600 font-black">이전</Text>
+                                    </TouchableOpacity>
+                                )}
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        if (fixedStep === 1) setFixedStep(2);
+                                        else handleAddFixed();
+                                    }}
+                                    disabled={fixedStep === 1 && !tempTitle}
+                                    className={cn("flex-[2] py-5 rounded-3xl items-center justify-center shadow-lg", (fixedStep === 1 && !tempTitle) ? "bg-gray-200" : themeBg)}
+                                >
+                                    <Text className="text-white font-black">{fixedStep === 2 ? "등록 완료!" : "다음 단계"}</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
-
-                        <TouchableOpacity onPress={handleAddFixed} className={cn("w-full py-5 rounded-2xl items-center", themeBg)}>
-                            <Text className="text-white font-bold text-lg">등록 완료</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                    </TouchableWithoutFeedback>
+                </KeyboardAvoidingView>
             </Modal>
 
             <TutorialOverlay

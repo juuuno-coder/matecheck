@@ -15,6 +15,18 @@ module.exports = {
           DEFAULT: '#4DB6AC', // Soft Teal
         },
         vote: '#5C6BC0', // Indigo
+        toss: {
+          blue: '#3182f6',
+          gray: {
+            DEFAULT: '#4e5968',
+            dark: '#191f28',
+            light: '#8b95a1',
+            input: '#f2f4f6',
+          },
+          bg: '#f9fafb',
+          success: '#2da07a',
+          error: '#f04452',
+        }
       }
     },
   },
